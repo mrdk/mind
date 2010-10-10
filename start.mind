@@ -1,0 +1,161 @@
+\ Tests of built-in words
+.( Page: ) page# @ h.  .(  Line: ) line# @ h.  cr
+
+\ here here h. ," teststring" here h. count type cr
+\ align here h. cr
+
+\ (') h. h. (') cr execute
+
+\ here ," testword" ^dovar entry, 1 ,  \ 0 testword !
+\ .( testword:  ) testword h. cr
+\ .( here:      ) here h. cr
+\ .( value: )     testword @ h. cr
+
+\ Defining words						. o ( mind )
+
+here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
+	] parse  dup c@ 1+ allot  swap entry,  ;; [
+
+^dodefer Create-as ?pairs  (') 2drop ,  ( n1 n2 -- ) 
+
+^docol Create-as :			( "name" -- )
+	] ^docol Create-as  1 state !   lit :  ;; [
+: ;	lit : ?pairs   lit ;; ,   0 state !   ;; [
+        drop                                    \ drop flag created by :
+	#immediate  latest @ link>  flags!	\ make immediate
+
+: 'latest ( -- cfa )    latest @ link> ;
+: immediate   'latest dup flags@  #immediate or  swap flags! ;
+
+: Create  ^dovar Create-as ;
+: does>   'latest  ^dodoes over !   r> swap >doer ! ;
+
+: Defer ( cfa -- )   ^dodefer Create-as , ;
+\ (') cr Defer ccr  ccr
+
+: Variable ( n -- )   Create , ;
+: Constant ( n -- )   Create ,  does> @ ;
+\ 1 Variable v   'latest flags@ h. cr
+\ 1 Constant c .( c defined, value=)  c h.  cr
+
+
+\ Literals and inline strings
+
+: .name   ( cfa -- )   >name count type ;
+
+(') drop Defer ?exists ( cfa -- ) \ Abort if word does not exist
+
+: '	( --- cfa )	(') dup ?exists ;
+: [compile]  	' , ;  immediate
+: literal,	( n -- )	lit lit ,  , ; \ create { ' lit | n } in dict.
+' literal, Defer literal ( n -- ) immediate
+\ : literal-test	[ 1 1 + ] literal h. cr ; literal-test
+: [']   ' literal, ;  immediate
+\ : test[']	['] cr .name cr  ['] ' .name cr ;   test[']
+
+: Stringlit ( cfa -- )   Create ,  immediate  does> @ ,  ," ;
+
+: (.")  ( -- )       inline-string count type ;
+: (")   ( -- a # )   inline-string ;
+
+' (.") Stringlit ."
+' (")  Stringlit  "
+
+\ : test."   ." 123456" cr ;            test."
+\ : test"   " 12345" count type cr ;    test"
+
+: >mark  ( -- a )	align  here 0 , ;
+: >resolve  ( a )	align  here swap ! ;
+
+: IF   ( -- a )      ['] 0branch ,  >mark ;  immediate
+: ELSE ( a1 -- a2 )  ['] branch ,   >mark  swap >resolve ;  immediate
+: THEN ( a -- )      >resolve ;  immediate
+
+\ : test-if-else ( f -- )   dup h. IF ." IF" cr  ELSE ." ELSE" cr THEN ;
+\ 0 test-if-else  1 test-if-else
+\ : test-if      ( f -- )   dup h. IF ." IF" THEN cr ;
+\ 0 test-if  1 test-if
+
+: <mark ( -- a )	align here ;
+: <resolve ( a -- )	, ;
+: >resolve-all ( a1 ... an n -- )
+   0;  swap >resolve  1- >resolve-all ;
+
+: BEGIN ( -- 0 a )	0 <mark ;  immediate
+: WHILE ( n a -- a' n+1 a )
+    >r  ['] 0branch ,  >mark  swap 1+  r> ;  immediate
+: REPEAT ( a1 ... an n a -- )
+    ['] branch ,  <resolve  >resolve-all ;  immediate
+
+\ : test-loop  BEGIN ." l" dup h. cr  dup 1- WHILE  dup WHILE  1-  REPEAT h. ;
+\ 2 2 * test-loop
+
+\ Characters
+: char ( -- c )		parse 1+ c@ ;
+: [char]	char literal, ;  immediate
+\ char A emit cr
+\ : test[char]   [char] x emit ;  test[char]
+
+: space    blank emit ;
+: spaces   BEGIN  ?dup WHILE 1- space REPEAT ;
+\ 2 2 2 * * spaces .( spaces) cr
+
+
+\ Debug tools
+
+: do-abort   swap IF ." Abort: "  count type cr  abort ELSE drop THEN ;
+: (abort")   ( f -- )   inline-string do-abort ;
+' (abort") Stringlit abort"
+
+: qtype ( a # -- )	[char] " emit  type  [char] " emit ;
+
+: depth ( -- n )   sp@  s0 @ - [ 1 cells literal, ] / ;
+\ depth h. cr
+: ?stack   depth 0< abort" Stack empty" ;
+
+: .s    ?stack  sp@ >r  s0 @
+    BEGIN  dup r u< WHILE  cell+  dup @ h.  REPEAT  drop rdrop ;
+\ .s cr 
+\ 1 2 1 1 .s cr
+
+
+\ Reading numbers
+
+: -1st ( a # -- a' #' )   1- swap  1+ swap ; \ Cut first character from string
+
+2 Variable base			\ Base for number conversion.
+
+0 Variable #acc			\ Number accumulator
+: accumulate ( n -- )	#acc @  base @ u* +  #acc ! ;
+
+: digit? ( n -- ? )	base @ u< ;
+: digit>acc ( c -- ? )
+    [char] 0 -  dup digit?  under  IF accumulate ELSE drop THEN ;
+: udigits ( a # -- a' #' )	\ Accumulate first unsigned digits
+    BEGIN dup WHILE  over c@  digit>acc WHILE  -1st REPEAT ;
+: ?rest ( a # -- a # )    dup IF ." Not converted: " qtype abort THEN ;
+: >unumber ( a # -- n )
+    0 #acc !  udigits  ?rest 2drop  #acc @ ;
+\ : test-unumber  parse count >unumber  h. cr ;
+\ test-unumber 1001
+
+: minus-digit? ( a # -- a' #' sign )
+    over c@ [char] - = IF -1st  -1 ELSE 1 THEN ;
+: >number ( a # -- n )
+    minus-digit? -rot  >unumber  * ;
+\ : test-number  parse count >number  h. cr ;
+\ test-number -1001
+
+\ Words
+
+: words   latest  BEGIN @  ?dup WHILE  dup link> .name space  REPEAT ;
+\ words cr
+
+1101
+
+\ Last page
+.( Page: ) page# @ h.  .(  Line: ) line# @ h.  cr
+
+\ Local Variables:
+\ comment-start: "\\ "
+\ End:
