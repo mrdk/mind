@@ -133,7 +133,8 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
     [char] 0 -  dup digit?  under  IF accumulate ELSE drop THEN ;
 : udigits ( a # -- a' #' )	\ Accumulate first unsigned digits
     BEGIN dup WHILE  over c@  digit>acc WHILE  -1st REPEAT ;
-: ?rest ( a # -- a # )    dup IF ." Not converted: " qtype abort THEN ;
+: ?rest ( a # -- a # )          \ Abort if not a number
+    dup IF abort" Not found" THEN ;
 : >unumber ( a # -- n )
     0 #acc !  udigits  ?rest 2drop  #acc @ ;
 \ : test-unumber  parse count >unumber  h. cr ;
@@ -146,12 +147,25 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 \ : test-number  parse count >number  h. cr ;
 \ test-number -1001
 
+\ Add number conversion to the outer interpreter
+
+: convert-number   here count >number  state @ IF literal, THEN ;
+' convert-number word? !     \ Add number conversion
+
+\ : compile-test   110 h. cr ;  compile-test
+
+
+1010 base !   \ going decimal
+
+: binary    2  base ! ;
+: octal      8 base ! ;
+: decimal   10 base ! ;
+: hex       16 base ! ;
+
 \ Words
 
 : words   latest  BEGIN @  ?dup WHILE  dup link> .name space  REPEAT ;
 \ words cr
-
-1101
 
 \ Last page
 .( Page: ) page# @ h.  .(  Line: ) line# @ h.  cr
