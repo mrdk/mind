@@ -13,11 +13,6 @@ typedef void* cell;		/* A Forth cell. We require that
 /* ---------------------------------------------------------------------- */
 /* I/O */
 
-static char eol[]   = "\f\n";
-static char blank[] = "\f\n\t ";
-static char paren_end[] = "\f)";
-static char quote_end[] = "\f\"";
-
 struct file_t {
     FILE *input;		/* Input file */
     int lineno;
@@ -87,7 +82,7 @@ static char *read_string(struct file_t *inf, char *pos, char* charlist)
 // POS. Return whether the string is empty
 static int parse(struct file_t *inf, char *pos)
 {
-    int cin = get_char_in(inf, blank);
+    int cin = get_char_in(inf, "\f\n\t ");
 
     if (cin == EOF) {
 	*pos = 0;
@@ -97,7 +92,7 @@ static int parse(struct file_t *inf, char *pos)
 	char *end;
 
 	*start = cin;
-	end = read_while(inf, start + 1, blank);
+	end = read_while(inf, start + 1, "\f\n\t ");
 	*pos = end - start;
 
 	return TRUE;
@@ -372,10 +367,10 @@ rbrack:	// ]
     sys.state = 1; goto next;
 
 backslash: // "\": comment to the end of the line
-    get_char_notin(&sys.inf, eol); goto next;
+    get_char_notin(&sys.inf, "\f\n"); goto next;
 
 paren: // "("
-    get_char_notin(&sys.inf, paren_end); goto next;
+    get_char_notin(&sys.inf, "\f)"); goto next;
 
 // ---------------------------------------------------------------------------
 // Dictionary
@@ -390,7 +385,7 @@ comma: // , ( n -- )
     COMMA(TOS, cell); DROP(1); goto next;
 
 comma_quote: // ,"
-    sys.dp = read_string(&sys.inf, sys.dp, quote_end); goto next;
+    sys.dp = read_string(&sys.inf, sys.dp, "\f\""); goto next;
 
 parse: // ( -- a )
     parse(&sys.inf, sys.dp); EXTEND(1); TOS = sys.dp; goto next;
@@ -585,7 +580,7 @@ blank: FUNC0(' ');
 // ---------------------------------------------------------------------------
 
 dotparen: // .(
-    read_string(&sys.inf, sys.dp, paren_end);
+    read_string(&sys.inf, sys.dp, "\f)");
     printf("%.*s", *sys.dp, sys.dp + 1);
     goto next;
 }
