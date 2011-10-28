@@ -1,0 +1,16 @@
+#+STARTUP: hidestars
+#+STARTUP: odd
+*Design decisions*
+* C Code
+*** Use C99 to full extent.
+*** Use gcc specific extensions only when necessary.
+    Currently used:
+    - computed goto
+    - __alignof
+* Forth code
+*** Normal Forth words are in lower case.
+    This makes it much easier to switch between Forth and other
+    applications.
+*** "Create"-like words begin with a capital letter.
+*** There are no words that handle double integers.
+    The C integers are large enough for us. [From GraspForth]
