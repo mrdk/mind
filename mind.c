@@ -445,7 +445,7 @@ latest:   FUNC0(&sys.latest);
 dp:       FUNC0(&sys.dp);
 here:     FUNC0(sys.dp);
 state:    FUNC0(&sys.state);
-wordq: FUNC0(&sys.wordq);
+wordq:    FUNC0(&sys.wordq);
 lineno:   FUNC0(&sys.inf.lineno);
 pageno:   FUNC0(&sys.inf.pageno);
 
@@ -560,16 +560,16 @@ emit: // ( c -- )
     putchar((int)TOS); DROP(1); goto next;
 
 type: // ( a # -- )
-{
-    int n = (int)TOS;
-    char *addr = NOS;
+    {
+	int n = (int)TOS;
+	char *addr = NOS;
 
-    DROP(2);
+	DROP(2);
 
-    while (n--)
-	putchar(*addr++);
-    goto next;
-}
+	while (n--)
+	    putchar(*addr++);
+	goto next;
+    }
 
 hdot: // h. ( n -- )		print hexadecimal
     printf("%x ", (int)TOS); DROP(1); goto next;
