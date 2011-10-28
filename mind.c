@@ -13,13 +13,10 @@ typedef void* cell;		/* A Forth cell. We require that
 /* ---------------------------------------------------------------------- */
 /* I/O */
 
-#define EOLCHARS	['\f'] = 1, ['\n'] = 1
-
-typedef const char chartable[255];
-static chartable eol   = { EOLCHARS };
-static chartable blank = { EOLCHARS, [' '] = 1, ['\t'] = 1 };
-static chartable paren_end = { ['\f'] = 1, [')'] = 1 };
-static chartable quote_end = { ['\f'] = 1, ['"'] = 1 };
+static char eol[]   = "\f\n";
+static char blank[] = "\f\n\t ";
+static char paren_end[] = "\f)";
+static char quote_end[] = "\f\"";
 
 struct file_t {
     FILE *input;		/* Input file */
@@ -46,32 +43,42 @@ static int gettextchar(struct file_t *inf)
     return cin;
 }
 
-static int firstchar_with(struct file_t *inf, chartable endc, char val)
+static int firstchar_with(struct file_t *inf, char *endc)
 {
     int cin;
 
     do {
 	cin = gettextchar(inf);
-    } while (endc[cin] != val);
+    } while (strchr(endc, cin));
 
     return cin;
 }
 
-static char *read_while(struct file_t *inf, char *cur, chartable endc, char val)
+static int firstchar_without(struct file_t *inf, char *endc)
 {
     int cin;
 
-    while ((cin = gettextchar(inf)) != EOF && endc[cin] == val)
+    do {
+	cin = gettextchar(inf);
+    } while (!strchr(endc, cin));
+
+    return cin;
+}
+
+static char *read_while(struct file_t *inf, char *cur, char *endc)
+{
+    int cin;
+
+    while ((cin = gettextchar(inf)) != EOF && !strchr(endc, cin))
 	*cur++ = cin;
 
     return cur;
 }
 
-static char *read_string(struct file_t *inf, char *pos,
-			 chartable endc, char val)
+static char *read_string(struct file_t *inf, char *pos, char* endc)
 {
     char *start = pos + 1;
-    char *end = read_while(inf, start, endc, val);
+    char *end = read_while(inf, start, endc);
     *pos = end - start;
 
     return end;
@@ -81,7 +88,7 @@ static char *read_string(struct file_t *inf, char *pos,
 // POS. Return whether the string is empty
 static int parse(struct file_t *inf, char *pos)
 {
-    int cin = firstchar_with(inf, blank, 0);
+    int cin = firstchar_with(inf, blank);
 
     if (cin == EOF) {
 	*pos = 0;
@@ -91,7 +98,7 @@ static int parse(struct file_t *inf, char *pos)
 	char *end;
 
 	*start = cin;
-	end = read_while(inf, start + 1, blank, 0);
+	end = read_while(inf, start + 1, blank);
 	*pos = end - start;
 
 	return TRUE;
@@ -366,10 +373,10 @@ rbrack:	// ]
     sys.state = 1; goto next;
 
 backslash: // "\": comment to the end of the line
-    firstchar_with(&sys.inf, eol, 1); goto next;
+    firstchar_without(&sys.inf, eol); goto next;
 
 paren: // "("
-    firstchar_with(&sys.inf, paren_end, 1); goto next;
+    firstchar_without(&sys.inf, paren_end); goto next;
 
 // ---------------------------------------------------------------------------
 // Dictionary
@@ -384,7 +391,7 @@ comma: // , ( n -- )
     COMMA(TOS, cell); DROP(1); goto next;
 
 comma_quote: // ,"
-    sys.dp = read_string(&sys.inf, sys.dp, quote_end, 0); goto next;
+    sys.dp = read_string(&sys.inf, sys.dp, quote_end); goto next;
 
 parse: // ( -- a )
     parse(&sys.inf, sys.dp); EXTEND(1); TOS = sys.dp; goto next;
@@ -579,7 +586,7 @@ blank: FUNC0(' ');
 // ---------------------------------------------------------------------------
 
 dotparen: // .(
-    read_string(&sys.inf, sys.dp, paren_end, 0);
+    read_string(&sys.inf, sys.dp, paren_end);
     printf("%.*s", *sys.dp, sys.dp + 1);
     goto next;
 }
