@@ -31,7 +31,7 @@ static void open_file(struct file_t *inf, char *name)
     inf->pageno = 0;
 }
 
-static int gettextchar(struct file_t *inf)
+static int get_file_char(struct file_t *inf)
 {
     int cin = fgetc(inf->input);
 
@@ -43,42 +43,41 @@ static int gettextchar(struct file_t *inf)
     return cin;
 }
 
-static int firstchar_with(struct file_t *inf, char *endc)
+static int get_char_in(struct file_t *inf, char *charlist)
 {
     int cin;
 
     do {
-	cin = gettextchar(inf);
-    } while (strchr(endc, cin));
+	cin = get_file_char(inf);
+    } while (strchr(charlist, cin));
 
     return cin;
 }
 
-static int firstchar_without(struct file_t *inf, char *endc)
+static void get_char_notin(struct file_t *inf, char *charlist)
 {
     int cin;
 
     do {
-	cin = gettextchar(inf);
-    } while (!strchr(endc, cin));
-
-    return cin;
+	cin = get_file_char(inf);
+    } while (!strchr(charlist, cin));
 }
 
-static char *read_while(struct file_t *inf, char *cur, char *endc)
+static char *read_while(struct file_t *inf, char *pos, char *charlist)
 {
     int cin;
 
-    while ((cin = gettextchar(inf)) != EOF && !strchr(endc, cin))
-	*cur++ = cin;
+    while ((cin = get_file_char(inf)) != EOF && !strchr(charlist, cin))
+	*pos++ = cin;
 
-    return cur;
+    return pos;
 }
 
-static char *read_string(struct file_t *inf, char *pos, char* endc)
+/* Place a counted string at pos, consisting of chars in charlist. */
+static char *read_string(struct file_t *inf, char *pos, char* charlist)
 {
     char *start = pos + 1;
-    char *end = read_while(inf, start, endc);
+    char *end = read_while(inf, start, charlist);
     *pos = end - start;
 
     return end;
@@ -88,7 +87,7 @@ static char *read_string(struct file_t *inf, char *pos, char* endc)
 // POS. Return whether the string is empty
 static int parse(struct file_t *inf, char *pos)
 {
-    int cin = firstchar_with(inf, blank);
+    int cin = get_char_in(inf, blank);
 
     if (cin == EOF) {
 	*pos = 0;
@@ -373,10 +372,10 @@ rbrack:	// ]
     sys.state = 1; goto next;
 
 backslash: // "\": comment to the end of the line
-    firstchar_without(&sys.inf, eol); goto next;
+    get_char_notin(&sys.inf, eol); goto next;
 
 paren: // "("
-    firstchar_without(&sys.inf, paren_end); goto next;
+    get_char_notin(&sys.inf, paren_end); goto next;
 
 // ---------------------------------------------------------------------------
 // Dictionary
