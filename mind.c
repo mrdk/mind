@@ -2,11 +2,13 @@
 #include <string.h>
 #include <stddef.h>
 
+typedef long int INT;
+typedef unsigned long UINT;
 typedef void* cell;		/* A Forth cell. We require that
-				 * sizeof(cell) == sizeof(int) */
+				 * sizeof(cell) == sizeof(INT) */
 
 // Forth truth values
-#define TRUE 	(-1)
+#define TRUE 	(INT)(-1)
 #define FALSE 	0
 #define BOOL(n)	((cell)((n) ? TRUE : FALSE))
 
@@ -15,8 +17,8 @@ typedef void* cell;		/* A Forth cell. We require that
 
 struct file_t {
     FILE *input;		/* Input file */
-    int lineno;
-    int pageno;
+    INT lineno;
+    INT pageno;
 };
 
 static void open_file(struct file_t *inf, char *name)
@@ -26,9 +28,9 @@ static void open_file(struct file_t *inf, char *name)
     inf->pageno = 0;
 }
 
-static int get_file_char(struct file_t *inf)
+static INT get_file_char(struct file_t *inf)
 {
-    int cin = fgetc(inf->input);
+    INT cin = fgetc(inf->input);
 
     switch (cin) {
     case '\n': inf->lineno += 1; break;
@@ -38,9 +40,9 @@ static int get_file_char(struct file_t *inf)
     return cin;
 }
 
-static int get_char_in(struct file_t *inf, char *charlist)
+static INT get_char_in(struct file_t *inf, char *charlist)
 {
-    int cin;
+    INT cin;
 
     do {
 	cin = get_file_char(inf);
@@ -51,7 +53,7 @@ static int get_char_in(struct file_t *inf, char *charlist)
 
 static void get_char_notin(struct file_t *inf, char *charlist)
 {
-    int cin;
+    INT cin;
 
     do {
 	cin = get_file_char(inf);
@@ -60,7 +62,7 @@ static void get_char_notin(struct file_t *inf, char *charlist)
 
 static char *read_while(struct file_t *inf, char *pos, char *charlist)
 {
-    int cin;
+    INT cin;
 
     while ((cin = get_file_char(inf)) != EOF && !strchr(charlist, cin))
 	*pos++ = cin;
@@ -80,9 +82,9 @@ static char *read_string(struct file_t *inf, char *pos, char* charlist)
 
 // Read the next word from INPUT and store it as counted string at
 // POS. Return whether the string is empty
-static int parse(struct file_t *inf, char *pos)
+static INT parse(struct file_t *inf, char *pos)
 {
-    int cin = get_char_in(inf, "\f\n\t ");
+    INT cin = get_char_in(inf, "\f\n\t ");
 
     if (cin == EOF) {
 	*pos = 0;
@@ -174,7 +176,7 @@ struct sys_t {
     char *dp;			/* Dictionary pointer */
     cell *s0;			/* Start of the parameter stack */
     struct entry *latest;	/* Pointer to the latest definition */
-    int state;			/* Compiler state */
+    INT state;			/* Compiler state */
     cell wordq;		        /* Called if word not found (Name: Retro) */
     struct file_t inf;		/* Input file */
     cell mem[MEMCELLS];		/* The memory */
@@ -219,7 +221,7 @@ static void init_sys(full_entry dict[])
 static char *aligned(char *addr, unsigned align)
 {
     /* Assertion: alignment is a power of 2 */
-    return (char*)(((unsigned)addr + align - 1) & ~(align - 1));
+    return (char*)(((UINT)addr + align - 1) & ~(align - 1));
 }
 
 #define ALIGNED(ptr, type)  aligned((ptr), __alignof(type))
@@ -328,7 +330,7 @@ interpret:
 
 notfound: // Tell that the word at sys.dp could not be interpreted
     {
-	printf("p%i:l%i: not found: %.*s\n",
+	printf("p%li:l%li: not found: %.*s\n",
 	       sys.inf.pageno, sys.inf.lineno, *sys.dp, sys.dp + 1);
 	fclose(sys.inf.input);
 	goto abort;
@@ -349,7 +351,7 @@ parentick: // (') ( "word" -- cfa | 0 )
 
 parenfind: // (find) ( addr n -- cfa t=found | f )
     {
-	int n = (int)TOS;
+	INT n = (INT)TOS;
 	char *addr = NOS;
 
 	struct entry *e = find_word(sys.latest, addr, n);
@@ -379,7 +381,7 @@ align:
     ALIGN(cell); goto next;
 
 allot: // ( n -- )
-    sys.dp += (int)TOS; DROP(1); goto next;
+    sys.dp += (INT)TOS; DROP(1); goto next;
 
 comma: // , ( n -- )
     COMMA(TOS, cell); DROP(1); goto next;
@@ -411,9 +413,9 @@ entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
     }
 
 link_to:     FUNC1(&ENTRY(TOS, lfa)->cfa);       // link>  ( lfa -- cfa )
-flags_fetch: FUNC1((int)ENTRY(TOS, cfa)->flags); // flags@ ( cfa -- n )
+flags_fetch: FUNC1((INT)ENTRY(TOS, cfa)->flags); // flags@ ( cfa -- n )
 flags_store:                                     // flags! ( n cfa -- )
-    ENTRY(TOS, cfa)->flags = (int)NOS; DROP(2); goto next;
+    ENTRY(TOS, cfa)->flags = (INT)NOS; DROP(2); goto next;
 
 to_name: FUNC1(ENTRY(TOS, cfa)->name);  // >name ( cfa -- 'name )
 to_doer: FUNC1(&ENTRY(TOS, cfa)->doer); // >doer ( cfa -- 'doer )
@@ -516,32 +518,32 @@ one:  FUNC0(1);
 minus_one: FUNC0(-1);
 two:  FUNC0(2);
 
-oneplus:  FUNC1((cell)((int)TOS + 1)); // 1+  ( n -- n+1 )
-oneminus: FUNC1((cell)((int)TOS - 1)); // 1-  ( n -- n-1 )
+oneplus:  FUNC1((cell)((INT)TOS + 1)); // 1+  ( n -- n+1 )
+oneminus: FUNC1((cell)((INT)TOS - 1)); // 1-  ( n -- n-1 )
 
-minus:  FUNC2((int)NOS - (int)TOS); // -
-plus:   FUNC2((int)NOS + (int)TOS); // +
-times:  FUNC2((int)NOS * (int)TOS); // *
-divide: FUNC2((int)NOS / (int)TOS); // /
-utimes: FUNC2((unsigned)NOS * (unsigned)TOS); // u*
-or:     FUNC2((int)NOS | (int)TOS);
+minus:  FUNC2((INT)NOS - (INT)TOS); // -
+plus:   FUNC2((INT)NOS + (INT)TOS); // +
+times:  FUNC2((INT)NOS * (INT)TOS); // *
+divide: FUNC2((INT)NOS / (INT)TOS); // /
+utimes: FUNC2((UINT)NOS * (UINT)TOS); // u*
+or:     FUNC2((INT)NOS | (INT)TOS);
 
 equal:      FUNC2(BOOL(NOS == TOS)); // =
 zero_equal: FUNC1(BOOL(TOS == 0));   // 0=
-zero_less:  FUNC1(BOOL((int)TOS < 0));    // 0<
-uless:      FUNC2(BOOL((unsigned)NOS < (unsigned)TOS)); // u<
-ugreater:   FUNC2(BOOL((unsigned)NOS > (unsigned)TOS)); // u>
+zero_less:  FUNC1(BOOL((INT)TOS < 0));    // 0<
+uless:      FUNC2(BOOL((UINT)NOS < (UINT)TOS)); // u<
+ugreater:   FUNC2(BOOL((UINT)NOS > (UINT)TOS)); // u>
 
 // ---------------------------------------------------------------------------
 // Memory
 
 fetch:  FUNC1(*(cell**)TOS);	    // @  ( a -- n )
-cfetch: FUNC1((int)(*(char*)TOS));  // c@ ( a -- n )
+cfetch: FUNC1((INT)(*(char*)TOS));  // c@ ( a -- n )
 
 store: // ! ( n a -- )
     *(cell*)TOS = NOS; DROP(2); goto next;
 
-cells:     FUNC1((int)TOS * sizeof(cell));
+cells:     FUNC1((INT)TOS * sizeof(cell));
 cellplus:  FUNC1((char*)TOS + sizeof(cell)); // cell+
 cellminus: FUNC1((char*)TOS - sizeof(cell)); // cell-
 
@@ -550,7 +552,7 @@ cellminus: FUNC1((char*)TOS - sizeof(cell)); // cell-
 
 count: // ( a -- a' # )
     EXTEND(1);
-    TOS = (cell)(int)(*(char*)NOS);
+    TOS = (cell)(INT)(*(char*)NOS);
     NOS = (char*)NOS + 1;
     goto next;
 
@@ -558,11 +560,11 @@ cr:
     putchar('\n'); goto next;
 
 emit: // ( c -- )
-    putchar((int)TOS); DROP(1); goto next;
+    putchar((INT)TOS); DROP(1); goto next;
 
 type: // ( a # -- )
     {
-	int n = (int)TOS;
+	INT n = (INT)TOS;
 	char *addr = NOS;
 
 	DROP(2);
@@ -573,7 +575,7 @@ type: // ( a # -- )
     }
 
 hdot: // h. ( n -- )		print hexadecimal
-    printf("%x ", (int)TOS); DROP(1); goto next;
+    printf("%lx ", (INT)TOS); DROP(1); goto next;
 
 blank: FUNC0(' ');
 
