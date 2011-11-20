@@ -60,16 +60,6 @@ static void get_char_notin(struct file_t *inf, char *charlist)
     } while (!strchr(charlist, cin));
 }
 
-static char *read_while(struct file_t *inf, char *pos, char *charlist)
-{
-    INT cin;
-
-    while ((cin = get_file_char(inf)) != EOF && !strchr(charlist, cin))
-	*pos++ = cin;
-
-    return pos;
-}
-
 /* Place a string at pos, consisting of chars in charlist. */
 static char *read_string(struct file_t *inf, char *pos, char *charlist)
 {
@@ -95,8 +85,7 @@ static INT parse(struct file_t *inf, char *pos)
 	char *end;
     
 	*start = cin;
-	end = read_while(inf, start + 1, "\f\n\t ");
-	*end = '\0';
+	end = read_string(inf, start + 1, "\f\n\t ");
 
 	return TRUE;
     }
