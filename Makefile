@@ -13,7 +13,10 @@ test: mind
 stats:
 	@wc *.mind *.c Makefile *.txt
 
+clean:
+	rm -f mind mind.o
+
 TAGS:
 	etags *.c start.mind
 
-.PHONY: mind.s TAGS
+.PHONY: mind.s clean TAGS
