@@ -70,32 +70,33 @@ static char *read_while(struct file_t *inf, char *pos, char *charlist)
     return pos;
 }
 
-/* Place a counted string at pos, consisting of chars in charlist. */
-static char *read_string(struct file_t *inf, char *pos, char* charlist)
+/* Place a string at pos, consisting of chars in charlist. */
+static char *read_string(struct file_t *inf, char *pos, char *charlist)
 {
-    char *start = pos + 1;
-    char *end = read_while(inf, start, charlist);
-    *pos = end - start;
+    INT cin;
 
-    return end;
+    while ((cin = get_file_char(inf)) != EOF && !strchr(charlist, cin))
+	*pos++ = cin;
+    *pos++ = '\0';
+
+    return pos;
 }
 
-// Read the next word from INPUT and store it as counted string at
+// Read the next word from INPUT and store it as string at
 // POS. Return whether the string is empty
 static INT parse(struct file_t *inf, char *pos)
 {
     INT cin = get_char_in(inf, "\f\n\t ");
 
-    if (cin == EOF) {
-	*pos = 0;
+    if (cin == EOF)
 	return FALSE;
-    } else {
-	char *start = pos + 1;
+    else {
+	char *start = pos;
 	char *end;
-
+    
 	*start = cin;
 	end = read_while(inf, start + 1, "\f\n\t ");
-	*pos = end - start;
+	*end = '\0';
 
 	return TRUE;
     }
@@ -113,17 +114,9 @@ enum wordnum {
 /* Interpreter flags */
 #define IMMEDIATE 1
 
-#define NAMESIZE 13		/* size of kernel name field */
-struct counted {
-    char count;
-    char str[NAMESIZE];
-};
-
-#define COUNTED(str) { sizeof(str) - 1, str }
-
 struct entry {
-    struct entry *lfa;	/* link field address */
-    struct counted *name;
+    struct entry *lfa;		/* link field address */
+    char *name;
     char flags;
     cell *cfa;			/* code field address */
     cell *doer;
@@ -131,28 +124,19 @@ struct entry {
 };
 
 #define ENTRY(a, field) \
-	((struct entry*)((char*)(a) - offsetof(struct entry, field)))
+    ((struct entry*)((char*)(a) - offsetof(struct entry, field)))
 
-#define NEW_ENTRY(label, wflags)					\
-{   .lfa   = i_##label ? &dict[i_##label - 1].head : NULL,	\
-    .flags = wflags,						\
-    .name  = &dict[i_##label].cname,				\
-    .cfa   = &&label,						\
-    .doer = NULL }
+#define NEW_ENTRY(label, wname, wflags)			\
+{   .lfa   = i_##label ? &dict[i_##label - 1] : NULL,	\
+    .flags = wflags,					\
+    .name  = wname,					\
+    .cfa   = &&label,					\
+    .doer = NULL },
 
-typedef struct {
-    struct counted cname;
-    struct entry head;
-} full_entry;
-
-#define HEADINIT(label, wname, wflags)		\
-{    .cname = COUNTED(wname),			\
-     .head  = NEW_ENTRY(label, wflags) },
-
-static struct entry *find_word(struct entry *e, char *name, char count)
+static struct entry *find_word(struct entry *e, char *name)
 {
     for (;;) {
-	if (e->name->count == count && !memcmp(e->name->str, name, count))
+	if (!strcmp(e->name, name))
 	    return e;
 
 	if (e->lfa)
@@ -168,7 +152,7 @@ static struct entry *find_word(struct entry *e, char *name, char count)
 #define MEMBYTES (64 * 1024)	/* Memory in bytes */
 #define MEMCELLS (MEMBYTES / sizeof(cell)) /* Memory in cells */
 
-#define PR(label)  (&dict[i_##label].head.cfa) /* Primitive */
+#define PR(label)  (&dict[i_##label].cfa) /* Primitive */
 
 /* System variables */
 struct sys_t {
@@ -182,12 +166,12 @@ struct sys_t {
     cell mem[MEMCELLS];		/* The memory */
 } sys;
 
-static void init_sys(full_entry dict[])
+static void init_sys(struct entry dict[])
 {
     sys.r0 = sys.mem + 100;
     sys.dp = (char*)(sys.r0 + 1);
     sys.s0 = sys.mem + MEMCELLS - 0x10; /* Top of memory + safety space */
-    sys.latest = &dict[num_words - 1].head;
+    sys.latest = &dict[num_words - 1];
     sys.state = 0;
     sys.wordq = PR(notfound);
     open_file(&sys.inf, "start.mind");
@@ -239,8 +223,8 @@ int main(int argc, char *argv[])
     cell *rp;			/* Return Stack Pointer */
     cell *sp;			/* Stack Pointer */
 
-    static full_entry dict[] = {	/* Dictionary */
-#define E HEADINIT
+    static struct entry dict[] = { /* Dictionary */
+#define E NEW_ENTRY
 #include "heads.c"
 #undef E
     };
@@ -309,7 +293,7 @@ interpret:
 	    goto bye;
 
 	{
-	    struct entry *e = find_word(sys.latest, pos + 1, *pos);
+	    struct entry *e = find_word(sys.latest, pos);
 	    if (e) {
 		if (sys.state && !(e->flags & IMMEDIATE)) {
 		    COMMA(&e->cfa, cell);
@@ -330,8 +314,8 @@ interpret:
 
 notfound: // Tell that the word at sys.dp could not be interpreted
     {
-	printf("p%li:l%li: not found: %.*s\n",
-	       sys.inf.pageno, sys.inf.lineno, *sys.dp, sys.dp + 1);
+	printf("p%li:l%li: not found: %s\n",
+	       sys.inf.pageno, sys.inf.lineno, sys.dp);
 	fclose(sys.inf.input);
 	goto abort;
     }
@@ -342,19 +326,18 @@ parentick: // (') ( "word" -- cfa | 0 )
 	char *pos = sys.dp;
 
 	EXTEND(1);
-	if (parse(&sys.inf, pos) && (e = find_word(sys.latest, pos + 1, *pos)))
+	if (parse(&sys.inf, pos) && (e = find_word(sys.latest, pos)))
 	    TOS = &e->cfa;
 	else
 	    TOS = 0;
 	goto next;
     }
 
-parenfind: // (find) ( addr n -- cfa t=found | f )
+parenfind: // (find) ( addr -- cfa t=found | f )
     {
-	INT n = (INT)TOS;
-	char *addr = NOS;
+	char *addr = TOS;
 
-	struct entry *e = find_word(sys.latest, addr, n);
+	struct entry *e = find_word(sys.latest, addr);
 	if (e) {
 	    NOS = &e->cfa; TOS = (cell)TRUE;
 	} else {
@@ -395,14 +378,13 @@ parse: // ( -- a )
 entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
     {
 	struct entry *e;
-	struct counted *name = NOS;
 
 	ALIGN(struct entry);
 	e = (struct entry*)sys.dp;
 	sys.dp += sizeof(struct entry);
 
 	e->lfa = sys.latest;
-	e->name = name;
+	e->name = NOS;
 	e->flags = 0;
 	e->cfa = TOS;
 	e->doer = NULL;
@@ -417,7 +399,7 @@ flags_fetch: FUNC1((INT)ENTRY(TOS, cfa)->flags); // flags@ ( cfa -- n )
 flags_store:                                     // flags! ( n cfa -- )
     ENTRY(TOS, cfa)->flags = (INT)NOS; DROP(2); goto next;
 
-to_name: FUNC1(ENTRY(TOS, cfa)->name);  // >name ( cfa -- 'name )
+to_name: FUNC1(ENTRY(TOS, cfa)->name);	// >name ( cfa -- 'name )
 to_doer: FUNC1(&ENTRY(TOS, cfa)->doer); // >doer ( cfa -- 'doer )
 
 num_immediate: FUNC0(IMMEDIATE); // #immediate
@@ -465,16 +447,6 @@ rfrom: // r> ( -- n )
     EXTEND(1); TOS = RPOP; goto next;
 
 r: FUNC0(*rp);
-
-inline_string: { // ( -- a )   Returns address of counted string following
-		 //            in code.
-	char *addr = *(char**)rp;
-
-	*rp = ALIGNED(addr + 1 + *addr, cell);
-	EXTEND(1);
-	TOS = addr;
-	goto next;
-    }
 
 // ---------------------------------------------------------------------------
 // Stack
@@ -550,11 +522,7 @@ cellminus: FUNC1((char*)TOS - sizeof(cell)); // cell-
 // ---------------------------------------------------------------------------
 // Input/Output
 
-count: // ( a -- a' # )
-    EXTEND(1);
-    TOS = (cell)(INT)(*(char*)NOS);
-    NOS = (char*)NOS + 1;
-    goto next;
+strlen: FUNC1(strlen((char*)TOS)); // ( a -- # )
 
 cr:
     putchar('\n'); goto next;
@@ -574,6 +542,9 @@ type: // ( a # -- )
 	goto next;
     }
 
+puts: // ( a -- )               print null-terminated string
+    fputs((char*)TOS, stdout); DROP(1); goto next;
+
 hdot: // h. ( n -- )		print hexadecimal
     printf("%lx ", (INT)TOS); DROP(1); goto next;
 
@@ -583,6 +554,6 @@ blank: FUNC0(' ');
 
 dotparen: // .(
     read_string(&sys.inf, sys.dp, "\f)");
-    printf("%.*s", *sys.dp, sys.dp + 1);
+    printf("%s", sys.dp);
     goto next;
 }

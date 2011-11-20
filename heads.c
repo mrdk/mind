@@ -62,7 +62,6 @@ E(rdrop, "rdrop", 0)
 E(rto, ">r", 0)
 E(rfrom, "r>", 0)
 E(r, "r", 0)
-E(inline_string, "inline-string", 0)
 
 // Stack
 E(drop, "drop", 0)
@@ -105,9 +104,10 @@ E(cellplus, "cell+", 0)
 E(cellminus, "cell-", 0)
 
 // Input/Output
-E(count, "count", 0)
+E(strlen, "strlen", 0)
 E(emit, "emit", 0)
 E(type, "type", 0)
+E(puts, "puts", 0)
 E(cr, "cr", 0)
 E(hdot, "h.", 0)
 E(blank, "blank", 0)

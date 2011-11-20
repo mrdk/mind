@@ -1,7 +1,7 @@
 \ Tests of built-in words
 .( Page: ) page# @ h.  .(  Line: ) line# @ h.  cr
 
-\ here here h. ," teststring" here h. count type cr
+\ here here h. ," teststring" here h. puts cr
 \ align here h. cr
 
 \ (') h. h. (') cr execute
@@ -14,7 +14,7 @@
 \ Defining words						. o ( mind )
 
 here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
-	] parse  dup c@ 1+ allot  swap entry,  ;; [
+	] parse  dup strlen 1+ allot  swap entry,  ;; [
 
 ^dodefer Create-as ?pairs  (') 2drop ,  ( n1 n2 -- ) 
 
@@ -41,7 +41,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 \ Literals and inline strings
 
-: .name   ( cfa -- )   >name count type ;
+: .name   ( cfa -- )   >name puts ;
 
 (') drop Defer ?exists ( cfa -- ) \ Abort if word does not exist
 
@@ -53,19 +53,24 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 : [']   ' literal, ;  immediate
 \ : test[']	['] cr .name cr  ['] ' .name cr ;   test[']
 
-: Stringlit ( cfa -- )   Create ,  immediate  does> @ ,  ," ;
+: >mark  ( -- a )	align  here 0 , ;
+: >resolve  ( a )	align  here swap ! ;
 
-: (.")  ( -- )       inline-string count type ;
-: (")   ( -- a # )   inline-string ;
+\ data structure: { ' inline-data | ' end | data ... | }
+\ return address of data following in code, relative to the word calling
+\ inline-data
+: inline-data ( -- a )   r> r>   dup @ >r  cell+  swap >r ;
+
+: (.")  ( -- )     inline-data puts ;
+: (")   ( -- a )   inline-data ;
+
+: Stringlit ( cfa -- )   Create ,  immediate  does>  @ ,  >mark  ," >resolve ;
 
 ' (.") Stringlit ."
 ' (")  Stringlit  "
 
-\ : test."   ." 123456" cr ;            test."
-\ : test"   " 12345" count type cr ;    test"
-
-: >mark  ( -- a )	align  here 0 , ;
-: >resolve  ( a )	align  here swap ! ;
+\ : test."   ." 123456" cr ;       test."
+\ : test"     " 12345"  puts cr ;  test"
 
 : IF   ( -- a )      ['] 0branch ,  >mark ;  immediate
 : ELSE ( a1 -- a2 )  ['] branch ,   >mark  swap >resolve ;  immediate
@@ -91,10 +96,10 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 \ 2 2 * test-loop
 
 \ Characters
-: char ( -- c )		parse 1+ c@ ;
+: char ( -- c )		parse c@ ;
 : [char]	char literal, ;  immediate
 \ char A emit cr
-\ : test[char]   [char] x emit ;  test[char]
+\ : test[char]   [char] x emit cr ;  test[char]
 
 : space    blank emit ;
 : spaces   BEGIN  ?dup WHILE 1- space REPEAT ;
@@ -103,8 +108,8 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 \ Debug tools
 
-: do-abort   swap IF ." Abort: "  count type cr  abort ELSE drop THEN ;
-: (abort")   ( f -- )   inline-string do-abort ;
+: do-abort   swap IF ." Abort: "  puts cr  abort ELSE drop THEN ;
+: (abort")   ( f -- )   inline-data do-abort ;
 ' (abort") Stringlit abort"
 
 : qtype ( a # -- )	[char] " emit  type  [char] " emit ;
@@ -137,19 +142,19 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
     dup IF abort" Not found" THEN ;
 : >unumber ( a # -- n )
     0 #acc !  udigits  ?rest 2drop  #acc @ ;
-\ : test-unumber  parse count >unumber  h. cr ;
+\ : test-unumber  parse dup strlen  >unumber  h. cr ;
 \ test-unumber 1001
 
 : minus-digit? ( a # -- a' #' sign )
     over c@ [char] - = IF -1st  -1 ELSE 1 THEN ;
-: >number ( a # -- n )
-    minus-digit? -rot  >unumber  * ;
-\ : test-number  parse count >number  h. cr ;
+: >number ( a -- n )
+    dup strlen  minus-digit? -rot  >unumber  * ;
+\ : test-number  parse  >number  h. cr ;
 \ test-number -1001
 
 \ Add number conversion to the outer interpreter
 
-: convert-number   here count >number  state @ IF literal, THEN ;
+: convert-number   here >number  state @ IF literal, THEN ;
 ' convert-number word? !     \ Add number conversion
 
 \ : compile-test   110 h. cr ;  compile-test
@@ -157,7 +162,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 1010 base !   \ going decimal
 
-: binary    2  base ! ;
+: binary     2 base ! ;
 : octal      8 base ! ;
 : decimal   10 base ! ;
 : hex       16 base ! ;
