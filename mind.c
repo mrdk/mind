@@ -191,7 +191,7 @@ static void init_sys(struct entry dict[])
 /* ---------------------------------------------------------------------- */
 /* Code and dictionary */
 
-static char *aligned(char *addr, unsigned align)
+static char *aligned(char *addr, UINT align)
 {
     /* Assertion: alignment is a power of 2 */
     return (char*)(((UINT)addr + align - 1) & ~(align - 1));
