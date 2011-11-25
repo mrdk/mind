@@ -2,12 +2,13 @@
 
 /* E(label, name, flags); */
 
+// Starting and ending
 E(boot, "boot", 0)
 E(abort, "abort", 0)
 E(quit, "quit", 0)
 E(bye, "bye", 0)
 
-// Inner Interpreter
+// Inner interpreter
 E(next, "noop", 0)
 E(semi, ";;", 0)
 E(zero_semi, "0;", 0)

@@ -218,6 +218,8 @@ int main(int argc, char *argv[])
 #undef E
     };
 
+// ---------------------------------------------------------------------------
+// Starting and ending
 boot:
     init_sys(dict);
 abort:
@@ -540,6 +542,7 @@ hdot: // h. ( n -- )		print hexadecimal
 blank: FUNC0(' ');
 
 // ---------------------------------------------------------------------------
+// Others
 
 dotparen: // .(
     read_string(&sys.inf, sys.dp, "\f)");
