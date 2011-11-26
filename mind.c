@@ -359,6 +359,9 @@ allot: // ( n -- )
 comma: // , ( n -- )
     COMMA(TOS, cell); DROP(1); goto next;
 
+ccomma: // c, ( n -- )
+    COMMA((INT)TOS, char); DROP(1); goto next;
+
 comma_quote: // ,"
     sys.dp = read_string(&sys.inf, sys.dp, "\f\""); goto next;
 
