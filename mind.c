@@ -324,16 +324,15 @@ parentick: // (') ( "word" -- cfa | 0 )
 	goto next;
     }
 
-parenfind: // (find) ( addr -- cfa t=found | f )
+parenfind: // (find) ( addr -- cfa | 0 )
     {
 	char *addr = TOS;
 
 	struct entry *e = find_word(sys.latest, addr);
-	if (e) {
-	    NOS = &e->cfa; TOS = (cell)TRUE;
-	} else {
-	    DROP(1); TOS = FALSE;
-	}
+	if (e)
+	    TOS = &e->cfa;
+	else
+	    TOS = 0;
 	goto next;
     }
 
