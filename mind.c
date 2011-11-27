@@ -459,6 +459,9 @@ qdup: // ?dup ( 0 -- 0 | n -- n n  if n > 0)
 dup: // ( n -- n n )
     EXTEND(1); TOS = NOS; goto next;
 
+twodup: // a b -- a b a b
+    EXTEND(2); NOS = ST(3); TOS = ST(2); goto next;
+
 over: // ( a b -- a b a )
     EXTEND(1); TOS = ST(2); goto next;
 under: // ( a b -- b a b )
@@ -473,7 +476,10 @@ minus_rot: // ( a b c -- c a b )
     { cell tmp = TOS; TOS = NOS; NOS = ST(2); ST(2) = tmp; goto next; }
 
 
-spfetch: FUNC0(&NOS); // sp@
+spfetch: FUNC0(&NOS); // sp@ ( -- addr )
+
+spstore: // sp! ( addr -- )
+    sp = TOS; DROP(1); goto next;
 
 // ---------------------------------------------------------------------------
 // Arithmetics
