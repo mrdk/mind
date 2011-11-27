@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 typedef long int INT;
 typedef unsigned long UINT;
@@ -496,12 +497,29 @@ minus:  FUNC2((INT)NOS - (INT)TOS); // -
 plus:   FUNC2((INT)NOS + (INT)TOS); // +
 times:  FUNC2((INT)NOS * (INT)TOS); // *
 divide: FUNC2((INT)NOS / (INT)TOS); // /
+mod: 	FUNC2((INT)NOS % (INT)TOS); // mod
 utimes: FUNC2((UINT)NOS * (UINT)TOS); // u*
 or:     FUNC2((INT)NOS | (INT)TOS);
+and:    FUNC2((INT)NOS & (INT)TOS);
+invert:	FUNC1(~(INT)TOS);
+
+divmod: // /mod ( n1 n2 -- div mod )
+    { 
+	ldiv_t res = ldiv((INT)NOS, (INT)TOS);
+	NOS = (cell)res.quot;
+	TOS = (cell)res.rem;
+	goto next;
+    }
 
 equal:      FUNC2(BOOL(NOS == TOS)); // =
+unequal:    FUNC2(BOOL(NOS != TOS)); // <>
 zero_equal: FUNC1(BOOL(TOS == 0));   // 0=
 zero_less:  FUNC1(BOOL((INT)TOS < 0));    // 0<
+zero_greater: FUNC1(BOOL((INT)TOS > 0));  // 0>
+less:       FUNC2(BOOL((INT)NOS < (INT)TOS)); // <
+less_eq:    FUNC2(BOOL((INT)NOS <= (INT)TOS)); // <=
+greater:    FUNC2(BOOL((INT)NOS > (INT)TOS)); // >
+greater_eq: FUNC2(BOOL((INT)NOS >= (INT)TOS)); // >=
 uless:      FUNC2(BOOL((UINT)NOS < (UINT)TOS)); // u<
 ugreater:   FUNC2(BOOL((UINT)NOS > (UINT)TOS)); // u>
 
