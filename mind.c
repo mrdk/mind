@@ -532,6 +532,9 @@ cfetch: FUNC1((INT)(*(char*)TOS));  // c@ ( a -- n )
 store: // ! ( n a -- )
     *(cell*)TOS = NOS; DROP(2); goto next;
 
+cstore: // c! ( n a -- )
+    *(char*)TOS = (INT)NOS; DROP(2); goto next;
+
 cells:     FUNC1((INT)TOS * sizeof(cell));
 cellplus:  FUNC1((char*)TOS + sizeof(cell)); // cell+
 cellminus: FUNC1((char*)TOS - sizeof(cell)); // cell-
