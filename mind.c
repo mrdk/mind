@@ -3,23 +3,22 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-typedef long int INT;
 typedef unsigned long UINT;
-typedef void* cell;		/* A Forth cell. We require that
+typedef long int cell;		/* A Forth cell. We require that
 				 * sizeof(cell) == sizeof(INT) */
 
 // Forth truth values
-#define TRUE 	(INT)(-1)
+#define TRUE 	(cell)(-1)
 #define FALSE 	0
-#define BOOL(n)	((cell)((n) ? TRUE : FALSE))
+#define BOOL(n)	((n) ? TRUE : FALSE)
 
 /* ---------------------------------------------------------------------- */
 /* I/O */
 
 struct file_t {
     FILE *input;		/* Input file */
-    INT lineno;
-    INT pageno;
+    cell lineno;
+    cell pageno;
 };
 
 static void open_file(struct file_t *inf, char *name)
@@ -29,9 +28,9 @@ static void open_file(struct file_t *inf, char *name)
     inf->pageno = 0;
 }
 
-static INT get_file_char(struct file_t *inf)
+static int get_file_char(struct file_t *inf)
 {
-    INT cin = fgetc(inf->input);
+    int cin = fgetc(inf->input);
 
     switch (cin) {
     case '\n': inf->lineno += 1; break;
@@ -41,9 +40,9 @@ static INT get_file_char(struct file_t *inf)
     return cin;
 }
 
-static INT get_char_in(struct file_t *inf, char *charlist)
+static int get_char_in(struct file_t *inf, char *charlist)
 {
-    INT cin;
+    int cin;
 
     do {
 	cin = get_file_char(inf);
@@ -54,7 +53,7 @@ static INT get_char_in(struct file_t *inf, char *charlist)
 
 static void get_char_notin(struct file_t *inf, char *charlist)
 {
-    INT cin;
+    int cin;
 
     do {
 	cin = get_file_char(inf);
@@ -64,7 +63,7 @@ static void get_char_notin(struct file_t *inf, char *charlist)
 /* Place a string at pos, consisting of chars in charlist. */
 static char *read_string(struct file_t *inf, char *pos, char *charlist)
 {
-    INT cin;
+    int cin;
 
     while ((cin = get_file_char(inf)) != EOF && !strchr(charlist, cin))
 	*pos++ = cin;
@@ -75,9 +74,9 @@ static char *read_string(struct file_t *inf, char *pos, char *charlist)
 
 // Read the next word from INPUT and store it as string at
 // POS. Return whether the string is empty
-static INT parse(struct file_t *inf, char *pos)
+static int parse(struct file_t *inf, char *pos)
 {
-    INT cin = get_char_in(inf, "\f\n\t ");
+    int cin = get_char_in(inf, "\f\n\t ");
 
     if (cin == EOF)
 	return FALSE;
@@ -109,8 +108,8 @@ struct entry {
     char *name;
     char flags;
     cell *cfa;			/* code field address */
-    cell *doer;
-    cell body[];
+    cell **doer;
+    cell *body[];
 };
 
 #define ENTRY(a, field) \
@@ -150,8 +149,8 @@ struct sys_t {
     char *dp;			/* Dictionary pointer */
     cell *s0;			/* Start of the parameter stack */
     struct entry *latest;	/* Pointer to the latest definition */
-    INT state;			/* Compiler state */
-    cell wordq;		        /* Called if word not found (Name: Retro) */
+    cell state;			/* Compiler state */
+    cell *wordq;	        /* Called if word not found (Name: Retro) */
     struct file_t inf;		/* Input file */
     cell mem[MEMCELLS];		/* The memory */
 } sys;
@@ -163,7 +162,7 @@ static void init_sys(struct entry dict[])
     sys.s0 = sys.mem + MEMCELLS - 0x10; /* Top of memory + safety space */
     sys.latest = &dict[num_words - 1];
     sys.state = 0;
-    sys.wordq = PR(notfound);
+    sys.wordq = (cell*)PR(notfound);
     open_file(&sys.inf, "start.mind");
 }
 
@@ -171,7 +170,7 @@ static void init_sys(struct entry dict[])
 /* Stack manipulation */
 
 /* Return stack, growing downwards */
-#define RPUSH(x) (*--rp = (x))
+#define RPUSH(x) (*--rp = (cell)(x))
 #define RPOP     (*rp++)
 #define RDROP    (rp++)
 
@@ -202,13 +201,13 @@ static char *aligned(char *addr, UINT align)
 #define ALIGN(type)	    sys.dp = ALIGNED(sys.dp, type)
 
 #define COMMA(val, type) \
-    ALIGN(type), *(type*)sys.dp = (val), sys.dp += sizeof(type)
+    ALIGN(type), *(type*)sys.dp = (type)(val), sys.dp += sizeof(type)
 
 /* ---------------------------------------------------------------------- */
 
 int main(int argc, char *argv[])
 {
-    cell *ip;			/* Instruction Pointer */
+    cell **ip;			/* Instruction Pointer */
     cell *w;			/* Word Pointer */
     cell *rp;			/* Return Stack Pointer */
     cell *sp;			/* Stack Pointer */
@@ -228,8 +227,9 @@ abort:
 quit:
     rp = sys.r0;
     {
-	static cell interpreter[] = { PR(interpret), PR(branch), interpreter };
-	ip = interpreter;
+	static cell **interpreter[] =
+	    { PR(interpret), PR(branch), (cell**)interpreter };
+	ip = (cell**)interpreter;
 	goto next;
     }
 
@@ -262,17 +262,17 @@ dodoes_addr:  FUNC0(&&dodoes);
 
 
 semi:	// ;;		    end of colon definition		[Name: Retro]
-    ip = RPOP; goto next;
+    ip = (cell**)RPOP; goto next;
 
 zero_semi:  // 0;  ( 0 -- | n -- n ) exit if TOS = 0		[Name: Retro]
     if (!TOS) {
 	DROP(1);
-	ip = RPOP;
+	ip = (cell**)RPOP;
     }
     goto next;
 
 execute: // ( a -- )
-    w = TOS; DROP(1); goto **w;
+    w = (cell*)TOS; DROP(1); goto **w;
 
 // ---------------------------------------------------------------------------
 // Outer interpreter
@@ -297,9 +297,9 @@ interpret:
 		w = sys.wordq;
 
 	    /* Execute word at w */
-	    static cell endcode[] = { PR(semi) };
+	    static cell **endcode[] = { PR(semi) };
 	    RPUSH(ip);
-	    ip = endcode;
+	    ip = (cell**)endcode;
 	    goto **w;
 	}
     }
@@ -319,7 +319,7 @@ parentick: // (') ( "word" -- cfa | 0 )
 
 	EXTEND(1);
 	if (parse(&sys.inf, pos) && (e = find_word(sys.latest, pos)))
-	    TOS = &e->cfa;
+	    TOS = (cell)&e->cfa;
 	else
 	    TOS = 0;
 	goto next;
@@ -327,11 +327,11 @@ parentick: // (') ( "word" -- cfa | 0 )
 
 parenfind: // (find) ( addr -- cfa | 0 )
     {
-	char *addr = TOS;
+	char *addr = (char*)TOS;
 
 	struct entry *e = find_word(sys.latest, addr);
 	if (e)
-	    TOS = &e->cfa;
+	    TOS = (cell)&e->cfa;
 	else
 	    TOS = 0;
 	goto next;
@@ -355,19 +355,19 @@ align:
     ALIGN(cell); goto next;
 
 allot: // ( n -- )
-    sys.dp += (INT)TOS; DROP(1); goto next;
+    sys.dp += TOS; DROP(1); goto next;
 
 comma: // , ( n -- )
     COMMA(TOS, cell); DROP(1); goto next;
 
 ccomma: // c, ( n -- )
-    COMMA((INT)TOS, char); DROP(1); goto next;
+    COMMA(TOS, char); DROP(1); goto next;
 
 comma_quote: // ,"
     sys.dp = read_string(&sys.inf, sys.dp, "\f\""); goto next;
 
 parse: // ( -- a )
-    parse(&sys.inf, sys.dp); EXTEND(1); TOS = sys.dp; goto next;
+    parse(&sys.inf, sys.dp); EXTEND(1); TOS = (cell)sys.dp; goto next;
 
 entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
     {
@@ -378,9 +378,9 @@ entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
 	sys.dp += sizeof(struct entry);
 
 	e->lfa = sys.latest;
-	e->name = NOS;
+	e->name = (char*)NOS;
 	e->flags = 0;
-	e->cfa = TOS;
+	e->cfa = (cell*)TOS;
 	e->doer = NULL;
 
 	sys.latest = e;
@@ -389,9 +389,9 @@ entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
     }
 
 link_to:     FUNC1(&ENTRY(TOS, lfa)->cfa);       // link>  ( lfa -- cfa )
-flags_fetch: FUNC1((INT)ENTRY(TOS, cfa)->flags); // flags@ ( cfa -- n )
+flags_fetch: FUNC1(ENTRY(TOS, cfa)->flags); // flags@ ( cfa -- n )
 flags_store:                                     // flags! ( n cfa -- )
-    ENTRY(TOS, cfa)->flags = (INT)NOS; DROP(2); goto next;
+    ENTRY(TOS, cfa)->flags = NOS; DROP(2); goto next;
 
 to_name: FUNC1(ENTRY(TOS, cfa)->name);	// >name ( cfa -- 'name )
 to_doer: FUNC1(&ENTRY(TOS, cfa)->doer); // >doer ( cfa -- 'doer )
@@ -402,13 +402,13 @@ num_immediate: FUNC0(IMMEDIATE); // #immediate
 // Inline constants
 
 branch:
-    ip = *ip; goto next;
+    ip = (cell**)*ip; goto next;
 
 zbranch:			/* flag -- */
     if (TOS)
 	ip++;			/* ignore */
     else
-	ip = *ip;		/* jump */
+	ip = (cell**)*ip;	/* jump */
     DROP(1);
     goto next;
 
@@ -480,7 +480,7 @@ minus_rot: // ( a b c -- c a b )
 spfetch: FUNC0(&NOS); // sp@ ( -- addr )
 
 spstore: // sp! ( addr -- )
-    sp = TOS; DROP(1); goto next;
+    sp = (cell*)TOS; DROP(1); goto next;
 
 // ---------------------------------------------------------------------------
 // Arithmetics
@@ -490,36 +490,36 @@ one:  FUNC0(1);
 minus_one: FUNC0(-1);
 two:  FUNC0(2);
 
-oneplus:  FUNC1((cell)((INT)TOS + 1)); // 1+  ( n -- n+1 )
-oneminus: FUNC1((cell)((INT)TOS - 1)); // 1-  ( n -- n-1 )
+oneplus:  FUNC1(TOS + 1); // 1+  ( n -- n+1 )
+oneminus: FUNC1(TOS - 1); // 1-  ( n -- n-1 )
 
-minus:  FUNC2((INT)NOS - (INT)TOS); // -
-plus:   FUNC2((INT)NOS + (INT)TOS); // +
-times:  FUNC2((INT)NOS * (INT)TOS); // *
-divide: FUNC2((INT)NOS / (INT)TOS); // /
-mod: 	FUNC2((INT)NOS % (INT)TOS); // mod
+minus:  FUNC2(NOS - TOS); // -
+plus:   FUNC2(NOS + TOS); // +
+times:  FUNC2(NOS * TOS); // *
+divide: FUNC2(NOS / TOS); // /
+mod: 	FUNC2(NOS % TOS); // mod
 utimes: FUNC2((UINT)NOS * (UINT)TOS); // u*
-or:     FUNC2((INT)NOS | (INT)TOS);
-and:    FUNC2((INT)NOS & (INT)TOS);
-invert:	FUNC1(~(INT)TOS);
+or:     FUNC2(NOS | TOS);
+and:    FUNC2(NOS & TOS);
+invert:	FUNC1(~TOS);
 
 divmod: // /mod ( n1 n2 -- div mod )
     { 
-	ldiv_t res = ldiv((INT)NOS, (INT)TOS);
-	NOS = (cell)res.quot;
-	TOS = (cell)res.rem;
+	ldiv_t res = ldiv(NOS, TOS);
+	NOS = res.quot;
+	TOS = res.rem;
 	goto next;
     }
 
 equal:      FUNC2(BOOL(NOS == TOS)); // =
 unequal:    FUNC2(BOOL(NOS != TOS)); // <>
 zero_equal: FUNC1(BOOL(TOS == 0));   // 0=
-zero_less:  FUNC1(BOOL((INT)TOS < 0));    // 0<
-zero_greater: FUNC1(BOOL((INT)TOS > 0));  // 0>
-less:       FUNC2(BOOL((INT)NOS < (INT)TOS)); // <
-less_eq:    FUNC2(BOOL((INT)NOS <= (INT)TOS)); // <=
-greater:    FUNC2(BOOL((INT)NOS > (INT)TOS)); // >
-greater_eq: FUNC2(BOOL((INT)NOS >= (INT)TOS)); // >=
+zero_less:  FUNC1(BOOL(TOS < 0));    // 0<
+zero_greater: FUNC1(BOOL(TOS > 0));  // 0>
+less:       FUNC2(BOOL(NOS < TOS)); // <
+less_eq:    FUNC2(BOOL(NOS <= TOS)); // <=
+greater:    FUNC2(BOOL(NOS > TOS)); // >
+greater_eq: FUNC2(BOOL(NOS >= TOS)); // >=
 uless:      FUNC2(BOOL((UINT)NOS < (UINT)TOS)); // u<
 ugreater:   FUNC2(BOOL((UINT)NOS > (UINT)TOS)); // u>
 
@@ -527,17 +527,17 @@ ugreater:   FUNC2(BOOL((UINT)NOS > (UINT)TOS)); // u>
 // Memory
 
 fetch:  FUNC1(*(cell**)TOS);	    // @  ( a -- n )
-cfetch: FUNC1((INT)(*(char*)TOS));  // c@ ( a -- n )
+cfetch: FUNC1((*(char*)TOS));  // c@ ( a -- n )
 
 store: // ! ( n a -- )
     *(cell*)TOS = NOS; DROP(2); goto next;
 
 cstore: // c! ( n a -- )
-    *(char*)TOS = (INT)NOS; DROP(2); goto next;
+    *(char*)TOS = NOS; DROP(2); goto next;
 
-cells:     FUNC1((INT)TOS * sizeof(cell));
-cellplus:  FUNC1((char*)TOS + sizeof(cell)); // cell+
-cellminus: FUNC1((char*)TOS - sizeof(cell)); // cell-
+cells:     FUNC1(TOS * sizeof(cell));
+cellplus:  FUNC1(TOS + sizeof(cell)); // cell+
+cellminus: FUNC1(TOS - sizeof(cell)); // cell-
 
 // ---------------------------------------------------------------------------
 // Input/Output
@@ -548,12 +548,12 @@ cr:
     putchar('\n'); goto next;
 
 emit: // ( c -- )
-    putchar((INT)TOS); DROP(1); goto next;
+    putchar(TOS); DROP(1); goto next;
 
 type: // ( a # -- )
     {
-	INT n = (INT)TOS;
-	char *addr = NOS;
+	cell n = TOS;
+	char *addr = (char*)NOS;
 
 	DROP(2);
 
@@ -566,7 +566,7 @@ puts: // ( a -- )               print null-terminated string
     fputs((char*)TOS, stdout); DROP(1); goto next;
 
 hdot: // h. ( n -- )		print hexadecimal
-    printf("%lx ", (INT)TOS); DROP(1); goto next;
+    printf("%lx ", TOS); DROP(1); goto next;
 
 blank: FUNC0(' ');
 
