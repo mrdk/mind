@@ -7,6 +7,13 @@
     Currently used:
     - computed goto
     - __alignof
+*** A cell may contain both an int and a pointer
+    The basic Forth data type, the cell, becomes the smallest integer
+    type with at least as many bytes to store both an int or a void*.
+
+    This will make it possible to interface to C functions in a
+    machine-independent and efficient way: It will always be possible
+    to store an int, a char or any pointer e.g. on the stack.
 * Forth vocabulary
 *** Normal Forth words are in lower case.
     This makes it much easier to switch between Forth and other
