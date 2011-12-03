@@ -11,12 +11,12 @@ test: mind
 	@./mind
 
 stats:
-	@wc *.mind *.c Makefile *.txt
+	@wc *.mind *.c Makefile *.org
 
 clean:
 	rm -f mind mind.o
 
 TAGS:
-	etags *.c start.mind
+	etags *.c *.h start.mind
 
 .PHONY: mind.s clean TAGS
