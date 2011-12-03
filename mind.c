@@ -101,33 +101,35 @@ enum wordnum {
 /* Interpreter flags */
 #define IMMEDIATE 1
 
+typedef void *label_t;		/* Target of computed goto. */
+
 struct entry {
-    struct entry *lfa;		/* link field address */
-    char *name;
+    cell lfa;	       /* link field address: points to next entry. */
+    cell name;			/* Pointer to start of word name */
     char flags;
-    cell *cfa;			/* code field address */
-    cell **doer;
-    cell *body[];
+    cell cfa;			/* code field address */
+    cell doer;	     /* Pointer to C routine that executes the word. */
+    cell body[];
 };
 
 #define ENTRY(a, field) \
     ((struct entry*)((char*)(a) - offsetof(struct entry, field)))
 
-#define NEW_ENTRY(label, wname, wflags)			\
-{   .lfa   = i_##label ? &dict[i_##label - 1] : NULL,	\
-    .flags = wflags,					\
-    .name  = wname,					\
-    .cfa   = &&label,					\
-    .doer = NULL },
+#define NEW_ENTRY(label, wname, wflags)				\
+{   .lfa   = (cell)(i_##label ? &dict[i_##label - 1] : NULL),	\
+    .flags = wflags,						\
+    .name  = (cell)wname,					\
+    .cfa   = (cell)&&label,					\
+    .doer  = (cell)NULL },
 
 static struct entry *find_word(struct entry *e, char *name)
 {
     for (;;) {
-	if (!strcmp(e->name, name))
+	if (!strcmp((char*)e->name, name))
 	    return e;
 
 	if (e->lfa)
-	    e = e->lfa;
+	    e = (struct entry*)e->lfa;
 	else
 	    return NULL;
     }
@@ -139,28 +141,28 @@ static struct entry *find_word(struct entry *e, char *name)
 #define MEMBYTES (64 * 1024)	/* Memory in bytes */
 #define MEMCELLS (MEMBYTES / sizeof(cell)) /* Memory in cells */
 
-#define PR(label)  (&dict[i_##label].cfa) /* Primitive */
+#define PR(label)  ((cell)(&dict[i_##label].cfa)) /* Primitive */
 
 /* System variables */
 struct sys_t {
-    cell *r0;			/* Start of the return stack */
-    char *dp;			/* Dictionary pointer */
-    cell *s0;			/* Start of the parameter stack */
-    struct entry *latest;	/* Pointer to the latest definition */
+    cell r0;			/* Pointer: Start of the return stack */
+    cell dp;			/* Dictionary pointer */
+    cell s0;			/* Pointer: Start of the parameter stack */
+    cell latest;	  /* (struct entry*): The latest definition */
     cell state;			/* Compiler state */
-    cell *wordq;	        /* Called if word not found (Name: Retro) */
+    cell wordq;		  /* Called if word not found (Name: Retro) */
     struct file_t inf;		/* Input file */
     cell mem[MEMCELLS];		/* The memory */
 } sys;
 
 static void init_sys(struct entry dict[])
 {
-    sys.r0 = sys.mem + 100;
-    sys.dp = (char*)(sys.r0 + 1);
-    sys.s0 = sys.mem + MEMCELLS - 0x10; /* Top of memory + safety space */
-    sys.latest = &dict[num_words - 1];
+    sys.r0 = (cell)(sys.mem + 100);
+    sys.dp = sys.r0 + sizeof(cell);
+    sys.s0 = (cell)(sys.mem + MEMCELLS - 0x10); /* Top of memory + safety space */
+    sys.latest = (cell)&dict[num_words - 1];
     sys.state = 0;
-    sys.wordq = (cell*)PR(notfound);
+    sys.wordq = PR(notfound);
     open_file(&sys.inf, "start.mind");
 }
 
@@ -189,10 +191,10 @@ static void init_sys(struct entry dict[])
 /* ---------------------------------------------------------------------- */
 /* Code and dictionary */
 
-static char *aligned(char *addr, UINT align)
+static cell aligned(cell addr, cell align)
 {
     /* Assertion: alignment is a power of 2 */
-    return (char*)(((UINT)addr + align - 1) & ~(align - 1));
+    return (addr + align - 1) & ~(align - 1);
 }
 
 #define ALIGNED(ptr, type)  aligned((ptr), __alignof(type))
@@ -205,8 +207,8 @@ static char *aligned(char *addr, UINT align)
 
 int main(int argc, char *argv[])
 {
-    cell **ip;			/* Instruction Pointer */
-    cell *w;			/* Word Pointer */
+    cell *ip;			/* Instruction Pointer */
+    label_t *w;			/* Word Pointer */
     cell *rp;			/* Return Stack Pointer */
     cell *sp;			/* Stack Pointer */
 
@@ -221,13 +223,13 @@ int main(int argc, char *argv[])
 boot:
     init_sys(dict);
 abort:
-    sp = sys.s0;
+    sp = (cell*)sys.s0;
 quit:
-    rp = sys.r0;
+    rp = (cell*)sys.r0;
     {
-	static cell **interpreter[] =
-	    { PR(interpret), PR(branch), (cell**)interpreter };
-	ip = (cell**)interpreter;
+	static cell interpreter[] =
+	    { PR(interpret), PR(branch), (cell)interpreter };
+	ip = interpreter;
 	goto next;
     }
 
@@ -238,20 +240,22 @@ bye:
 // Inner interpreter
 
 next:				/* Address Interpreter */
-    w = *ip++; goto **w;
+    w = (label_t*)*ip++;
+    goto **w;
 
 
 docol:				/* Runtime of ":" */
     RPUSH(ip); ip = ENTRY(w, cfa)->body; goto next;
 
 dodefer:			/* Runtime of Defer */
-    RPUSH(ip); w = *ENTRY(w, cfa)->body; goto **w;
+    RPUSH(ip); w = (label_t)*ENTRY(w, cfa)->body; goto **w;
 
 dovar:				/* Runtime of Variable */
     PUSH(ENTRY(w, cfa)->body); goto next;
 
 dodoes: //			Runtime for Create ... does>
-    PUSH(ENTRY(w, cfa)->body); RPUSH(ip); ip = ENTRY(w, cfa)->doer; goto next;
+    PUSH(ENTRY(w, cfa)->body);
+    RPUSH(ip); ip = (cell*)ENTRY(w, cfa)->doer; goto next;
 
 docol_addr:   FUNC0(&&docol);
 dodefer_addr: FUNC0(&&dodefer);
@@ -260,44 +264,44 @@ dodoes_addr:  FUNC0(&&dodoes);
 
 
 semi:	// ;;		    end of colon definition		[Name: Retro]
-    ip = (cell**)RPOP; goto next;
+    ip = (cell*)RPOP; goto next;
 
 zero_semi:  // 0;  ( 0 -- | n -- n ) exit if TOS = 0		[Name: Retro]
     if (!TOS) {
 	DROP(1);
-	ip = (cell**)RPOP;
+	ip = (cell*)RPOP;
     }
     goto next;
 
 execute: // ( a -- )
-    w = (cell*)TOS; DROP(1); goto **w;
+    w = (label_t*)TOS; DROP(1); goto **w;
 
 // ---------------------------------------------------------------------------
 // Outer interpreter
 
 interpret:
     {
-	char *pos = sys.dp;
+	char *pos = (char*)sys.dp;
 
 	if (!parse(&sys.inf, pos))
 	    goto bye;
 
 	{
-	    struct entry *e = find_word(sys.latest, pos);
+	    struct entry *e = find_word((struct entry*)sys.latest, pos);
 	    if (e) {
 		if (sys.state && !(e->flags & IMMEDIATE)) {
 		    COMMA(&e->cfa, cell);
 		    goto next;
 		}
 		else
-		    w = (cell*)&e->cfa;
+		    w = (label_t*)&e->cfa;
 	    } else
-		w = sys.wordq;
+		w = (label_t*)sys.wordq;
 
 	    /* Execute word at w */
-	    static cell **endcode[] = { PR(semi) };
+	    static cell endcode[] = { PR(semi) };
 	    RPUSH(ip);
-	    ip = (cell**)endcode;
+	    ip = endcode;
 	    goto **w;
 	}
     }
@@ -305,7 +309,7 @@ interpret:
 notfound: // Tell that the word at sys.dp could not be interpreted
     {
 	printf("p%li:l%li: not found: %s\n",
-	       sys.inf.pageno, sys.inf.lineno, sys.dp);
+	       sys.inf.pageno, sys.inf.lineno, (char*)sys.dp);
 	fclose(sys.inf.input);
 	goto abort;
     }
@@ -313,10 +317,11 @@ notfound: // Tell that the word at sys.dp could not be interpreted
 parentick: // (') ( "word" -- cfa | 0 )
     {
 	struct entry *e;
-	char *pos = sys.dp;
+	char *pos = (char*)sys.dp;
 
 	EXTEND(1);
-	if (parse(&sys.inf, pos) && (e = find_word(sys.latest, pos)))
+	if (parse(&sys.inf, pos) &&
+	    (e = find_word((struct entry*)sys.latest, pos)))
 	    TOS = (cell)&e->cfa;
 	else
 	    TOS = 0;
@@ -327,7 +332,7 @@ parenfind: // (find) ( addr -- cfa | 0 )
     {
 	char *addr = (char*)TOS;
 
-	struct entry *e = find_word(sys.latest, addr);
+	struct entry *e = find_word((struct entry*)sys.latest, addr);
 	if (e)
 	    TOS = (cell)&e->cfa;
 	else
@@ -362,10 +367,10 @@ ccomma: // c, ( n -- )
     COMMA(TOS, char); DROP(1); goto next;
 
 comma_quote: // ,"
-    sys.dp = read_string(&sys.inf, sys.dp, "\f\""); goto next;
+    sys.dp = (cell)read_string(&sys.inf, (char*)sys.dp, "\f\""); goto next;
 
 parse: // ( -- a )
-    parse(&sys.inf, sys.dp); EXTEND(1); TOS = (cell)sys.dp; goto next;
+    parse(&sys.inf, (char*)sys.dp); EXTEND(1); TOS = sys.dp; goto next;
 
 entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
     {
@@ -376,12 +381,12 @@ entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
 	sys.dp += sizeof(struct entry);
 
 	e->lfa = sys.latest;
-	e->name = (char*)NOS;
+	e->name = NOS;
 	e->flags = 0;
-	e->cfa = (cell*)TOS;
-	e->doer = NULL;
+	e->cfa = TOS;
+	e->doer = (cell)NULL;
 
-	sys.latest = e;
+	sys.latest = (cell)e;
 	DROP(2);
 	goto next;
     }
@@ -400,13 +405,13 @@ num_immediate: FUNC0(IMMEDIATE); // #immediate
 // Inline constants
 
 branch:
-    ip = (cell**)*ip; goto next;
+    ip = (cell*)*ip; goto next;
 
 zbranch:			/* flag -- */
     if (TOS)
 	ip++;			/* ignore */
     else
-	ip = (cell**)*ip;	/* jump */
+	ip = (cell*)*ip;	/* jump */
     DROP(1);
     goto next;
 
@@ -572,7 +577,7 @@ blank: FUNC0(' ');
 // Others
 
 dotparen: // .(
-    read_string(&sys.inf, sys.dp, "\f)");
-    printf("%s", sys.dp);
+    read_string(&sys.inf, (char*)sys.dp, "\f)");
+    printf("%s", (char*)sys.dp);
     goto next;
 }
