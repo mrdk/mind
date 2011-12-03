@@ -1,4 +1,4 @@
-CFLAGS=-Wall -Wfatal-errors -std=gnu99 -O3 -fno-strict-aliasing -fno-gcse
+CFLAGS=-Wall -std=gnu99 -O3 -fno-strict-aliasing -fno-gcse
 
 all: mind
 
