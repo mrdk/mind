@@ -3,9 +3,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-typedef unsigned long UINT;
-typedef long int cell;		/* A Forth cell. We require that
-				 * sizeof(cell) == sizeof(INT) */
+#include "types.h"
 
 // Forth truth values
 #define TRUE 	(cell)(-1)
@@ -505,7 +503,7 @@ invert:	FUNC1(~TOS);
 
 divmod: // /mod ( n1 n2 -- div mod )
     { 
-	ldiv_t res = ldiv(NOS, TOS);
+	celldiv_t res = celldiv(NOS, TOS);
 	NOS = res.quot;
 	TOS = res.rem;
 	goto next;
