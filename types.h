@@ -2,7 +2,8 @@
 #define TYPES_H
 
 #include <limits.h>
-#include <stdint.h>
+//#include <stdint.h>
+#include <inttypes.h>
 #include <stdlib.h>
 
 /* Define the type cell as an integer type large enough to contain
@@ -18,12 +19,18 @@ typedef unsigned int UINT;
 typedef div_t celldiv_t;
 #define celldiv div
 
+#define PRIdCELL  "d"		/* Print format specifier: decimal */
+#define PRIxCELL  "x"		/* Print format specifier: hex */
+
 #elif INTPTR_MAX <= LONG_MAX	/* cell == long int */
 typedef long int cell;
 typedef unsigned long int UINT;
 
 typedef ldiv_t celldiv_t;
 #define celldiv ldiv
+
+#define PRIdCELL  "ld"		/* Print format specifier: decimal */
+#define PRIxCELL  "lx"		/* Print format specifier: hex */
 
 #else  /* cell == long long int? Maybe we won't ever need it.  */
 #error sizeof(void*) > sizeof(long int): not yet supported.

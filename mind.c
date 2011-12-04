@@ -308,7 +308,7 @@ interpret:
 
 notfound: // Tell that the word at sys.dp could not be interpreted
     {
-	printf("p%li:l%li: not found: %s\n",
+	printf("p%"PRIdCELL":l%"PRIdCELL": not found: %s\n",
 	       sys.inf.pageno, sys.inf.lineno, (char*)sys.dp);
 	fclose(sys.inf.input);
 	goto abort;
@@ -569,7 +569,7 @@ puts: // ( a -- )               print null-terminated string
     fputs((char*)TOS, stdout); DROP(1); goto next;
 
 hdot: // h. ( n -- )		print hexadecimal
-    printf("%lx ", TOS); DROP(1); goto next;
+    printf("%"PRIxCELL" ", TOS); DROP(1); goto next;
 
 blank: FUNC0(' ');
 
