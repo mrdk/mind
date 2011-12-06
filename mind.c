@@ -240,9 +240,7 @@ bye:
 // Inner interpreter
 
 next:				/* Address Interpreter */
-    w = (label_t*)*ip++;
-    goto **w;
-
+    w = (label_t*)*ip++; goto **w;
 
 docol:				/* Runtime of ":" */
     RPUSH(ip); ip = ENTRY(w, cfa)->body; goto next;
@@ -529,8 +527,8 @@ ugreater:   FUNC2(BOOL((UINT)NOS > (UINT)TOS)); // u>
 // ---------------------------------------------------------------------------
 // Memory
 
-fetch:  FUNC1(*(cell**)TOS);	    // @  ( a -- n )
-cfetch: FUNC1((*(char*)TOS));  // c@ ( a -- n )
+fetch:  FUNC1(*(cell*)TOS);	// @  ( a -- n )
+cfetch: FUNC1(*(char*)TOS);	// c@ ( a -- n )
 
 store: // ! ( n a -- )
     *(cell*)TOS = NOS; DROP(2); goto next;
