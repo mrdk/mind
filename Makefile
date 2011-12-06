@@ -4,8 +4,8 @@ all: mind
 
 mind.o: heads.c types.h
 
-mind.s: mind.c heads.c
-	$(CC) -S $(CFLAGS) $<
+mind.s: mind.c heads.c types.h
+	$(CC) -S $(CFLAGS) -fverbose-asm $<
 
 test: mind
 	@./mind
