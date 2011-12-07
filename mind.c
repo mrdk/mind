@@ -6,7 +6,7 @@
 #include "types.h"
 
 // Forth truth values
-#define TRUE 	(cell)(-1)
+#define TRUE 	~(cell)0
 #define FALSE 	0
 #define BOOL(n)	((n) ? TRUE : FALSE)
 
