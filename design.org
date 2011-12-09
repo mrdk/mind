@@ -14,6 +14,16 @@
     This will make it possible to interface to C functions in a
     machine-independent and efficient way: It will always be possible
     to store an int, a char or any pointer e.g. on the stack.
+*** We assume that signed integers are always in two's complement
+    This choice has influence on the Forth code: it means that we need
+    only one kind of addition and subtraction; only multiplication and
+    comparisons come in two version.
+
+    The C standard allows also sign+magnitude and one's complement,
+    but they are rarely used, if at all. And Java explicitly requires
+    two's complement, so this may be the future quasi-standard. (This
+    includes some guessing, I didn't find yet explicit information in
+    the internet. - mr)
 * Forth vocabulary
 *** Normal Forth words are in lower case.
     This makes it much easier to switch between Forth and other
@@ -25,3 +35,4 @@
 *** There are no words that handle double integers.
     The C integers are large enough for us. [From GraspForth]
 *** Strings are null-terminated, as in C
+    This is better for cooperation with C libraries.
