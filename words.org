@@ -204,10 +204,14 @@
       *quot* is n1 / n2 and *rem* is n1 mod n2.
 ***** u*		n1 n2 -- n3
       Product of n1 and n2 as unsigned integers.
+***** u/			n1 n2 -- n3
+      Quotient of n1 and n2 as unsigned integer.
 ***** or		n1 n2 -- n3
       Bitwise "or" of n1 and n2.
 ***** and		n1 n2 -- n3
       Bitwise "and" of n1 and n2.
+***** xor		n1 n2 -- n3
+      Bitwise exclusive "or" of n1 and n2.
 ***** invert		n1 -- n2
       Bitwise nagation of the TOS.
 ***** =			n1 n2 -- flag
@@ -231,8 +235,12 @@
       Test whether n1 >= n2.
 ***** u<		n1 n2 -- flag
       Test whether n1 < n2 as unsigned integers.
+***** u<=		n1 n2 -- flag
+      Test whether n1 <= n2 as unsigned integers.
 ***** u>		n1 n2 -- flag
       Test whether n1 > n2 as unsigned integers.
+***** u>=		n1 n2 -- flag
+      Test whether n1 >= n2 as unsigned integers.
 *** Memory
 ***** @			addr -- n
       Fetch the cell at *addr*.
@@ -242,6 +250,12 @@
       Store one cell at *addr*
 ***** c!		n addr --
       Store one byte at *addr*
+***** malloc		n -- addr
+      Allocate *n* bytes of memory and return its address. Return 0 if
+      the allocation fails.
+***** free		addr
+      Free the memory space at *addr*, which must have been allocated
+      by `malloc`.
 ***** cells		n1 -- n2
       Compute the number of bytes used by *n1* cells.
 ***** cell+		addr1 -- addr2

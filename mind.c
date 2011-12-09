@@ -500,8 +500,10 @@ times:  FUNC2(NOS * TOS); // *
 divide: FUNC2(NOS / TOS); // /
 mod: 	FUNC2(NOS % TOS); // mod
 utimes: FUNC2((ucell)NOS * (ucell)TOS); // u*
+udivide: FUNC2((ucell)NOS / (ucell)TOS); // u/
 or:     FUNC2(NOS | TOS);
 and:    FUNC2(NOS & TOS);
+xor:    FUNC2(NOS ^ TOS);
 invert:	FUNC1(~TOS);
 
 divmod: // /mod ( n1 n2 -- div mod )
@@ -521,8 +523,10 @@ less:       FUNC2(BOOL(NOS < TOS)); // <
 less_eq:    FUNC2(BOOL(NOS <= TOS)); // <=
 greater:    FUNC2(BOOL(NOS > TOS)); // >
 greater_eq: FUNC2(BOOL(NOS >= TOS)); // >=
-uless:      FUNC2(BOOL((ucell)NOS < (ucell)TOS)); // u<
-ugreater:   FUNC2(BOOL((ucell)NOS > (ucell)TOS)); // u>
+uless:      FUNC2(BOOL((ucell)NOS <  (ucell)TOS)); // u<
+uless_eq:   FUNC2(BOOL((ucell)NOS <= (ucell)TOS)); // u<=
+ugreater:   FUNC2(BOOL((ucell)NOS >   (ucell)TOS)); // u>
+ugreater_eq: FUNC2(BOOL((ucell)NOS >= (ucell)TOS)); // u>=
 
 // ---------------------------------------------------------------------------
 // Memory
@@ -535,6 +539,10 @@ store: // ! ( n a -- )
 
 cstore: // c! ( n a -- )
     *(char*)TOS = NOS; DROP(2); goto next;
+
+malloc: FUNC1(malloc(TOS)); // ( n -- addr )
+free:                       // ( addr -- )
+    free((void*)TOS); DROP(1); goto next;
 
 cells:     FUNC1(TOS * sizeof(cell));
 cellplus:  FUNC1(TOS + sizeof(cell)); // cell+
