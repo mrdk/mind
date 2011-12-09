@@ -14,7 +14,7 @@
 
 #if INTPTR_MAX <= INT_MAX	/* cell == int */
 typedef int cell;
-typedef unsigned int UINT;
+typedef unsigned int ucell;
 
 typedef div_t celldiv_t;
 #define celldiv div
@@ -24,7 +24,7 @@ typedef div_t celldiv_t;
 
 #elif INTPTR_MAX <= LONG_MAX	/* cell == long int */
 typedef long int cell;
-typedef unsigned long int UINT;
+typedef unsigned long int ucell;
 
 typedef ldiv_t celldiv_t;
 #define celldiv ldiv
