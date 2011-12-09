@@ -21,7 +21,7 @@ struct file_t {
 static void open_file(struct file_t *inf, char *name)
 {
     inf->input = fopen(name, "r");
-    inf->lineno = 0;
+    inf->lineno = 1;
 }
 
 static int get_file_char(struct file_t *inf)
