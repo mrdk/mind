@@ -19,6 +19,8 @@ typedef unsigned int ucell;
 typedef div_t celldiv_t;
 #define celldiv div
 
+#define cellabs abs
+
 #define PRIdCELL  "d"		/* Print format specifier: decimal */
 #define PRIxCELL  "x"		/* Print format specifier: hex */
 
@@ -28,6 +30,8 @@ typedef unsigned long int ucell;
 
 typedef ldiv_t celldiv_t;
 #define celldiv ldiv
+
+#define cellabs labs
 
 #define PRIdCELL  "ld"		/* Print format specifier: decimal */
 #define PRIxCELL  "lx"		/* Print format specifier: hex */
