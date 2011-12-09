@@ -1,5 +1,5 @@
 \ Tests of built-in words
-.(  Line: ) line# @ h.  cr
+.( Line: ) line# @ h.  cr
 
 \ here here h. ," teststring" here h. puts cr
 \ align here h. cr
@@ -112,8 +112,6 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 : (abort")   ( f -- )   inline-data do-abort ;
 ' (abort") Stringlit abort"
 
-: qtype ( a # -- )	[char] " emit  type  [char] " emit ;
-
 : depth ( -- n )   sp@  s0 @ - [ 1 cells literal, ] / ;
 \ depth h. cr
 : ?stack   depth 0< abort" Stack empty" ;
@@ -126,29 +124,25 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 \ Reading numbers
 
-: -1st ( a # -- a' #' )   1- swap  1+ swap ; \ Cut first character from string
-
 2 Variable base			\ Base for number conversion.
 
 0 Variable #acc			\ Number accumulator
 : accumulate ( n -- )	#acc @  base @ u* +  #acc ! ;
 
-: digit? ( n -- ? )	base @ u< ;
-: digit>acc ( c -- ? )
-    [char] 0 -  dup digit?  under  IF accumulate ELSE drop THEN ;
-: udigits ( a # -- a' #' )	\ Accumulate first unsigned digits
-    BEGIN dup WHILE  over c@  digit>acc WHILE  -1st REPEAT ;
-: ?rest ( a # -- a # )          \ Abort if not a number
-    dup IF abort" Not found" THEN ;
-: >unumber ( a # -- n )
-    0 #acc !  udigits  ?rest 2drop  #acc @ ;
-\ : test-unumber  parse dup strlen  >unumber  h. cr ;
+: digit?     ( n -- ? )	base @ u< ;
+: udigits    ( a -- a' )	\ Accumulate first unsigned digits
+    BEGIN  dup c@  WHILE  
+    	   dup c@  [char] 0 -  digit? WHILE
+	   dup c@  [char] 0 -  accumulate
+	   1+ REPEAT ;
+: ?rest    ( a -- )	c@ abort" Not found" ;	\ Abort if not a number
+: >unumber ( a -- n )	0 #acc !  udigits ?rest  #acc @ ;
+\ : test-unumber  parse  >unumber  h. cr ;
 \ test-unumber 1001
+\ test-unumber 1001x
 
-: minus-digit? ( a # -- a' #' sign )
-    over c@ [char] - = IF -1st  -1 ELSE 1 THEN ;
-: >number ( a -- n )
-    dup strlen  minus-digit? -rot  >unumber  * ;
+: get-sign ( a -- a' sign )	dup c@  [char] - =  IF 1+  -1 ELSE 1 THEN ;
+: >number  ( a -- n ) 	   	get-sign swap  dup strlen >unumber  * ;
 \ : test-number  parse  >number  h. cr ;
 \ test-number -1001
 
@@ -173,7 +167,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 \ words cr
 
 \ Last page
-.(  Line: ) line# @ h.  cr
+.( Line: ) line# @ h.  cr
 
 \ Local Variables:
 \ comment-start: "\\ "
