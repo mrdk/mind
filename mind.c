@@ -16,14 +16,12 @@
 struct file_t {
     FILE *input;		/* Input file */
     cell lineno;
-    cell pageno;
 };
 
 static void open_file(struct file_t *inf, char *name)
 {
     inf->input = fopen(name, "r");
     inf->lineno = 0;
-    inf->pageno = 0;
 }
 
 static int get_file_char(struct file_t *inf)
@@ -32,7 +30,6 @@ static int get_file_char(struct file_t *inf)
 
     switch (cin) {
     case '\n': inf->lineno += 1; break;
-    case '\f': inf->lineno = 0; inf->pageno += 1; break;
     }
 
     return cin;
@@ -306,8 +303,8 @@ interpret:
 
 notfound: // Tell that the word at sys.dp could not be interpreted
     {
-	printf("p%"PRIdCELL":l%"PRIdCELL": not found: %s\n",
-	       sys.inf.pageno, sys.inf.lineno, (char*)sys.dp);
+	printf("l%"PRIdCELL": not found: %s\n",
+	       sys.inf.lineno, (char*)sys.dp);
 	fclose(sys.inf.input);
 	goto abort;
     }
@@ -427,7 +424,6 @@ here:     FUNC0(sys.dp);
 state:    FUNC0(&sys.state);
 wordq:    FUNC0(&sys.wordq);
 lineno:   FUNC0(&sys.inf.lineno);
-pageno:   FUNC0(&sys.inf.pageno);
 
 // ---------------------------------------------------------------------------
 // Return stack

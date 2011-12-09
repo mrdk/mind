@@ -1,5 +1,5 @@
 \ Tests of built-in words
-.( Page: ) page# @ h.  .(  Line: ) line# @ h.  cr
+.(  Line: ) line# @ h.  cr
 
 \ here here h. ," teststring" here h. puts cr
 \ align here h. cr
@@ -11,7 +11,7 @@
 \ .( here:      ) here h. cr
 \ .( value: )     testword @ h. cr
 
-\ Defining words						. o ( mind )
+\ Defining words						. o ( mind )
 
 here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 	] parse  dup strlen 1+ allot  swap entry,  ;; [
@@ -39,7 +39,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 \ 1 Constant c .( c defined, value=)  c h.  cr
 
 
-\ Literals and inline strings
+\ Literals and inline strings
 
 : .name   ( cfa -- )   >name puts ;
 
@@ -95,7 +95,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 \ : test-loop  BEGIN ." l" dup h. cr  dup 1- WHILE  dup WHILE  1-  REPEAT h. ;
 \ 2 2 * test-loop
 
-\ Characters
+\ Characters
 : char ( -- c )		parse c@ ;
 : [char]	char literal, ;  immediate
 \ char A emit cr
@@ -106,7 +106,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 \ 2 2 2 * * spaces .( spaces) cr
 
 
-\ Debug tools
+\ Debug tools
 
 : do-abort   swap IF ." Abort: "  puts cr  abort ELSE drop THEN ;
 : (abort")   ( f -- )   inline-data do-abort ;
@@ -124,7 +124,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 \ 1 2 1 1 .s cr
 
 
-\ Reading numbers
+\ Reading numbers
 
 : -1st ( a # -- a' #' )   1- swap  1+ swap ; \ Cut first character from string
 
@@ -152,7 +152,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 \ : test-number  parse  >number  h. cr ;
 \ test-number -1001
 
-\ Add number conversion to the outer interpreter
+\ Add number conversion to the outer interpreter
 
 : convert-number   here >number  state @ IF literal, THEN ;
 ' convert-number word? !     \ Add number conversion
@@ -167,13 +167,13 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 : decimal   10 base ! ;
 : hex       16 base ! ;
 
-\ Words
+\ Words
 
 : words   latest  BEGIN @  ?dup WHILE  dup link> .name space  REPEAT ;
 \ words cr
 
-\ Last page
-.( Page: ) page# @ h.  .(  Line: ) line# @ h.  cr
+\ Last page
+.(  Line: ) line# @ h.  cr
 
 \ Local Variables:
 \ comment-start: "\\ "

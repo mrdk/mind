@@ -57,7 +57,6 @@ E(here, "here", 0)
 E(state, "state", 0)
 E(wordq, "word?", 0)
 E(lineno, "line#", 0)
-E(pageno, "page#", 0)
 
 // Return stack
 E(rdrop, "rdrop", 0)
