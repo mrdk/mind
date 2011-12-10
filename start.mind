@@ -142,7 +142,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 \ test-unumber 1001x
 
 : get-sign ( a -- a' sign )	dup c@  [char] - =  IF 1+  -1 ELSE 1 THEN ;
-: >number  ( a -- n ) 	   	get-sign swap  dup strlen >unumber  * ;
+: >number  ( a -- n ) 	   	get-sign swap  dup >unumber  * ;
 \ : test-number  parse  >number  h. cr ;
 \ test-number -1001
 
