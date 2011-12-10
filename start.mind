@@ -33,7 +33,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 : Defer ( cfa -- )   ^dodefer Create-as , ;
 \ (') cr Defer ccr  ccr
 
-: Variable ( n -- )   Create , ;
+: Variable ( -- )   Create  1 cells allot ;
 : Constant ( n -- )   Create ,  does> @ ;
 \ 1 Variable v   'latest flags@ h. cr
 \ 1 Constant c .( c defined, value=)  c h.  cr
@@ -124,9 +124,9 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 \ Reading numbers
 
-2 Variable base			\ Base for number conversion.
+Variable base	2 base !	\ Base for number conversion.
 
-0 Variable #acc			\ Number accumulator
+Variable #acc			\ Number accumulator
 : accumulate ( n -- )	#acc @  base @ u* +  #acc ! ;
 
 : digit?     ( n -- ? )	base @ u< ;
@@ -152,7 +152,6 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 ' convert-number word? !     \ Add number conversion
 
 \ : compile-test   110 h. cr ;  compile-test
-
 
 1010 base !   \ going decimal
 
