@@ -78,7 +78,7 @@ static int parse(struct file_t *inf, char *pos)
     else {
 	char *start = pos;
 	char *end;
-    
+
 	*start = cin;
 	end = read_string(inf, start + 1, "\f\n\t ");
 
@@ -489,13 +489,15 @@ two:  FUNC0(2);
 
 oneplus:  FUNC1(TOS + 1); // 1+  ( n -- n+1 )
 oneminus: FUNC1(TOS - 1); // 1-  ( n -- n-1 )
+twotimes: FUNC1(TOS * 2); // 2*  ( n -- n-1 )
+twodiv:   FUNC1(TOS / 2); // 2   ( n -- n-1 )
 
 minus:  FUNC2(NOS - TOS); // -
 plus:   FUNC2(NOS + TOS); // +
 times:  FUNC2(NOS * TOS); // *
 divide: FUNC2(NOS / TOS); // /
 mod: 	FUNC2(NOS % TOS); // mod
-utimes: FUNC2((ucell)NOS * (ucell)TOS); // u*
+utimes: FUNC2((ucell)NOS * (ucell)TOS);  // u*
 udivide: FUNC2((ucell)NOS / (ucell)TOS); // u/
 abs:    FUNC1(cellabs(TOS));
 or:     FUNC2(NOS | TOS);
@@ -504,10 +506,18 @@ xor:    FUNC2(NOS ^ TOS);
 invert:	FUNC1(~TOS);
 
 divmod: // /mod ( n1 n2 -- div mod )
-    { 
+    {
 	celldiv_t res = celldiv(NOS, TOS);
 	NOS = res.quot;
 	TOS = res.rem;
+	goto next;
+    }
+
+udivmod: // /mod ( u1 u2 -- div mod )
+    {
+	ucell u1 = NOS, u2 = TOS;
+	NOS = u1 / u2;
+	TOS = u1 % u2;
 	goto next;
     }
 
@@ -516,14 +526,22 @@ unequal:    FUNC2(BOOL(NOS != TOS)); // <>
 zero_equal: FUNC1(BOOL(TOS == 0));   // 0=
 zero_less:  FUNC1(BOOL(TOS < 0));    // 0<
 zero_greater: FUNC1(BOOL(TOS > 0));  // 0>
-less:       FUNC2(BOOL(NOS < TOS)); // <
+less:       FUNC2(BOOL(NOS < TOS));  // <
 less_eq:    FUNC2(BOOL(NOS <= TOS)); // <=
-greater:    FUNC2(BOOL(NOS > TOS)); // >
+greater:    FUNC2(BOOL(NOS > TOS));  // >
 greater_eq: FUNC2(BOOL(NOS >= TOS)); // >=
-uless:      FUNC2(BOOL((ucell)NOS <  (ucell)TOS)); // u<
-uless_eq:   FUNC2(BOOL((ucell)NOS <= (ucell)TOS)); // u<=
+uless:      FUNC2(BOOL((ucell)NOS <  (ucell)TOS));  // u<
+uless_eq:   FUNC2(BOOL((ucell)NOS <= (ucell)TOS));  // u<=
 ugreater:   FUNC2(BOOL((ucell)NOS >   (ucell)TOS)); // u>
 ugreater_eq: FUNC2(BOOL((ucell)NOS >= (ucell)TOS)); // u>=
+
+within: // ( n n0 n1 -- flag )  true when  n0 <= n < n1, with wraparound
+    {
+	ucell n = ST(2), n0 = NOS, n1 = TOS;
+	DROP(2);
+	TOS = BOOL(n - n0 < n1 - n0);
+	goto next;
+    }
 
 // ---------------------------------------------------------------------------
 // Memory
@@ -533,6 +551,9 @@ cfetch: FUNC1(*(char*)TOS);	// c@ ( a -- n )
 
 store: // ! ( n a -- )
     *(cell*)TOS = NOS; DROP(2); goto next;
+
+plus_store: // +!  ( n a -- )
+    *(cell*)TOS += NOS; DROP(2); goto next;
 
 cstore: // c! ( n a -- )
     *(char*)TOS = NOS; DROP(2); goto next;

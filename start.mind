@@ -108,8 +108,9 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 \ Debug tools
 
-: do-abort   swap IF ." Abort: "  puts cr  abort ELSE drop THEN ;
-: (abort")   ( f -- )   inline-data do-abort ;
+: .abort    ( str -- )	       ." Abort: "  here puts  space puts  cr ;
+: do-abort  ( flag str -- )    swap IF .abort  abort  ELSE drop THEN ;
+: (abort")  ( f -- )   inline-data do-abort ;
 ' (abort") Stringlit abort"
 
 : depth ( -- n )   sp@  s0 @ - [ 1 cells literal, ] / ;
@@ -122,7 +123,12 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 \ 1 2 1 1 .s cr
 
 
-\ Reading numbers
+\ Conversion: string > number
+
+0  Constant false
+-1 Constant true
+
+: within+  ( n n0 n1 -- flag )	1+ within ; \ true if n0 <= n <= n1
 
 Variable base	2 base !	\ Base for number conversion.
 
@@ -130,19 +136,22 @@ Variable #acc			\ Number accumulator
 : accumulate ( n -- )	#acc @  base @ u* +  #acc ! ;
 
 : digit?     ( n -- ? )	base @ u< ;
+: digit>#  ( c -- n ? )
+  dup  [char] 0 [char] 9 within+  IF  [char] 0 -  dup digit? ;; THEN
+  dup  [char] a [char] z within+  IF  [char] a -
+                     [ 1 2* 2* 1+ 2* ] literal +  dup digit? ;; THEN
+  false ;			 
+
 : udigits    ( a -- a' )	\ Accumulate first unsigned digits
-    BEGIN  dup c@  WHILE  
-    	   dup c@  [char] 0 -  digit? WHILE
-	   dup c@  [char] 0 -  accumulate
-	   1+ REPEAT ;
-: ?rest    ( a -- )	c@ abort" Not found" ;	\ Abort if not a number
+  BEGIN dup c@  digit># IF accumulate ELSE drop ;; THEN  1+ REPEAT ;
+: ?rest    ( a -- )	c@ abort" not found" ;	\ Abort if not a number
 : >unumber ( a -- n )	0 #acc !  udigits ?rest  #acc @ ;
 \ : test-unumber  parse  >unumber  h. cr ;
 \ test-unumber 1001
 \ test-unumber 1001x
 
 : get-sign ( a -- a' sign )	dup c@  [char] - =  IF 1+  -1 ELSE 1 THEN ;
-: >number  ( a -- n ) 	   	get-sign swap  dup >unumber  * ;
+: >number  ( a -- n ) 	   	get-sign swap  >unumber  * ;
 \ : test-number  parse  >number  h. cr ;
 \ test-number -1001
 
@@ -159,6 +168,26 @@ Variable #acc			\ Number accumulator
 : octal      8 base ! ;
 : decimal   10 base ! ;
 : hex       16 base ! ;
+
+\ Conversion: numbers > string (Modified f.i.g. model.)
+
+128 Constant /numbuf
+Create numbuf  /numbuf 1+ allot 
+Variable created-string
+
+: hold ( char -- )  -1 created-string +!   created-string @  c! ;
+: hold-sign ( n -- )   dup 0< IF  [char] - hold  ELSE drop THEN ;
+: <#	 numbuf /numbuf + created-string !   0 hold ;
+: # ( u -- u')	    base @ u/mod
+  dup 10 <  IF [char] 0 +  ELSE  10 - [char] a +  THEN  hold ;
+: #s ( u -- )	    BEGIN  ?dup WHILE  # REPEAT ;
+: #> ( -- addr )    created-string @ ;
+
+: (u.)  ( u -- )    <# # #s #> puts ;
+: u.    ( u -- )    (u.) space ;
+: (.)   ( n -- )    dup abs  <# # #s hold-sign #>  puts ;
+: .     ( n -- )    (.) space ;
+
 
 \ Words
 

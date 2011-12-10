@@ -187,6 +187,10 @@
       Add 1 to the TOS.
 ***** 1-		n -- n'
       Subtract 1 from the TOS.
+***** 2*		n -- n'
+      Multiplication with 2, as signed integer.
+***** 2/		n -- n'
+      Division by 2, as signed integer.
 ***** -			n1 n2 -- n3
       Compute the difference n1 - n2.
 ***** +			n1 n2 -- n3
@@ -204,8 +208,10 @@
       *quot* is n1 / n2 and *rem* is n1 mod n2.
 ***** u*		n1 n2 -- n3
       Product of n1 and n2 as unsigned integers.
-***** u/			n1 n2 -- n3
+***** u/		n1 n2 -- n3
       Quotient of n1 and n2 as unsigned integer.
+***** abs		n -- u
+      Compute the absolute value
 ***** or		n1 n2 -- n3
       Bitwise "or" of n1 and n2.
 ***** and		n1 n2 -- n3
@@ -241,15 +247,21 @@
       Test whether n1 > n2 as unsigned integers.
 ***** u>=		n1 n2 -- flag
       Test whether n1 >= n2 as unsigned integers.
+***** within		n n0 n1 -- flag
+      True if n0 <= n <= n1. The sequence of integers is here viewed
+      as cyclic; the word works therefore with unsigned integers as
+      well as with signed ones.
 *** Memory
 ***** @			addr -- n
       Fetch the cell at *addr*.
 ***** c@
       Fetch the byte at *addr*.
 ***** !			n addr --
-      Store one cell at *addr*
+      Store one cell at *addr*.
+***** +!		n addr --
+      Add *n* to the cell at *addr*.
 ***** c!		n addr --
-      Store one byte at *addr*
+      Store one byte at *addr*.
 ***** malloc		n -- addr
       Allocate *n* bytes of memory and return its address. Return 0 if
       the allocation fails.
