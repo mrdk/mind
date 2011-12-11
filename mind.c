@@ -171,14 +171,14 @@ static void init_sys(struct entry dict[])
 #define RPOP     (*rp++)
 #define RDROP    (rp++)
 
-/* Parameter stack, growing upwards */
-#define EXTEND(n)   	sp += (n) /* Extend the stack but don't initialise */
-#define DROP(n)		sp -= (n)
+/* Parameter stack, growing downwards */
+#define EXTEND(n)   	sp -= (n) /* Extend the stack but don't initialise */
+#define DROP(n)		sp += (n)
 #define PUSH(x) 	EXTEND(1), TOS = (cell)(x)
 
 #define TOS	(*sp)
-#define NOS     (*(sp - 1))
-#define ST(n)   (*(sp - (n)))
+#define NOS     (*(sp + 1))
+#define ST(n)   (*(sp + (n)))
 
 // Macros for "functions": words with 1 parameter a result
 #define FUNC0(x)  EXTEND(1); TOS = (cell)(x); goto next // ( -- n )

@@ -113,14 +113,11 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 : (abort")  ( f -- )   inline-data do-abort ;
 ' (abort") Stringlit abort"
 
-: depth ( -- n )   sp@  s0 @ - [ 1 cells literal, ] / ;
-\ depth h. cr
+: depth ( -- n )   s0 @ cell-  sp@ - [ 1 cells ] literal  / ;
 : ?stack   depth 0< abort" Stack empty" ;
 
 : .s    ?stack  sp@ >r  s0 @
-    BEGIN  dup r u< WHILE  cell+  dup @ h.  REPEAT  drop rdrop ;
-\ .s cr 
-\ 1 2 1 1 .s cr
+    BEGIN  dup r u> WHILE  cell-  dup @ h.  REPEAT  drop rdrop ;
 
 
 \ Conversion: string > number
