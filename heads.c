@@ -80,6 +80,8 @@ E(spfetch, "sp@", 0)
 E(spstore, "sp!", 0)
 
 // Arithmetics
+E(false, "false", 0)
+E(true, "true", 0)
 E(zero, "0", 0)
 E(one, "1", 0)
 E(minus_one, "-1", 0)
@@ -136,7 +138,7 @@ E(type, "type", 0)
 E(puts, "puts", 0)
 E(cr, "cr", 0)
 E(hdot, "h.", 0)
-E(blank, "blank", 0)
+E(bl, "bl", 0)
 
 // Others
 E(dotparen, ".(", 0)

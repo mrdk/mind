@@ -482,6 +482,9 @@ spstore: // sp! ( addr -- )
 // ---------------------------------------------------------------------------
 // Arithmetics
 
+false: FUNC0(FALSE);
+true:  FUNC0(TRUE);
+
 zero: FUNC0(0);
 one:  FUNC0(1);
 minus_one: FUNC0(-1);
@@ -595,7 +598,7 @@ puts: // ( a -- )               print null-terminated string
 hdot: // h. ( n -- )		print hexadecimal
     printf("%"PRIxCELL" ", TOS); DROP(1); goto next;
 
-blank: FUNC0(' ');
+bl: FUNC0(' ');
 
 // ---------------------------------------------------------------------------
 // Others

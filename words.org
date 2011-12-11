@@ -176,6 +176,10 @@
 ***** sp!		addr --
       Make *addr* the new value of the stack pointer.
 *** Arithmetics
+***** false		-- flag
+      Boolean flag for false,
+***** true		-- flag
+      Boolean flag for true.
 ***** 0			-- 0
       This and other numbers are defined as Forth words to shorten the
       compiled code and to make the bootstrapping of the language
@@ -290,8 +294,8 @@
       Begin a new output line.
 ***** h.		addr --
       Print the TOS as a hexadecimal number, followed by a space.
-***** blank
-      Send a blank to the output.
+***** bl		-- n
+      Code for a blank character.
 *** Others
 ***** .(
       Print the characters that follow this word in the input file to
