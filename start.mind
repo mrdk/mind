@@ -142,18 +142,21 @@ Variable #acc			\ Number accumulator
 Create numbuf  /numbuf 1+ allot 
 Variable 'num	    \ points to the beginning of the generated string.
 
+: #>digit ( n - char )
+  dup 10 <  IF [char] 0 +  ELSE  10 - [char] a +  THEN ;
+
 : hold   ( char -- )  -1 'num +!   'num @  c! ;
 : hold-sign ( n -- )   dup 0< IF  [char] - hold  ELSE drop THEN ;
-: <#	 numbuf /numbuf + 'num !   0 hold ;
-: # ( u -- u')	    base @ u/mod
-  dup 10 <  IF [char] 0 +  ELSE  10 - [char] a +  THEN  hold ;
+
+: <#	            numbuf /numbuf + 'num !   0 hold ;
+: # ( u -- u')	    base @ u/mod  #>digit hold ;
 : #s ( u -- )	    BEGIN  ?dup WHILE  # REPEAT ;
 : #> ( -- addr )    'num @ ;
 
-: (u.)  ( u -- )    <# # #s #> puts ;
-: u.    ( u -- )    (u.) space ;
-: (.)   ( n -- )    dup abs  <# # #s hold-sign #>  puts ;
-: .     ( n -- )    (.) space ;
+: (u.)  ( u -- addr )    <# # #s #> ;
+: u.    ( u -- )    (u.) puts space ;
+: (.)   ( n -- addr )    dup abs  <# # #s hold-sign #> ;
+: .     ( n -- )    (.)  puts space ;
 
 
 \ Words
