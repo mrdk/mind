@@ -109,27 +109,35 @@ struct entry {
     cell body[];
 };
 
-#define ENTRY(a, field) \
-    ((struct entry*)((char*)(a) - offsetof(struct entry, field)))
-
 #define NEW_ENTRY(label, wname, wflags)				\
-{   .lfa   = (cell)(i_##label ? &dict[i_##label - 1] : NULL),	\
+{   .lfa   = i_##label ? (cell)&dict[i_##label - 1] : 0,	\
     .flags = wflags,						\
     .name  = (cell)wname,					\
     .cfa   = (cell)&&label,					\
-    .doer  = (cell)NULL },
+    .doer  = 0 },
 
+#define FROM_CFA(addr)							\
+    ((struct entry*)((char*)(addr) - offsetof(struct entry, cfa)))
+
+
+/* Find string *name* in dictionary, starting at *e*. */
 static struct entry *find_word(struct entry *e, char *name)
 {
-    for (;;) {
+    for (; e->lfa; e = (struct entry*)e->lfa) {
 	if (!strcmp((char*)e->name, name))
 	    return e;
-
-	if (e->lfa)
-	    e = (struct entry*)e->lfa;
-	else
-	    return NULL;
     }
+    return NULL;
+}
+
+/* Find CFA for *name* in dictionary, starting at *e*. */
+static cell* find_cfa(struct entry *e, char *name)
+{
+    e = find_word(e, name);
+    if (e)
+	return &e->cfa;
+    else
+	return NULL;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -240,17 +248,17 @@ next:				/* Address Interpreter */
     w = (label_t*)*ip++; goto **w;
 
 docol:				/* Runtime of ":" */
-    RPUSH(ip); ip = ENTRY(w, cfa)->body; goto next;
+    RPUSH(ip); ip = FROM_CFA(w)->body; goto next;
 
 dodefer:			/* Runtime of Defer */
-    RPUSH(ip); w = (label_t)*ENTRY(w, cfa)->body; goto **w;
+    RPUSH(ip); w = (label_t)*FROM_CFA(w)->body; goto **w;
 
 dovar:				/* Runtime of Variable */
-    PUSH(ENTRY(w, cfa)->body); goto next;
+    PUSH(FROM_CFA(w)->body); goto next;
 
 dodoes: //			Runtime for Create ... does>
-    PUSH(ENTRY(w, cfa)->body);
-    RPUSH(ip); ip = (cell*)ENTRY(w, cfa)->doer; goto next;
+    PUSH(FROM_CFA(w)->body);
+    RPUSH(ip); ip = (cell*)FROM_CFA(w)->doer; goto next;
 
 docol_addr:   FUNC0(&&docol);
 dodefer_addr: FUNC0(&&dodefer);
@@ -276,29 +284,28 @@ execute: // ( a -- )
 
 interpret:
     {
-	char *pos = (char*)sys.dp;
+	char *here = (char*)sys.dp;
+	struct entry *e;
 
-	if (!parse(&sys.inf, pos))
+	if (!parse(&sys.inf, here))
 	    goto bye;
 
-	{
-	    struct entry *e = find_word((struct entry*)sys.latest, pos);
-	    if (e) {
-		if (sys.state && !(e->flags & IMMEDIATE)) {
-		    COMMA(&e->cfa, cell);
-		    goto next;
-		}
-		else
-		    w = (label_t*)&e->cfa;
-	    } else
-		w = (label_t*)sys.wordq;
+	e = find_word((struct entry*)sys.latest, here);
+	if (e) {
+	    if (sys.state && !(e->flags & IMMEDIATE)) {
+		COMMA(&e->cfa, cell);
+		goto next;
+	    }
+	    else
+		w = (label_t*)&e->cfa;
+	} else
+	    w = (label_t*)sys.wordq;
 
-	    /* Execute word at w */
-	    static cell endcode[] = { PR(semi) };
-	    RPUSH(ip);
-	    ip = endcode;
-	    goto **w;
-	}
+	/* Execute word at w */
+	static cell endcode[] = { PR(semi) };
+	RPUSH(ip);
+	ip = endcode;
+	goto **w;
     }
 
 notfound: // Tell that the word at sys.dp could not be interpreted
@@ -311,29 +318,19 @@ notfound: // Tell that the word at sys.dp could not be interpreted
 
 parentick: // (') ( "word" -- cfa | 0 )
     {
-	struct entry *e;
-	char *pos = (char*)sys.dp;
+	char *here = (char*)sys.dp;
 
 	EXTEND(1);
-	if (parse(&sys.inf, pos) &&
-	    (e = find_word((struct entry*)sys.latest, pos)))
-	    TOS = (cell)&e->cfa;
-	else
+	if (!parse(&sys.inf, here))
 	    TOS = 0;
+	else
+	    TOS = (cell)find_cfa((struct entry*)sys.latest, here);
+
 	goto next;
     }
 
 parenfind: // (find) ( addr -- cfa | 0 )
-    {
-	char *addr = (char*)TOS;
-
-	struct entry *e = find_word((struct entry*)sys.latest, addr);
-	if (e)
-	    TOS = (cell)&e->cfa;
-	else
-	    TOS = 0;
-	goto next;
-    }
+    FUNC1(find_cfa((struct entry*)sys.latest, (char*)TOS));
 
 lbrack:	// [
     sys.state = 0; goto next;
@@ -379,20 +376,20 @@ entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
 	e->name = NOS;
 	e->flags = 0;
 	e->cfa = TOS;
-	e->doer = (cell)NULL;
+	e->doer = 0;
 
 	sys.latest = (cell)e;
 	DROP(2);
 	goto next;
     }
 
-link_to:     FUNC1(&ENTRY(TOS, lfa)->cfa);       // link>  ( lfa -- cfa )
-flags_fetch: FUNC1(ENTRY(TOS, cfa)->flags); // flags@ ( cfa -- n )
-flags_store:                                     // flags! ( n cfa -- )
-    ENTRY(TOS, cfa)->flags = NOS; DROP(2); goto next;
+link_to:     FUNC1(&((struct entry*)TOS)->cfa);	// link>  ( lfa -- cfa )
+flags_fetch: FUNC1(FROM_CFA(TOS)->flags);	// flags@ ( cfa -- n )
+flags_store:					// flags! ( n cfa -- )
+    FROM_CFA(TOS)->flags = NOS; DROP(2); goto next;
 
-to_name: FUNC1(ENTRY(TOS, cfa)->name);	// >name ( cfa -- 'name )
-to_doer: FUNC1(&ENTRY(TOS, cfa)->doer); // >doer ( cfa -- 'doer )
+to_name: FUNC1(FROM_CFA(TOS)->name);	// >name ( cfa -- 'name )
+to_doer: FUNC1(&FROM_CFA(TOS)->doer);	// >doer ( cfa -- 'doer )
 
 num_immediate: FUNC0(IMMEDIATE); // #immediate
 
@@ -482,8 +479,8 @@ spstore: // sp! ( addr -- )
 // ---------------------------------------------------------------------------
 // Arithmetics
 
-false: FUNC0(FALSE);
-true:  FUNC0(TRUE);
+    false: FUNC0(FALSE);
+    true:  FUNC0(TRUE);
 
 zero: FUNC0(0);
 one:  FUNC0(1);
