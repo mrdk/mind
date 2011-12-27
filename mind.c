@@ -5,6 +5,8 @@
 
 #include "types.h"
 
+#define MEMCELLS 0x10000	/* Memory size in cells */
+
 // Forth truth values
 #define TRUE 	~(cell)0
 #define FALSE 	0
@@ -28,9 +30,8 @@ static int get_file_char(struct file_t *inf)
 {
     int cin = fgetc(inf->input);
 
-    switch (cin) {
-    case '\n': inf->lineno += 1; break;
-    }
+    if (cin == '\n')
+	inf->lineno++;
 
     return cin;
 }
@@ -101,20 +102,22 @@ enum wordnum {
 typedef void *label_t;		/* Target of computed goto. */
 
 struct entry {
-    cell lfa;	       /* link field address: points to next entry. */
-    cell name;			/* Pointer to start of word name */
+    cell link;		 /* (entry*) points to previous entry.     */
+    cell name;		 /* (char*)  Pointer to start of word name */
     char flags;
-    cell cfa;			/* code field address */
-    cell doer;	     /* Pointer to C routine that executes the word. */
+    cell cfa;		 /* (label_t) code field address              */
+    cell doer;		 /* (cell*)   Forth routine for `does>` part. */
     cell body[];
 };
 
 #define NEW_ENTRY(label, wname, wflags)				\
-{   .lfa   = i_##label ? (cell)&dict[i_##label - 1] : 0,	\
+{   .link   = i_##label ? (cell)&dict[i_##label - 1] : 0,	\
     .flags = wflags,						\
     .name  = (cell)wname,					\
     .cfa   = (cell)&&label,					\
     .doer  = 0 },
+
+#define PR(label)  ((cell)(&dict[i_##label].cfa)) /* Primitive */
 
 #define FROM_CFA(addr)							\
     ((struct entry*)((char*)(addr) - offsetof(struct entry, cfa)))
@@ -123,7 +126,7 @@ struct entry {
 /* Find string *name* in dictionary, starting at *e*. */
 static struct entry *find_word(struct entry *e, char *name)
 {
-    for (; e->lfa; e = (struct entry*)e->lfa) {
+    for (; e->link; e = (struct entry*)e->link) {
 	if (!strcmp((char*)e->name, name))
 	    return e;
     }
@@ -134,27 +137,19 @@ static struct entry *find_word(struct entry *e, char *name)
 static cell* find_cfa(struct entry *e, char *name)
 {
     e = find_word(e, name);
-    if (e)
-	return &e->cfa;
-    else
-	return NULL;
+    return e? &e->cfa : NULL;
 }
 
 /* ---------------------------------------------------------------------- */
 /* Memory */
 
-#define MEMBYTES (64 * 1024)	/* Memory in bytes */
-#define MEMCELLS (MEMBYTES / sizeof(cell)) /* Memory in cells */
-
-#define PR(label)  ((cell)(&dict[i_##label].cfa)) /* Primitive */
-
 /* System variables */
 struct sys_t {
-    cell r0;			/* Pointer: Start of the return stack */
-    cell dp;			/* Dictionary pointer */
-    cell s0;			/* Pointer: Start of the parameter stack */
-    cell latest;	  /* (struct entry*): The latest definition */
-    cell state;			/* Compiler state */
+    cell r0;		  /* (cell*) Start of the return stack */
+    cell dp;		  /* (cell*) Dictionary pointer */
+    cell s0;		  /* (cell*) Start of the parameter stack */
+    cell latest;	  /* (struct entry*) The latest definition */
+    cell state;		  /* Compiler state */
     cell wordq;		  /* Called if word not found (Name: Retro) */
     struct file_t inf;		/* Input file */
     cell mem[MEMCELLS];		/* The memory */
@@ -372,7 +367,7 @@ entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
 	e = (struct entry*)sys.dp;
 	sys.dp += sizeof(struct entry);
 
-	e->lfa = sys.latest;
+	e->link = sys.latest;
 	e->name = NOS;
 	e->flags = 0;
 	e->cfa = TOS;
