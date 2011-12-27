@@ -246,7 +246,7 @@ docol:				/* Runtime of ":" */
     RPUSH(ip); ip = FROM_CFA(w)->body; goto next;
 
 dodefer:			/* Runtime of Defer */
-    RPUSH(ip); w = (label_t)*FROM_CFA(w)->body; goto **w;
+    RPUSH(ip); w = (label_t)FROM_CFA(w)->doer; goto **w;
 
 dovar:				/* Runtime of Variable */
     PUSH(FROM_CFA(w)->body); goto next;

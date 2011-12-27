@@ -4,7 +4,8 @@
 here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 	] parse  dup strlen 1+ allot  swap entry,  ;; [
 
-^dodefer Create-as ?pairs  (') 2drop ,  ( n1 n2 -- ) 
+^dodefer Create-as ?pairs               ( n1 n2 -- ) 
+(') 2drop  (') ?pairs >doer !
 
 ^docol Create-as :			( "name" -- )
 	] ^docol Create-as  1 state !   lit :  ;; [
@@ -21,8 +22,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 : Variable ( -- )     Create  1 cells allot ;
 : Constant ( n -- )   Create ,  does> @ ;
 
-: Defer    ( cfa -- )   ^dodefer Create-as , ;
-
+: Defer    ( cfa -- )   ^dodefer Create-as  'latest >doer ! ;
 
 \ Literals
 
@@ -35,6 +35,8 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 : [']   ' literal, ; immediate
 : [compile]  	' , ; immediate
+
+: is       ( cfa "word" -- )   ' >doer ! ;   \ to set behaviour of Defer word
 
 
 \ Control structures
@@ -85,13 +87,16 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 \ Debug tools
 
-: .abort    ( str -- )	       ." Abort: "  here puts  space puts  cr ;
+: .abort    ( str -- )	       ." Abort: "  here puts  space  puts  cr ;
 : do-abort  ( flag str -- )    swap IF .abort  abort  ELSE drop THEN ;
 : (abort")  ( f -- )   inline-data do-abort ;
 ' (abort") Stringlit abort"
 
 : depth ( -- n )   s0 @ cell-  sp@ - [ 1 cells ] literal  / ;
 : ?stack   depth 0< abort" Stack empty" ;
+
+: (?pairs)  ( n1 n2 -- )    <> abort" Mismatching control structure" ;
+' (?pairs) is ?pairs
 
 : .s    ?stack  sp@ >r  s0 @
     BEGIN  dup r u> WHILE  cell-  dup @ h.  REPEAT  drop rdrop ;
