@@ -36,7 +36,7 @@ static int get_file_char(struct file_t *inf)
     return cin;
 }
 
-static int get_char_in(struct file_t *inf, char *charlist)
+static void skip_chars_in(struct file_t *inf, char *charlist)
 {
     int cin;
 
@@ -44,16 +44,18 @@ static int get_char_in(struct file_t *inf, char *charlist)
 	cin = get_file_char(inf);
     } while (strchr(charlist, cin));
 
-    return cin;
+    ungetc(cin, inf->input);
 }
 
-static void get_char_notin(struct file_t *inf, char *charlist)
+static int skip_chars_until(struct file_t *inf, char *charlist)
 {
     int cin;
 
     do {
 	cin = get_file_char(inf);
     } while (!strchr(charlist, cin));
+
+    return cin;
 }
 
 /* Place a string at pos, consisting of chars in charlist. */
@@ -69,22 +71,13 @@ static char *read_string(struct file_t *inf, char *pos, char *charlist)
 }
 
 // Read the next word from INPUT and store it as string at
-// POS. Return whether the string is empty
-static int parse(struct file_t *inf, char *pos)
+// START. Return whether the string is empty.
+static int parse(struct file_t *inf, char *start)
 {
-    int cin = get_char_in(inf, "\f\n\t ");
+    skip_chars_in(inf, "\f\n\t ");
+    read_string(inf, start, "\f\n\t ");
 
-    if (cin == EOF)
-	return FALSE;
-    else {
-	char *start = pos;
-	char *end;
-
-	*start = cin;
-	end = read_string(inf, start + 1, "\f\n\t ");
-
-	return TRUE;
-    }
+    return BOOL(*start);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -333,10 +326,10 @@ rbrack:	// ]
     sys.state = 1; goto next;
 
 backslash: // "\": comment to the end of the line
-    get_char_notin(&sys.inf, "\f\n"); goto next;
+    skip_chars_until(&sys.inf, "\f\n"); goto next;
 
 paren: // "("
-    get_char_notin(&sys.inf, "\f)"); goto next;
+    skip_chars_until(&sys.inf, "\f)"); goto next;
 
 // ---------------------------------------------------------------------------
 // Dictionary
