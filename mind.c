@@ -289,9 +289,7 @@ interpret:
 	} else
 	    w = (label_t*)sys.wordq;
 
-	/* Execute word at w */
-	static cell endcode[] = { PR(semi) };
-	RPUSH(ip); ip = endcode; goto **w;
+	goto **w;
     }
 
 notfound: // Tell that the word at sys.dp could not be interpreted
