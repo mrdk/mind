@@ -25,6 +25,7 @@ E(parentick, "(')", 0)
 E(parenfind, "(find)", 0)
 E(lbrack, "[", IMMEDIATE)
 E(rbrack, "]", 0)
+E(get_char, "get-char", 0)
 E(backslash, "\\", IMMEDIATE)
 E(paren, "(", IMMEDIATE)
 

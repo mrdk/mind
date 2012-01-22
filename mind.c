@@ -74,8 +74,8 @@ static char *read_string(struct file_t *inf, char *pos, char *charlist)
 // START. Return whether the string is empty.
 static int parse(struct file_t *inf, char *start)
 {
-    skip_chars_in(inf, "\f\n\t ");
-    read_string(inf, start, "\f\n\t ");
+    skip_chars_in(inf, "\n\t ");
+    read_string(inf, start, "\n\t ");
 
     return BOOL(*start);
 }
@@ -239,7 +239,7 @@ docol:				/* Runtime of ":" */
     RPUSH(ip); ip = FROM_CFA(w)->body; goto next;
 
 dodefer:			/* Runtime of Defer */
-    RPUSH(ip); w = (label_t)FROM_CFA(w)->doer; goto **w;
+    RPUSH(ip); w = (label_t*)FROM_CFA(w)->doer; goto **w;
 
 dovar:				/* Runtime of Variable */
     PUSH(FROM_CFA(w)->body); goto next;
@@ -291,9 +291,7 @@ interpret:
 
 	/* Execute word at w */
 	static cell endcode[] = { PR(semi) };
-	RPUSH(ip);
-	ip = endcode;
-	goto **w;
+	RPUSH(ip); ip = endcode; goto **w;
     }
 
 notfound: // Tell that the word at sys.dp could not be interpreted
@@ -325,11 +323,13 @@ lbrack:	// [
 rbrack:	// ]
     sys.state = 1; goto next;
 
+get_char: FUNC0(get_file_char(&sys.inf));
+
 backslash: // "\": comment to the end of the line
-    skip_chars_until(&sys.inf, "\f\n"); goto next;
+    skip_chars_until(&sys.inf, "\n"); goto next;
 
 paren: // "("
-    skip_chars_until(&sys.inf, "\f)"); goto next;
+    skip_chars_until(&sys.inf, ")"); goto next;
 
 // ---------------------------------------------------------------------------
 // Dictionary
@@ -347,7 +347,7 @@ ccomma: // c, ( n -- )
     COMMA(TOS, char); DROP(1); goto next;
 
 comma_quote: // ,"
-    sys.dp = (cell)read_string(&sys.inf, (char*)sys.dp, "\f\""); goto next;
+    sys.dp = (cell)read_string(&sys.inf, (char*)sys.dp, "\""); goto next;
 
 parse: // ( -- a )
     parse(&sys.inf, (char*)sys.dp); EXTEND(1); TOS = sys.dp; goto next;
@@ -589,7 +589,7 @@ bl: FUNC0(' ');
 // Others
 
 dotparen: // .(
-    read_string(&sys.inf, (char*)sys.dp, "\f)");
+    read_string(&sys.inf, (char*)sys.dp, ")");
     printf("%s", (char*)sys.dp);
     goto next;
 }

@@ -74,6 +74,9 @@
 ***** ]
       Switch the interpreter to compiling mode. All words are now
       compiled, except for those that are immediate.
+***** get-char		-- n
+      Read one character from the input stream and return it on the
+      stack.
 ***** \ 							  :immediate:
       Start a comment that reaches to the end of the line.
 ***** ( 							  :immediate:
