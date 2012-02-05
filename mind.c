@@ -36,50 +36,6 @@ static int get_file_char(struct file_t *inf)
     return cin;
 }
 
-static void skip_chars_in(struct file_t *inf, char *charlist)
-{
-    int cin;
-
-    do {
-	cin = get_file_char(inf);
-    } while (strchr(charlist, cin));
-
-    ungetc(cin, inf->input);
-}
-
-static int skip_chars_until(struct file_t *inf, char *charlist)
-{
-    int cin;
-
-    do {
-	cin = get_file_char(inf);
-    } while (!strchr(charlist, cin));
-
-    return cin;
-}
-
-/* Place a string at pos, consisting of chars in charlist. */
-static char *read_string(struct file_t *inf, char *pos, char *charlist)
-{
-    int cin;
-
-    while ((cin = get_file_char(inf)) != EOF && !strchr(charlist, cin))
-	*pos++ = cin;
-    *pos++ = '\0';
-
-    return pos;
-}
-
-// Read the next word from INPUT and store it as string at
-// START. Return whether the string is empty.
-static int parse(struct file_t *inf, char *start)
-{
-    skip_chars_in(inf, "\n\t ");
-    read_string(inf, start, "\n\t ");
-
-    return BOOL(*start);
-}
-
 /* ---------------------------------------------------------------------- */
 /* Dictionary structure */
 
@@ -110,11 +66,8 @@ struct entry {
     .cfa   = (cell)&&label,					\
     .doer  = 0 },
 
-#define PR(label)  ((cell)(&dict[i_##label].cfa)) /* Primitive */
-
 #define FROM_CFA(addr)							\
     ((struct entry*)((char*)(addr) - offsetof(struct entry, cfa)))
-
 
 /* Find string *name* in dictionary, starting at *e*. */
 static struct entry *find_word(struct entry *e, char *name)
@@ -132,6 +85,16 @@ static cell* find_cfa(struct entry *e, char *name)
     e = find_word(e, name);
     return e? &e->cfa : NULL;
 }
+
+/* ----------------------------------------------------------------------- */
+/* Define hand-compiled Forth code */
+#define CODE(...)					\
+    {							\
+	static cell start[] = {__VA_ARGS__, C(semi) };	\
+	RPUSH(ip), ip = start; goto next;		\
+    }
+
+#define C(label)  ((cell)(&dict[i_##label].cfa)) // Call to Forth word
 
 /* ---------------------------------------------------------------------- */
 /* Memory */
@@ -155,7 +118,7 @@ static void init_sys(struct entry dict[])
     sys.s0 = (cell)(sys.mem + MEMCELLS - 0x10); /* Top of memory + safety space */
     sys.latest = (cell)&dict[num_words - 1];
     sys.state = 0;
-    sys.wordq = PR(notfound);
+    sys.wordq = C(notfound);
     open_file(&sys.inf, "start.mind");
 }
 
@@ -172,8 +135,8 @@ static void init_sys(struct entry dict[])
 #define DROP(n)		sp += (n)
 #define PUSH(x) 	EXTEND(1), TOS = (cell)(x)
 
-#define TOS	(*sp)
-#define NOS     (*(sp + 1))
+#define TOS	(*sp)		/* Top of Stack */
+#define NOS     (*(sp + 1))	/* Next in Stack */
 #define ST(n)   (*(sp + (n)))
 
 // Macros for "functions": words with 1 parameter a result
@@ -221,7 +184,7 @@ quit:
     rp = (cell*)sys.r0;
     {
 	static cell interpreter[] =
-	    { PR(interpret), PR(branch), (cell)interpreter };
+	    { C(interpret), C(branch), (cell)interpreter };
 	ip = interpreter;
 	goto next;
     }
@@ -270,16 +233,16 @@ execute: // ( a -- )
 // ---------------------------------------------------------------------------
 // Outer interpreter
 
-interpret:
+paren_interpret: // (interpret)  ( ... cfa -- ... )
+    /* TODO: this word expects, via `sys.wordq`, that the string of
+     * the interpreted word is stored at `here`. Avoid this
+     * dependency! */
     {
-	char *here = (char*)sys.dp;
-	struct entry *e;
+	cell cfa = TOS;
+	struct entry *e = FROM_CFA(cfa);
 
-	if (!parse(&sys.inf, here))
-	    goto bye;
-
-	e = find_word((struct entry*)sys.latest, here);
-	if (e) {
+	DROP(1);
+	if (cfa) {
 	    if (sys.state && !(e->flags & IMMEDIATE)) {
 		COMMA(&e->cfa, cell);
 		goto next;
@@ -292,6 +255,9 @@ interpret:
 	goto **w;
     }
 
+interpret:
+    CODE(C(parentick), C(paren_interpret));
+
 notfound: // Tell that the word at sys.dp could not be interpreted
     {
 	printf("l%"PRIdCELL": not found: %s\n",
@@ -301,17 +267,7 @@ notfound: // Tell that the word at sys.dp could not be interpreted
     }
 
 parentick: // (') ( "word" -- cfa | 0 )
-    {
-	char *here = (char*)sys.dp;
-
-	EXTEND(1);
-	if (!parse(&sys.inf, here))
-	    TOS = 0;
-	else
-	    TOS = (cell)find_cfa((struct entry*)sys.latest, here);
-
-	goto next;
-    }
+    CODE(C(parse), C(parenfind));
 
 parenfind: // (find) ( addr -- cfa | 0 )
     FUNC1(find_cfa((struct entry*)sys.latest, (char*)TOS));
@@ -323,11 +279,31 @@ rbrack:	// ]
 
 get_char: FUNC0(get_file_char(&sys.inf));
 
-backslash: // "\": comment to the end of the line
-    skip_chars_until(&sys.inf, "\n"); goto next;
+get_char_after: // : get-char-after  ( string -- char )
+		//   BEGIN get-char  2dup strchr WHILE  drop AGAIN  nip ;
+    CODE(C(get_char), C(twodup), C(strchr),
+	 C(zbranch), (cell)(start + 8), C(drop), C(branch), (cell)start,
+	 C(nip));
 
-paren: // "("
-    skip_chars_until(&sys.inf, ")"); goto next;
+parse_to: // : parse-to ( addr string -- )
+	  //   >r BEGIN get-char  r@ over strchr 0= WHILE cplace AGAIN
+	  //   rdrop drop  0 swap c! ;
+    CODE(C(rto),
+	 C(get_char), C(rfetch), C(over), C(strchr), C(zero_equal),
+	 C(zbranch), (cell)(start + 11), C(cplace),
+	 C(branch), (cell)(start + 1),
+	 C(rdrop), C(drop), C(zero), C(swap), C(cstore));
+
+parse: // : parse ( -- addr )
+       //   here whitespace get-char-after cplace  whitespace parse-to  here ;
+    CODE(C(here), C(whitespace), C(get_char_after), C(cplace),
+	 C(whitespace), C(parse_to), C(here));
+
+backslash: // : \    BEGIN get-char  [char] ) = UNTIL ; immediate
+    CODE(C(get_char), C(eol), C(equal), C(zbranch), (cell)start);
+
+paren:    // : (    BEGIN get-char  [char] ) = UNTIL ; immediate
+    CODE(C(get_char), C(lit), ')', C(equal), C(zbranch), (cell)start);
 
 // ---------------------------------------------------------------------------
 // Dictionary
@@ -345,10 +321,8 @@ ccomma: // c, ( n -- )
     COMMA(TOS, char); DROP(1); goto next;
 
 comma_quote: // ,"
-    sys.dp = (cell)read_string(&sys.inf, (char*)sys.dp, "\""); goto next;
-
-parse: // ( -- a )
-    parse(&sys.inf, (char*)sys.dp); EXTEND(1); TOS = sys.dp; goto next;
+    CODE(C(here), C(lit), (cell)"\"", C(parse_to),
+    	 C(here), C(strlen), C(oneplus), C(allot));
 
 entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
     {
@@ -420,7 +394,7 @@ rto: // >r ( n -- )
 rfrom: // r> ( -- n )
     EXTEND(1); TOS = RPOP; goto next;
 
-r: FUNC0(*rp);
+rfetch: FUNC0(*rp);
 
 // ---------------------------------------------------------------------------
 // Stack
@@ -465,8 +439,8 @@ spstore: // sp! ( addr -- )
 // ---------------------------------------------------------------------------
 // Arithmetics
 
-    false: FUNC0(FALSE);
-    true:  FUNC0(TRUE);
+false: FUNC0(FALSE);
+true:  FUNC0(TRUE);
 
 zero: FUNC0(0);
 one:  FUNC0(1);
@@ -544,6 +518,9 @@ plus_store: // +!  ( n a -- )
 cstore: // c! ( n a -- )
     *(char*)TOS = NOS; DROP(2); goto next;
 
+cplace: // ( n a -- a' )
+    *(char*)NOS = TOS; NOS += 1; DROP(1); goto next;
+
 malloc: FUNC1(malloc(TOS)); // ( n -- addr )
 free:                       // ( addr -- )
     free((void*)TOS); DROP(1); goto next;
@@ -552,10 +529,11 @@ cells:     FUNC1(TOS * sizeof(cell));
 cellplus:  FUNC1(TOS + sizeof(cell)); // cell+
 cellminus: FUNC1(TOS - sizeof(cell)); // cell-
 
+strchr: FUNC2(strchr((char*)NOS, TOS)); // ( string char -- addr )
+strlen: FUNC1(strlen((char*)TOS)); // ( a -- # )
+
 // ---------------------------------------------------------------------------
 // Input/Output
-
-strlen: FUNC1(strlen((char*)TOS)); // ( a -- # )
 
 cr:
     putchar('\n'); goto next;
@@ -581,13 +559,13 @@ puts: // ( a -- )               print null-terminated string
 hdot: // h. ( n -- )		print hexadecimal
     printf("%"PRIxCELL" ", TOS); DROP(1); goto next;
 
-bl: FUNC0(' ');
+bl:  FUNC0(' ');
+eol: FUNC0('\n');
+whitespace: FUNC0("\n\t ");
 
 // ---------------------------------------------------------------------------
 // Others
 
-dotparen: // .(
-    read_string(&sys.inf, (char*)sys.dp, ")");
-    printf("%s", (char*)sys.dp);
-    goto next;
+dotparen: // : .(   here " )" parse-to  here puts ;
+    CODE(C(here), C(lit), (cell)")", C(parse_to), C(here), C(puts));
 }

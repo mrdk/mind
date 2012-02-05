@@ -99,7 +99,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 ' (?pairs) is ?pairs
 
 : .s    ?stack  sp@ >r  s0 @
-    BEGIN  dup r u> WHILE  cell-  dup @ h.  REPEAT  drop rdrop ;
+    BEGIN  dup r@ u> WHILE  cell-  dup @ h.  REPEAT  drop rdrop ;
 
 
 \ Conversion: string > number
@@ -172,6 +172,8 @@ Variable 'num	    \ points to the beginning of the generated string.
 
 \ Last page
 .( Line: ) line# @ .  cr
+
+bye
 
 \ Local Variables:
 \ comment-start: "\\ "
