@@ -1,5 +1,4 @@
-#+STARTUP: hidestars
-#+STARTUP: odd
+#+STARTUP: hidestars odd showall
 *Design decisions*
 * C Code
 *** Use C99 to full extent.
