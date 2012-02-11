@@ -233,16 +233,12 @@ execute: // ( a -- )
 // ---------------------------------------------------------------------------
 // Outer interpreter
 
-paren_interpret: // (interpret)  ( ... cfa -- ... )
-    /* TODO: this word expects, via `sys.wordq`, that the string of
-     * the interpreted word is stored at `here`. Avoid this
-     * dependency! */
+paren_interpret: // (interpret)  ( ... addr -- ... )
     {
-	cell cfa = TOS;
-	struct entry *e = FROM_CFA(cfa);
+	struct entry *e = find_word((struct entry*)sys.latest, (char*)TOS);
 
 	DROP(1);
-	if (cfa) {
+	if (e) {
 	    if (sys.state && !(e->flags & IMMEDIATE)) {
 		COMMA(&e->cfa, cell);
 		goto next;
@@ -255,8 +251,8 @@ paren_interpret: // (interpret)  ( ... cfa -- ... )
 	goto **w;
     }
 
-interpret:
-    CODE(C(parentick), C(paren_interpret));
+interpret:  // : interpret   parse (interpret) ;
+    CODE(C(parse), C(paren_interpret));
 
 notfound: // Tell that the word at sys.dp could not be interpreted
     {
@@ -286,23 +282,22 @@ get_char_after: // : get-char-after  ( string -- char )
 	 C(nip));
 
 parse_to: // : parse-to ( addr string -- )
-	  //   >r BEGIN get-char  r@ over strchr 0= WHILE cplace AGAIN
-	  //   rdrop drop  0 swap c! ;
+	  //   >r BEGIN get-char r@ append-notfrom  0= UNTIL  rdrop
+	  //   0 swap c! ;
     CODE(C(rto),
-	 C(get_char), C(rfetch), C(over), C(strchr), C(zero_equal),
-	 C(zbranch), (cell)(start + 11), C(cplace),
-	 C(branch), (cell)(start + 1),
-	 C(rdrop), C(drop), C(zero), C(swap), C(cstore));
+	 C(get_char), C(rfetch), C(append_notfrom),
+	 C(zero_equal), C(zbranch), (cell)(start + 1),
+	 C(rdrop), C(zero), C(swap), C(cstore));
 
 parse: // : parse ( -- addr )
-       //   here whitespace get-char-after cplace  whitespace parse-to  here ;
-    CODE(C(here), C(whitespace), C(get_char_after), C(cplace),
+       //   here whitespace get-char-after append  whitespace parse-to  here ;
+    CODE(C(here), C(whitespace), C(get_char_after), C(append),
 	 C(whitespace), C(parse_to), C(here));
 
-backslash: // : \    BEGIN get-char  [char] ) = UNTIL ; immediate
+backslash: // : \    BEGIN get-char  eol = UNTIL ; immediate
     CODE(C(get_char), C(eol), C(equal), C(zbranch), (cell)start);
 
-paren:    // : (    BEGIN get-char  [char] ) = UNTIL ; immediate
+paren:     // : (    BEGIN get-char  [char] ) = UNTIL ; immediate
     CODE(C(get_char), C(lit), ')', C(equal), C(zbranch), (cell)start);
 
 // ---------------------------------------------------------------------------
@@ -518,8 +513,26 @@ plus_store: // +!  ( n a -- )
 cstore: // c! ( n a -- )
     *(char*)TOS = NOS; DROP(2); goto next;
 
-cplace: // ( n a -- a' )
-    *(char*)NOS = TOS; NOS += 1; DROP(1); goto next;
+append: // ( a char -- a' )
+    *(char*)NOS = TOS; NOS++; DROP(1); goto next;
+
+append_from: // ( a char str -- a' flag )
+    {
+	cell appending = BOOL(strchr((char*)TOS, NOS));
+	if (appending) {
+	    *(char*)ST(2) = NOS; ST(2)++;
+	}
+	DROP(1); TOS = appending; goto next;
+    }
+
+append_notfrom: // ( a char str -- a' flag )
+    {
+	cell appending = BOOL(!strchr((char*)TOS, NOS));
+	if (appending) {
+	    *(char*)ST(2) = NOS; ST(2)++;
+	}
+	DROP(1); TOS = appending; goto next;
+    }
 
 malloc: FUNC1(malloc(TOS)); // ( n -- addr )
 free:                       // ( addr -- )
