@@ -1,8 +1,8 @@
-#+STARTUP: hidestars
-#+STARTUP: odd
+#+STARTUP: hidestars odd showall
 *Vocabulary*
 * Abbreviations in stack diagrams.
   - addr :: an address in memory.
+  - str :: the start address of an zero-terminated string
   - cfa :: "Code Field Address": The address of a word that can be
            executed.
   - n :: a number, or sometimes an arbitrary value
@@ -52,9 +52,12 @@
 ***** ^dodoes
 *** Outer interpreter
     These words are related to the interpretation of text.
+***** (interpret)	addr --
+      Search the string at *addr* in the dictionary and interpret or
+      compile it, depending on the value of `state`.
 ***** interpret
       Read one word from the input and execute or compile it,
-      depending on the state of the interpreter.
+      depending on the the value of `state`.
 ***** notfound
       This word is called by default if a word is not found in the
       dictionary. It prints an error message and closes the input
@@ -77,6 +80,21 @@
 ***** get-char		-- n
       Read one character from the input stream and return it on the
       stack.
+***** parse-to		addr str --
+      Read a character sequence from the input stream and store it as
+      a zero-terminated string at *addr*. The character sequence
+      consists of characters not contained in the zero-terminated
+      string at *str*. After reading, the reading position in the
+      input stream is directly after the first character not contained
+      in *str*.
+***** parse		-- addr
+      Read a whitespace-terminated word from the input stream and
+      return its address. Afterwards, the reading position in the
+      input stream is directly behind the first space character
+      *after* that word.
+
+      Currently the parsed word is located directly at the end of the
+      dictionary.
 ***** \ 							  :immediate:
       Start a comment that reaches to the end of the line.
 ***** ( 							  :immediate:
@@ -96,14 +114,6 @@
       Read until the next `"` and put the resulting string at the end
       of the dictionary. The space character immediately after the
       word does not belong to the string.
-***** parse		-- addr
-      Read a space-terminated word from the input stream and return
-      its address. Afterwards, the reading position in the input
-      stream is directly behind the first space character *after* that
-      word.
-
-      Currently the parsed word is located directly at the end of the
-      dictionary.
 ***** TODO entry,	str addr --
       Put a new entry at the end of the end of the dictionary. *str*
       is its name and addr is stored in its CFA field.
@@ -160,7 +170,7 @@
       Move the TOS to the top of the return stack.
 ***** r>		-- n
       Move the top of the return stack to the TOS.
-***** r			-- n
+***** r@		-- n
       Copy the top of the return stack to the TOS.
 *** Stack
 ***** drop		a --
@@ -269,6 +279,15 @@
       Add *n* to the cell at *addr*.
 ***** c!		n addr --
       Store one byte at *addr*.
+***** append		addr char -- addr'
+      Store *char* at *addr* and add 1 to *addr*. This word can be
+      used to build incrementally a string in memory.
+***** append-from	addr char str -- addr'
+      If *char* is contained in *str*, store it at *addr* and add 1 to
+      *addr*. Otherwise do nothing.
+***** append-notfrom
+      If *char* is not contained in *str*, store it at *addr* and add
+      1 to *addr*. Otherwise do nothing.
 ***** malloc		n -- addr
       Allocate *n* bytes of memory and return its address. Return 0 if
       the allocation fails.
@@ -281,17 +300,20 @@
       Increment the TOS by the size of one cell.
 ***** cell-		addr1 -- addr2
       Decrement the TOS by the size of one cell.
-*** Input/Output
 ***** strlen		addr -- n
       Return the length of the string starting at *addr*, without the
       trailing 0 byte.
+***** strchr		str char -- addr
+      If *char* is contained in *str*, then return the position of its
+      first occurrence. Othewise return 0.
+*** Input/Output
 ***** emit		n --
       Send the character with number *n* to the output.
 ***** type		addr n --
       Send the sequence of characters of length *n* starting at *addr*
       to the output.
 ***** puts		addr --
-      Send the null-terminated string beginning at *addr* to the
+      Send the zero-terminated string beginning at *addr* to the
       output.
 ***** cr
       Begin a new output line.
@@ -299,7 +321,13 @@
       Print the TOS as a hexadecimal number, followed by a space.
 ***** bl		-- n
       Code for a blank character.
+***** eol		-- n
+      Code for an "end of line" character.
+***** whitespace	-- str
+      Zero-terminated string that contains all the characters that are
+      viewed as whitespace by Mind.
 *** Others
 ***** .(
       Print the characters that follow this word in the input file to
-      the output.
+      the output, until the next ")". The closing bracket is not
+      printed.
