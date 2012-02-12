@@ -275,12 +275,6 @@ rbrack:	// ]
 
 get_char: FUNC0(get_file_char(&sys.inf));
 
-get_char_after: // : get-char-after  ( string -- char )
-		//   BEGIN get-char  2dup strchr WHILE  drop AGAIN  nip ;
-    CODE(C(get_char), C(twodup), C(strchr),
-	 C(zbranch), (cell)(start + 8), C(drop), C(branch), (cell)start,
-	 C(nip));
-
 parse_to: // : parse-to ( addr string -- )
 	  //   >r BEGIN get-char r@ append-notfrom  0= UNTIL  rdrop
 	  //   0 swap c! ;
@@ -290,8 +284,11 @@ parse_to: // : parse-to ( addr string -- )
 	 C(rdrop), C(zero), C(swap), C(cstore));
 
 parse: // : parse ( -- addr )
-       //   here whitespace get-char-after append  whitespace parse-to  here ;
-    CODE(C(here), C(whitespace), C(get_char_after), C(append),
+       //   here  BEGIN get-char whitespace append-notfrom UNTIL
+       //   whitespace parse-to  here ;
+    CODE(C(here),
+	 C(get_char), C(whitespace), C(append_notfrom),
+	 C(zbranch), (cell)(start + 1),
 	 C(whitespace), C(parse_to), C(here));
 
 backslash: // : \    BEGIN get-char  eol = UNTIL ; immediate
