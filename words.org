@@ -1,4 +1,4 @@
-#+STARTUP: hidestars odd showall
+#+STARTUP: hidestars odd content
 *Vocabulary*
 * Abbreviations in stack diagrams.
   - addr :: an address in memory.
@@ -35,8 +35,6 @@
 ***** bye
       Leave the Forth system immediately.
 *** Inner Interpreter
-    These words are related to the interpretation of compiled Forth
-    code.
 ***** noop
       Do nothing.
 ***** ;;
@@ -46,18 +44,21 @@
       word.
 ***** execute		( addr -- )
       Execute the word at addr.
-***** ^docol
-***** ^dodefer
-***** ^dovar
-***** ^dodoes
-*** Outer interpreter
-    These words are related to the interpretation of text.
+*** Outer Interpreter
+    These words are about reading and interpreting program text.
 ***** (interpret)	( addr -- )
       Search the string at *addr* in the dictionary and interpret or
       compile it, depending on the value of `state`.
 ***** interpret
       Read one word from the input and execute or compile it,
       depending on the the value of `state`.
+***** word?		( -- addr )
+      Contains a word that is executed when a string that cannot be
+      found in the dictionary by `(interpret)`. At system startup, its
+      value is `notfound`.
+
+      The Forth word stored in `word` has the signature `--`; it
+      expects the searched string at `here`.
 ***** notfound
       This word is called by default if a word is not found in the
       dictionary. It prints an error message and closes the input
@@ -65,18 +66,6 @@
       `here`.
 
       This word is the value of `word?` at startup.
-***** (') 		( -- cfa )
-      Read a word from the input and return its CFA. If it is not
-      found, return 0.
-***** (find)		( addr -- cfa )
-      Search the string at addr in the dictionary and return its CFA.
-      If it is not found, return 0.
-***** [ 							  :immediate:
-      Switch the interpreter to interpreting mode. All words are now
-      executed.
-***** ]
-      Switch the interpreter to compiling mode. All words are now
-      compiled, except for those that are immediate.
 ***** get-char		( -- n )
       Read one character from the input stream and return it on the
       stack.
@@ -100,9 +89,35 @@
 ***** ( 							  :immediate:
       Start a comment that reaches to the next ")" symbol or to the
       end of the page. Note that brackets are not nested.
+***** line#		( -- addr )
+      Contains the current line number in the input file. The line
+      number is relative to the beginning of the page.
+
+      The first line of a file has the number 1.
+*** Compilation
+***** [ 							  :immediate:
+      Switch the interpreter to interpreting mode. All words are now
+      executed.
+***** ]
+      Switch the interpreter to compiling mode. All words are now
+      compiled, except for those that are immediate.
+***** state		( -- addr )
+      State of the compiler. If the value is zero, all words are
+      interpreted; if it is nonzero, words are compiled and only those
+      with an immediate flag are executed.
+***** branch
+      Unconditional jump. The cell following this word contains the
+      address of the jump target.
+***** 0branch		( n -- )
+      Conditional jump. If *n* is zero, jump to the address in the
+      next cell. If *n* is nonzero, continue with the execution of the
+      word after the next cell.
+***** lit		( -- n )
+      Push the content of the cell after this word onto the stack.
 *** Dictionary
 ***** align
-      Align the end of the dictionary for a cell.
+      Increment (if necessary) the content of `dp` so that it points
+      to a valid address for a cell.
 ***** allot		( n -- )
       Allocate n bytes at the end of the dictionary. (Afterwards, it
       may be no longer aligned.
@@ -114,54 +129,32 @@
       Read until the next `"` and put the resulting string at the end
       of the dictionary. The space character immediately after the
       word does not belong to the string.
-***** TODO entry,	( str addr -- )
+***** entry,		( str addr -- )
       Put a new entry at the end of the end of the dictionary. *str*
       is its name and addr is stored in its CFA field.
-***** link>
-***** flags@
-***** flags!
-***** >name
-***** >doer
-***** #immediate
-*** Inline constants
-***** branch
-      Unconditional jump. The cell following this word contains the
-      address of the jump target.
-***** 0branch		( n -- )
-      Conditional jump. If *n* is zero, jump to the address in the
-      next cell. If *n* is nonzero, continue with the execution of the
-      word after the next cell.
-***** lit		( -- n )
-      Push the content of the cell after this word onto the stack.
-*** System variables
-***** s0		( -- addr )
-      Variable for the position of the stack pointer when the stack is
-      empty
-***** r0		( -- addr )
-      Variable for the position of the return stack pointer when the
-      stack is empty
 ***** latest		( -- addr )
       Variable for the address of the latest dictionary entry.
 ***** dp		( -- addr )
       Dictionary Pointer. It contains the endpoint of the dictionary.
 ***** here		( -- addr )
       Put the current value of the dictionary pointer onto the stack.
-***** state		( -- addr )
-      State of the compiler. If the value is zero, all words are
-      interpreted; if it is nonzero, words are compiled and only those
-      with an immediate flag are executed.
-***** word?		( -- addr )
-      Contains a word that is executed when a string that cannot be
-      found in the dictionary. At system startup, its value is
-      `notfound`.
-
-      The Forth word stored in `word` has the signature `--`; it
-      expects the searched string at `here`.
-***** line#		( -- addr )
-      Contains the current line number in the input file. The line
-      number is relative to the beginning of the page.
-
-      The first line of a file has the number 1.
+***** (') 		( -- cfa )
+      Read a word from the input and return its CFA. If it is not
+      found, return 0.
+***** (find)		( addr -- cfa )
+      Search the string at addr in the dictionary and return its CFA.
+      If it is not found, return 0.
+*** Dictionary Headers
+***** ^docol
+***** ^dodefer
+***** ^dovar
+***** ^dodoes
+***** link>
+***** flags@
+***** flags!
+***** >name
+***** >doer
+***** #immediate
 *** Return stack
 ***** rdrop
       Remove the top value of the return stack.
@@ -171,6 +164,9 @@
       Move the top of the return stack to the TOS.
 ***** r@		( -- n )
       Copy the top of the return stack to the TOS.
+***** r0		( -- addr )
+      Variable for the position of the return stack pointer when the
+      stack is empty
 *** Stack
 ***** drop		( a -- )
 ***** nip		( a b -- b )
@@ -187,11 +183,10 @@
       Get the value of the stack pointer. `sp@ @` is equivalent to `dup`.
 ***** sp!		( addr -- )
       Make *addr* the new value of the stack pointer.
-*** Arithmetics
-***** false		( -- flag )
-      Boolean flag for false,
-***** true		( -- flag )
-      Boolean flag for true.
+***** s0		( -- addr )
+      Variable for the position of the stack pointer when the stack is
+      empty
+*** Interger Arithmetic
 ***** 0			( -- 0 )
       This and other numbers are defined as Forth words to shorten the
       compiled code and to make the bootstrapping of the language
@@ -228,6 +223,11 @@
       Quotient of n1 and n2 as unsigned integer.
 ***** abs		( n -- u )
       Compute the absolute value
+*** Binary Arithmetic
+***** false		( -- flag )
+      Boolean flag for false,
+***** true		( -- flag )
+      Boolean flag for true.
 ***** or		( n1 n2 -- n3 )
       Bitwise "or" of n1 and n2.
 ***** and		( n1 n2 -- n3 )
@@ -236,6 +236,7 @@
       Bitwise exclusive "or" of n1 and n2.
 ***** invert		( n1 -- n2 )
       Bitwise nagation of the TOS.
+*** Comparisons
 ***** =			( n1 n2 -- flag )
       Test whether n1 and n2 are equal.
 ***** <>		( n1 n2 -- flag )
@@ -270,7 +271,7 @@
 *** Memory
 ***** @			( addr -- n )
       Fetch the cell at *addr*.
-***** c@
+***** c@		( addr -- n )
       Fetch the byte at *addr*.
 ***** !			( n addr -- )
       Store one cell at *addr*.
@@ -278,6 +279,19 @@
       Add *n* to the cell at *addr*.
 ***** c!		( n addr -- )
       Store one byte at *addr*.
+***** malloc		( n -- addr )
+      Allocate *n* bytes of memory and return its address. Return 0 if
+      the allocation fails.
+***** free		( addr -- )
+      Free the memory space at *addr*, which must have been allocated
+      by `malloc`.
+***** cells		( n1 -- n2 )
+      Compute the number of bytes used by *n1* cells.
+***** cell+		( addr1 -- addr2 )
+      Increment the TOS by the size of one cell.
+***** cell-		( addr1 -- addr2 )
+      Decrement the TOS by the size of one cell.
+*** Strings
 ***** append		( addr char -- addr' )
       Store *char* at *addr* and add 1 to *addr*. This word can be
       used to build incrementally a string in memory.
@@ -287,24 +301,20 @@
 ***** append-notfrom	( addr char str -- addr' )
       If *char* is not contained in *str*, store it at *addr* and add
       1 to *addr*. Otherwise do nothing.
-***** malloc		( n -- addr )
-      Allocate *n* bytes of memory and return its address. Return 0 if
-      the allocation fails.
-***** free		addr
-      Free the memory space at *addr*, which must have been allocated
-      by `malloc`.
-***** cells		( n1 -- n2 )
-      Compute the number of bytes used by *n1* cells.
-***** cell+		( addr1 -- addr2 )
-      Increment the TOS by the size of one cell.
-***** cell-		( addr1 -- addr2 )
-      Decrement the TOS by the size of one cell.
 ***** strlen		( addr -- n )
       Return the length of the string starting at *addr*, without the
       trailing 0 byte.
 ***** strchr		( str char -- addr )
       If *char* is contained in *str*, then return the position of its
       first occurrence. Othewise return 0.
+***** bl		( -- n )
+      Code for a blank character.
+***** eol		( -- n )
+      Code for an "end of line" character.
+***** whitespace	( -- str )
+      Zero-terminated string that contains all the characters that are
+      viewed as whitespace by Mind.
+
 *** Input/Output
 ***** emit		( n -- )
       Send the character with number *n* to the output.
@@ -314,19 +324,11 @@
 ***** puts		( addr -- )
       Send the zero-terminated string beginning at *addr* to the
       output.
-***** cr
-      Begin a new output line.
-***** h.		( addr -- )
-      Print the TOS as a hexadecimal number, followed by a space.
-***** bl		( -- n )
-      Code for a blank character.
-***** eol		( -- n )
-      Code for an "end of line" character.
-***** whitespace	( -- str )
-      Zero-terminated string that contains all the characters that are
-      viewed as whitespace by Mind.
-*** Others
 ***** .(
       Print the characters that follow this word in the input file to
       the output, until the next ")". The closing bracket is not
       printed.
+***** cr
+      Begin a new output line.
+***** h.		( addr -- )
+      Print the TOS as a hexadecimal number, followed by a space.
