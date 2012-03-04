@@ -164,6 +164,18 @@ Variable 'num	    \ points to the beginning of the generated string.
 : .     ( n -- )    (.)  puts space ;
 
 
+\ Line input
+
+: chomp   ( str -- )
+  dup strlen + 1-  dup c@ eol = IF  0 swap c!  ELSE drop THEN ;
+
+: accept  ( addr n -- n' )
+  over swap  1+ gets IF  dup chomp strlen ELSE  0 swap c!  drop 0 THEN ;
+
+256 Constant /linebuf
+Create linebuf  /linebuf 1+ allot
+
+
 \ Words
 
 : .name   ( cfa -- )   >name puts ;

@@ -563,6 +563,9 @@ type: // ( a # -- )
 	goto next;
     }
 
+gets: // ( a n -- a' )
+    FUNC2(fgets((char*)NOS, TOS, stdin));
+
 puts: // ( a -- )               print null-terminated string
     fputs((char*)TOS, stdout); DROP(1); goto next;
 

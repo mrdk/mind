@@ -143,6 +143,7 @@ E(strchr, "strchr", 0)
 // Input/Output
 E(emit, "emit", 0)
 E(type, "type", 0)
+E(gets, "gets", 0)
 E(puts, "puts", 0)
 E(cr, "cr", 0)
 E(hdot, "h.", 0)

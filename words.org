@@ -324,6 +324,28 @@
 ***** puts		( addr -- )
       Send the zero-terminated string beginning at *addr* to the
       output.
+***** gets		( addr n -- str )
+      An interface to the function `fgets()` from libc.
+
+      The word reads characters from standard input until a return
+      character is encountered or *n* - 1 characters are read. A
+      zero-terminated string with these characters is created at
+      *addr*. The string contains the terminating end-of-line
+      character, if one has been typed.
+
+      If no characters could be read from standard input because the
+      standard input is in an end-of-file state, the return value is
+      0, and nothing is written to the buffer at *addr*, not even a
+      terminating zero.
+***** accept		( addr n -- n' )
+      Read a line from the standard input and store it as a
+      zero-terminated string with maximal length *n* in the buffer at
+      *addr*. The buffer must therefore be at least *n* + 1 bytes
+      wide. A line ends if the maximal number of characters is read, a
+      return character is encountered, or the input stream has ended.
+      If a return has been typed, it is not part of the string.
+
+      The return value is the number of bytes actually read.
 ***** .(
       Print the characters that follow this word in the input file to
       the output, until the next ")". The closing bracket is not
