@@ -346,6 +346,7 @@
       If a return has been typed, it is not part of the string.
 
       The return value is the number of bytes actually read.
+      - Source :: Reva, ANSI. Modified for zero-terminated strings.
 ***** .(
       Print the characters that follow this word in the input file to
       the output, until the next ")". The closing bracket is not
