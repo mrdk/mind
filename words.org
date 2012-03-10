@@ -2,6 +2,8 @@
 *Vocabulary*
 * Abbreviations in stack diagrams.
   - addr :: an address in memory.
+  - char :: a text character: a number that fits into one byte.
+  - flag :: a boolean flag, either 0 or -1.
   - str :: the start address of an zero-terminated string
   - cfa :: "Code Field Address": The address of a word that can be
            executed.
@@ -66,9 +68,6 @@
       `here`.
 
       This word is the value of `word?` at startup.
-***** get-char		( -- n )
-      Read one character from the input stream and return it on the
-      stack.
 ***** parse-to		( addr str -- )
       Read a character sequence from the input stream and store it as
       a zero-terminated string at *addr*. The character sequence
@@ -89,11 +88,20 @@
 ***** ( 							  :immediate:
       Start a comment that reaches to the next ")" symbol or to the
       end of the page. Note that brackets are not nested.
+*** Text streams
+    Text streams are an abstraction for the input of program text -
+    both from a file and from strings stored in memory.
+***** get-char		( -- char )
+      Read one character from the current stream and return it on the
+      stack.
 ***** line#		( -- addr )
-      Contains the current line number in the input file. The line
-      number is relative to the beginning of the page.
-
-      The first line of a file has the number 1.
+      Address of the current line number in the current stream. The
+      first line of a file has the number 1.
+***** file-get-char	( stream -- char )
+      Read one character from a file stream and return it on the
+      stack.
+***** file-eof		( stream -- flag )
+      Test whether the end of the file stream is reached.
 *** Compilation
 ***** [ 							  :immediate:
       Switch the interpreter to interpreting mode. All words are now

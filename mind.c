@@ -12,18 +12,24 @@
 #define FALSE 	0
 #define BOOL(n)	((n) ? TRUE : FALSE)
 
-/* ---------------------------------------------------------------------- */
-/* I/O */
+// ---------------------------------------------------------------------------
+// Reading text files and interactive input
+
+struct textstream {
+    cell get_char;		// Forth word ( stream -- char )
+    cell eof;			// Forth word ( stream -- flag )
+    cell lineno;		// integer: line number
+};
 
 struct file_t {
+    struct textstream stream;
     FILE *input;		/* Input file */
-    cell lineno;
 };
 
 static void open_file(struct file_t *inf, char *name)
 {
     inf->input = fopen(name, "r");
-    inf->lineno = 1;
+    inf->stream.lineno = 1;
 }
 
 static int get_file_char(struct file_t *inf)
@@ -31,7 +37,7 @@ static int get_file_char(struct file_t *inf)
     int cin = fgetc(inf->input);
 
     if (cin == '\n')
-	inf->lineno++;
+	inf->stream.lineno++;
 
     return cin;
 }
@@ -119,6 +125,8 @@ static void init_sys(struct entry dict[])
     sys.latest = (cell)&dict[num_words - 1];
     sys.state = 0;
     sys.wordq = C(notfound);
+    sys.inf.stream.get_char = C(file_get_char);
+    sys.inf.stream.eof = C(file_eof);
     open_file(&sys.inf, "start.mind");
 }
 
@@ -257,7 +265,7 @@ interpret:  // : interpret   parse (interpret) ;
 notfound: // Tell that the word at sys.dp could not be interpreted
     {
 	printf("l%"PRIdCELL": not found: %s\n",
-	       sys.inf.lineno, (char*)sys.dp);
+	       sys.inf.stream.lineno, (char*)sys.dp);
 	fclose(sys.inf.input);
 	goto abort;
     }
@@ -273,7 +281,14 @@ lbrack:	// [
 rbrack:	// ]
     sys.state = 1; goto next;
 
-get_char: FUNC0(get_file_char(&sys.inf));
+file_get_char: // ( stream -- char )
+    FUNC1(get_file_char((struct file_t*)TOS));
+file_eof:      // ( stream -- flag )
+    FUNC1(BOOL(feof(((struct file_t*)TOS)->input)));
+
+get_char: // ( -- char )
+    EXTEND(1); TOS = (cell)&sys.inf;
+    w = (label_t*)sys.inf.stream.get_char; goto **w;
 
 parse_to: // : parse-to ( addr string -- )
 	  //   >r BEGIN get-char r@ append-notfrom  0= UNTIL  rdrop
@@ -372,7 +387,7 @@ dp:       FUNC0(&sys.dp);
 here:     FUNC0(sys.dp);
 state:    FUNC0(&sys.state);
 wordq:    FUNC0(&sys.wordq);
-lineno:   FUNC0(&sys.inf.lineno);
+lineno:   FUNC0(&sys.inf.stream.lineno);
 
 // ---------------------------------------------------------------------------
 // Return stack
