@@ -26,13 +26,16 @@ E(parentick, "(')", 0)
 E(parenfind, "(find)", 0)
 E(lbrack, "[", IMMEDIATE)
 E(rbrack, "]", 0)
-E(file_eof, "file-eof", 0)
-E(file_get_char, "file-get-char", 0)
-E(get_char, "get-char", 0)
 E(parse_to, "parse-to", 0)
 E(parse, "parse", 0)
 E(backslash, "\\", IMMEDIATE)
 E(paren, "(", IMMEDIATE)
+
+// Text streams
+E(get_char, "get-char", 0)
+E(lineno, "line#", 0)
+E(file_eof, "file-eof", 0)
+E(file_get_char, "file-get-char", 0)
 
 // Dictionary
 E(align, "align", 0)
@@ -61,7 +64,6 @@ E(dp, "dp",0)
 E(here, "here", 0)
 E(state, "state", 0)
 E(wordq, "word?", 0)
-E(lineno, "line#", 0)
 
 // Return stack
 E(rdrop, "rdrop", 0)

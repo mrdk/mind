@@ -281,15 +281,6 @@ lbrack:	// [
 rbrack:	// ]
     sys.state = 1; goto next;
 
-file_get_char: // ( stream -- char )
-    FUNC1(get_file_char((struct file_t*)TOS));
-file_eof:      // ( stream -- flag )
-    FUNC1(BOOL(feof(((struct file_t*)TOS)->input)));
-
-get_char: // ( -- char )
-    EXTEND(1); TOS = (cell)&sys.inf;
-    w = (label_t*)sys.inf.stream.get_char; goto **w;
-
 parse_to: // : parse-to ( addr string -- )
 	  //   >r BEGIN get-char r@ append-notfrom  0= UNTIL  rdrop
 	  //   0 swap c! ;
@@ -311,6 +302,20 @@ backslash: // : \    BEGIN get-char  eol = UNTIL ; immediate
 
 paren:     // : (    BEGIN get-char  [char] ) = UNTIL ; immediate
     CODE(C(get_char), C(lit), ')', C(equal), C(zbranch), (cell)start);
+
+// ---------------------------------------------------------------------------
+// Text streams
+
+lineno: FUNC0(&sys.inf.stream.lineno);
+
+get_char: // ( -- char )
+    EXTEND(1); TOS = (cell)&sys.inf;
+    w = (label_t*)sys.inf.stream.get_char; goto **w;
+
+file_get_char: // ( stream -- char )
+    FUNC1(get_file_char((struct file_t*)TOS));
+file_eof:      // ( stream -- flag )
+    FUNC1(BOOL(feof(((struct file_t*)TOS)->input)));
 
 // ---------------------------------------------------------------------------
 // Dictionary
@@ -387,7 +392,6 @@ dp:       FUNC0(&sys.dp);
 here:     FUNC0(sys.dp);
 state:    FUNC0(&sys.state);
 wordq:    FUNC0(&sys.wordq);
-lineno:   FUNC0(&sys.inf.stream.lineno);
 
 // ---------------------------------------------------------------------------
 // Return stack
