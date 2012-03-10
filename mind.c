@@ -312,6 +312,10 @@ get_char: // ( -- char )
     EXTEND(1); TOS = (cell)&sys.inf;
     w = (label_t*)sys.inf.stream.get_char; goto **w;
 
+eof: // ( -- char )
+    EXTEND(1); TOS = (cell)&sys.inf;
+    w = (label_t*)sys.inf.stream.eof; goto **w;
+
 file_get_char: // ( stream -- char )
     FUNC1(get_file_char((struct file_t*)TOS));
 file_eof:      // ( stream -- flag )

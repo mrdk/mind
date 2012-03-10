@@ -33,9 +33,10 @@ E(paren, "(", IMMEDIATE)
 
 // Text streams
 E(get_char, "get-char", 0)
+E(eof, "eof", 0)
 E(lineno, "line#", 0)
-E(file_eof, "file-eof", 0)
 E(file_get_char, "file-get-char", 0)
+E(file_eof, "file-eof", 0)
 
 // Dictionary
 E(align, "align", 0)

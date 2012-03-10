@@ -93,13 +93,15 @@
     both from a file and from strings stored in memory.
 ***** get-char		( -- char )
       Read one character from the current stream and return it on the
-      stack.
+      stack. `line#` is updated if necessary.
+***** eof		( -- flag )
+      Test whether the end of the current stream is reached.
 ***** line#		( -- addr )
       Address of the current line number in the current stream. The
       first line of a file has the number 1.
 ***** file-get-char	( stream -- char )
       Read one character from a file stream and return it on the
-      stack.
+      stack. `line#` is updated if necessary.
 ***** file-eof		( stream -- flag )
       Test whether the end of the file stream is reached.
 *** Compilation
