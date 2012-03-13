@@ -3,6 +3,7 @@
 * Abbreviations in stack diagrams.
   - addr :: an address in memory.
   - char :: a text character: a number that fits into one byte.
+  - inchar :: an "input characte": either a *char* or the constant `#eof`.
   - flag :: a boolean flag, either 0 or -1.
   - str :: the start address of an zero-terminated string
   - cfa :: "Code Field Address": The address of a word that can be
@@ -305,10 +306,10 @@
 ***** append		( addr char -- addr' )
       Store *char* at *addr* and add 1 to *addr*. This word can be
       used to build incrementally a string in memory.
-***** append-from	( addr char str -- addr' )
+***** append-from	( addr inchar str -- addr' )
       If *char* is contained in *str*, store it at *addr* and add 1 to
       *addr*. Otherwise do nothing.
-***** append-notfrom	( addr char str -- addr' )
+***** append-notfrom	( addr inchar str -- addr' )
       If *char* is not contained in *str*, store it at *addr* and add
       1 to *addr*. Otherwise do nothing.
 ***** strlen		( addr -- n )
@@ -317,10 +318,14 @@
 ***** strchr		( str char -- addr )
       If *char* is contained in *str*, then return the position of its
       first occurrence. Othewise return 0.
-***** bl		( -- n )
-      Code for a blank character.
-***** eol		( -- n )
-      Code for an "end of line" character.
+***** bl		( -- char )
+      Code for the "blank" character.
+
+      - Source :: Forth 83
+***** #eol		( -- char )
+      Code for the "end of line" character.
+***** #eof		( -- inchar )
+      Code for the "end of file" constant (which is *not* a character)
 ***** whitespace	( -- str )
       Zero-terminated string that contains all the characters that are
       viewed as whitespace by Mind.

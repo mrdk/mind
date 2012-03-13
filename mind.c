@@ -191,7 +191,7 @@ abort:
 quit:
     rp = (cell*)sys.r0;
     {
-	static cell interpreter[] =
+	static cell interpreter[] = // BEGIN interpret REPEAT ;
 	    { C(interpret), C(branch), (cell)interpreter };
 	ip = interpreter;
 	goto next;
@@ -297,8 +297,8 @@ parse: // : parse ( -- addr )
 	 C(zbranch), (cell)(start + 1),
 	 C(whitespace), C(parse_to), C(here));
 
-backslash: // : \    BEGIN get-char  eol = UNTIL ; immediate
-    CODE(C(get_char), C(eol), C(equal), C(zbranch), (cell)start);
+backslash: // : \    BEGIN get-char  #eol = UNTIL ; immediate
+    CODE(C(get_char), C(num_eol), C(equal), C(zbranch), (cell)start);
 
 paren:     // : (    BEGIN get-char  [char] ) = UNTIL ; immediate
     CODE(C(get_char), C(lit), ')', C(equal), C(zbranch), (cell)start);
@@ -596,7 +596,8 @@ hdot: // h. ( n -- )		print hexadecimal
     printf("%"PRIxCELL" ", TOS); DROP(1); goto next;
 
 bl:  FUNC0(' ');
-eol: FUNC0('\n');
+num_eol: FUNC0('\n');		// #eol ( -- char )
+num_eof: FUNC0(EOF);		// #eof ( -- char )
 whitespace: FUNC0("\n\t ");
 
 // ---------------------------------------------------------------------------

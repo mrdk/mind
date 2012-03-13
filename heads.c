@@ -153,7 +153,8 @@ E(puts, "puts", 0)
 E(cr, "cr", 0)
 E(hdot, "h.", 0)
 E(bl, "bl", 0)
-E(eol, "eol", 0)
+E(num_eol, "#eol", 0)
+E(num_eof, "#eof", 0)
 E(whitespace, "whitespace", 0)
 
 // Others
