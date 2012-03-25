@@ -130,6 +130,7 @@ Variable #acc			\ Number accumulator
 \ Add number conversion to the outer interpreter
 
 : convert-number   here >number  state @ IF literal, THEN ;
+
 ' convert-number word? !     \ Activate number conversion
 
 
@@ -151,7 +152,7 @@ Variable 'num	    \ points to the beginning of the generated string.
   dup 10 <  IF [char] 0 +  ELSE  10 - [char] a +  THEN ;
 
 : hold   ( char -- )  -1 'num +!   'num @  c! ;
-: hold-sign ( n -- )   dup 0< IF  [char] - hold  ELSE drop THEN ;
+: hold-sign ( n -- )   0< IF  [char] - hold  THEN ;
 
 : <#	            numbuf /numbuf + 'num !   0 hold ;
 : # ( u -- u')	    base @ u/mod  #>digit hold ;

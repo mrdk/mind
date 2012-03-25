@@ -92,11 +92,15 @@
 *** Text streams
     Text streams are an abstraction for the input of program text -
     both from a file and from strings stored in memory.
-***** get-char		( -- char )
+***** get-char		( -- inchar )
       Read one character from the current stream and return it on the
-      stack. `line#` is updated if necessary.
-***** eof		( -- flag )
+      stack. `line#` is updated if necessary. If the end of the stream
+      is reached and no other characters can be read, `#eos` is
+      returned.
+***** eos		( -- flag )
       Test whether the end of the current stream is reached.
+***** #eos		( -- inchar)
+      The "end of stream" constant for the current stream.
 ***** line#		( -- addr )
       Address of the current line number in the current stream. The
       first line of a file has the number 1.
@@ -307,11 +311,13 @@
       Store *char* at *addr* and add 1 to *addr*. This word can be
       used to build incrementally a string in memory.
 ***** append-from	( addr inchar str -- addr' )
-      If *char* is contained in *str*, store it at *addr* and add 1 to
-      *addr*. Otherwise do nothing.
+      If *inchar* is contained in *str* and it is not the current
+      `eos` constant, store it at *addr* and add 1 to *addr*.
+      Otherwise do nothing.
 ***** append-notfrom	( addr inchar str -- addr' )
-      If *char* is not contained in *str*, store it at *addr* and add
-      1 to *addr*. Otherwise do nothing.
+      If *inchar* is not contained in *str* and it is not the current
+      `eos` constant, store it at *addr* and add 1 to *addr*.
+      Otherwise do nothing.
 ***** strlen		( addr -- n )
       Return the length of the string starting at *addr*, without the
       trailing 0 byte.

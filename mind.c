@@ -17,7 +17,8 @@
 
 struct textstream {
     cell get_char;		// Forth word ( stream -- char )
-    cell eof;			// Forth word ( stream -- flag )
+    cell eos;			// Forth word ( stream -- flag )
+    cell num_eos;		// integer: "end of stream constant"
     cell lineno;		// integer: line number
 };
 
@@ -126,7 +127,8 @@ static void init_sys(struct entry dict[])
     sys.state = 0;
     sys.wordq = C(notfound);
     sys.inf.stream.get_char = C(file_get_char);
-    sys.inf.stream.eof = C(file_eof);
+    sys.inf.stream.eos = C(file_eof);
+    sys.inf.stream.num_eos = EOF;
     open_file(&sys.inf, "start.mind");
 }
 
@@ -297,11 +299,15 @@ parse: // : parse ( -- addr )
 	 C(zbranch), (cell)(start + 1),
 	 C(whitespace), C(parse_to), C(here));
 
-backslash: // : \    BEGIN get-char  #eol = UNTIL ; immediate
-    CODE(C(get_char), C(num_eol), C(equal), C(zbranch), (cell)start);
+backslash: // : \    BEGIN get-char
+	   //              dup #eos =  swap #eol =  or UNTIL ; immediate
+    CODE(C(get_char), C(dup), C(num_eos), C(equal),
+	 C(swap), C(num_eol), C(equal), C(or), C(zbranch), (cell)start);
 
-paren:     // : (    BEGIN get-char  [char] ) = UNTIL ; immediate
-    CODE(C(get_char), C(lit), ')', C(equal), C(zbranch), (cell)start);
+paren:     // : (    BEGIN get-char
+	   //        dup #eos =  swap [char] ) =  or UNTIL ; immediate
+    CODE(C(get_char), C(dup), C(num_eos), C(equal),
+	 C(swap), C(lit), ')', C(equal), C(or), C(zbranch), (cell)start);
 
 // ---------------------------------------------------------------------------
 // Text streams
@@ -312,9 +318,11 @@ get_char: // ( -- char )
     EXTEND(1); TOS = (cell)&sys.inf;
     w = (label_t*)sys.inf.stream.get_char; goto **w;
 
-eof: // ( -- char )
+eos: // ( -- char )
     EXTEND(1); TOS = (cell)&sys.inf;
-    w = (label_t*)sys.inf.stream.eof; goto **w;
+    w = (label_t*)sys.inf.stream.eos; goto **w;
+
+num_eos: FUNC0(sys.inf.stream.num_eos);
 
 file_get_char: // ( stream -- char )
     FUNC1(get_file_char((struct file_t*)TOS));
@@ -536,18 +544,20 @@ cstore: // c! ( n a -- )
 append: // ( a char -- a' )
     *(char*)NOS = TOS; NOS++; DROP(1); goto next;
 
-append_from: // ( a char str -- a' flag )
+append_from: // ( a inchar str -- a' flag )
     {
-	cell appending = BOOL(strchr((char*)TOS, NOS));
+	cell appending = BOOL(TOS != sys.inf.stream.num_eos &&
+			      strchr((char*)TOS, NOS));
 	if (appending) {
 	    *(char*)ST(2) = NOS; ST(2)++;
 	}
 	DROP(1); TOS = appending; goto next;
     }
 
-append_notfrom: // ( a char str -- a' flag )
+append_notfrom: // ( a inchar str -- a' flag )
     {
-	cell appending = BOOL(!strchr((char*)TOS, NOS));
+	cell appending = BOOL(TOS != sys.inf.stream.num_eos &&
+			      !strchr((char*)TOS, NOS));
 	if (appending) {
 	    *(char*)ST(2) = NOS; ST(2)++;
 	}
