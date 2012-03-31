@@ -12,41 +12,12 @@
 #define FALSE 	0
 #define BOOL(n)	((n) ? TRUE : FALSE)
 
-// ---------------------------------------------------------------------------
-// Reading text files and interactive input
-
-struct textstream {
-    cell get_char;		// Forth word ( stream -- char )
-    cell eos;			// Forth word ( stream -- flag )
-    cell num_eos;		// integer: "end of stream constant"
-    cell lineno;		// integer: line number
-};
-
-struct file_t {
-    struct textstream stream;
-    FILE *input;		/* Input file */
-};
-
-static void open_file(struct file_t *inf, char *name)
-{
-    inf->input = fopen(name, "r");
-    inf->stream.lineno = 1;
-}
-
-static int get_file_char(struct file_t *inf)
-{
-    int cin = fgetc(inf->input);
-
-    if (cin == '\n')
-	inf->stream.lineno++;
-
-    return cin;
-}
-
 /* ---------------------------------------------------------------------- */
 /* Dictionary structure */
 
-enum wordnum {
+// Enumerate the dictionary entries. The word `foo` gets the number
+// `i_foo`, and its dictionary entry is found at dict[i_foo].
+enum wordnum_t {
 #define E(label, name, flags)  i_##label,
 #include "heads.c"
 #undef E
@@ -57,14 +28,14 @@ enum wordnum {
 
 typedef void *label_t;		/* Target of computed goto. */
 
-struct entry {
+typedef struct {
     cell link;		 /* (entry*) points to previous entry.     */
     cell name;		 /* (char*)  Pointer to start of word name */
     char flags;
     cell cfa;		 /* (label_t) code field address              */
     cell doer;		 /* (cell*)   Forth routine for `does>` part. */
     cell body[];
-};
+} entry_t;
 
 #define NEW_ENTRY(label, wname, wflags)				\
 {   .link   = i_##label ? (cell)&dict[i_##label - 1] : 0,	\
@@ -74,12 +45,12 @@ struct entry {
     .doer  = 0 },
 
 #define FROM_CFA(addr)							\
-    ((struct entry*)((char*)(addr) - offsetof(struct entry, cfa)))
+    ((entry_t*)((char*)(addr) - offsetof(entry_t, cfa)))
 
 /* Find string *name* in dictionary, starting at *e*. */
-static struct entry *find_word(struct entry *e, char *name)
+static entry_t *find_word(entry_t *e, char *name)
 {
-    for (; e->link; e = (struct entry*)e->link) {
+    for (; e->link; e = (entry_t*)e->link) {
 	if (!strcmp((char*)e->name, name))
 	    return e;
     }
@@ -87,7 +58,7 @@ static struct entry *find_word(struct entry *e, char *name)
 }
 
 /* Find CFA for *name* in dictionary, starting at *e*. */
-static cell* find_cfa(struct entry *e, char *name)
+static cell* find_cfa(entry_t *e, char *name)
 {
     e = find_word(e, name);
     return e? &e->cfa : NULL;
@@ -103,33 +74,64 @@ static cell* find_cfa(struct entry *e, char *name)
 
 #define C(label)  ((cell)(&dict[i_##label].cfa)) // Call to Forth word
 
+// ---------------------------------------------------------------------------
+// Reading text files and interactive input
+
+typedef struct {
+    cell get_char;		// Forth word ( stream -- char )
+    cell eos;			// Forth word ( stream -- flag )
+    cell num_eos;		// integer: "end of stream constant"
+    cell lineno;		// integer: line number
+} textstream_t;
+
+typedef struct {
+    textstream_t stream;
+    FILE *input;		/* Input file */
+} textfile_t;
+
+static void open_textfile(textfile_t *inf, char* name, entry_t dict[])
+{
+    inf->stream.get_char = C(file_get_char);
+    inf->stream.eos = C(file_eof);
+    inf->stream.num_eos = EOF;
+    inf->stream.lineno = 1;
+    inf->input = fopen(name, "r");
+}
+
+static int get_file_char(textfile_t *inf)
+{
+    int cin = fgetc(inf->input);
+
+    if (cin == '\n')
+	inf->stream.lineno++;
+
+    return cin;
+}
+
 /* ---------------------------------------------------------------------- */
 /* Memory */
 
 /* System variables */
-struct sys_t {
+struct {
     cell r0;		  /* (cell*) Start of the return stack */
     cell dp;		  /* (cell*) Dictionary pointer */
     cell s0;		  /* (cell*) Start of the parameter stack */
-    cell latest;	  /* (struct entry*) The latest definition */
+    cell latest;	  /* (entry_t*) The latest definition */
     cell state;		  /* Compiler state */
     cell wordq;		  /* Called if word not found (Name: Retro) */
-    struct file_t inf;		/* Input file */
+    textfile_t inf;		/* Input file */
     cell mem[MEMCELLS];		/* The memory */
 } sys;
 
-static void init_sys(struct entry dict[])
+static void init_sys(entry_t dict[])
 {
     sys.r0 = (cell)(sys.mem + 100);
     sys.dp = sys.r0 + sizeof(cell);
-    sys.s0 = (cell)(sys.mem + MEMCELLS - 0x10); /* Top of memory + safety space */
+    sys.s0 = (cell)(sys.mem + MEMCELLS - 0x10); // Top of memory + safety space 
     sys.latest = (cell)&dict[num_words - 1];
     sys.state = 0;
     sys.wordq = C(notfound);
-    sys.inf.stream.get_char = C(file_get_char);
-    sys.inf.stream.eos = C(file_eof);
-    sys.inf.stream.num_eos = EOF;
-    open_file(&sys.inf, "start.mind");
+    open_textfile(&sys.inf, "start.mind", dict);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -178,7 +180,7 @@ int main(int argc, char *argv[])
     cell *rp;			/* Return Stack Pointer */
     cell *sp;			/* Stack Pointer */
 
-    static struct entry dict[] = { /* Dictionary */
+    static entry_t dict[] = { /* Dictionary */
 #define E NEW_ENTRY
 #include "heads.c"
 #undef E
@@ -245,7 +247,7 @@ execute: // ( a -- )
 
 paren_interpret: // (interpret)  ( ... addr -- ... )
     {
-	struct entry *e = find_word((struct entry*)sys.latest, (char*)TOS);
+	entry_t *e = find_word((entry_t*)sys.latest, (char*)TOS);
 
 	DROP(1);
 	if (e) {
@@ -276,7 +278,7 @@ parentick: // (') ( "word" -- cfa | 0 )
     CODE(C(parse), C(parenfind));
 
 parenfind: // (find) ( addr -- cfa | 0 )
-    FUNC1(find_cfa((struct entry*)sys.latest, (char*)TOS));
+    FUNC1(find_cfa((entry_t*)sys.latest, (char*)TOS));
 
 lbrack:	// [
     sys.state = 0; goto next;
@@ -325,9 +327,9 @@ eos: // ( -- char )
 num_eos: FUNC0(sys.inf.stream.num_eos);
 
 file_get_char: // ( stream -- char )
-    FUNC1(get_file_char((struct file_t*)TOS));
+    FUNC1(get_file_char((textfile_t*)TOS));
 file_eof:      // ( stream -- flag )
-    FUNC1(BOOL(feof(((struct file_t*)TOS)->input)));
+    FUNC1(BOOL(feof(((textfile_t*)TOS)->input)));
 
 // ---------------------------------------------------------------------------
 // Dictionary
@@ -350,11 +352,11 @@ comma_quote: // ,"
 
 entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
     {
-	struct entry *e;
+	entry_t *e;
 
-	ALIGN(struct entry);
-	e = (struct entry*)sys.dp;
-	sys.dp += sizeof(struct entry);
+	ALIGN(entry_t);
+	e = (entry_t*)sys.dp;
+	sys.dp += sizeof(entry_t);
 
 	e->link = sys.latest;
 	e->name = NOS;
@@ -367,7 +369,7 @@ entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
 	goto next;
     }
 
-link_to:     FUNC1(&((struct entry*)TOS)->cfa);	// link>  ( lfa -- cfa )
+link_to:     FUNC1(&((entry_t*)TOS)->cfa);	// link>  ( lfa -- cfa )
 flags_fetch: FUNC1(FROM_CFA(TOS)->flags);	// flags@ ( cfa -- n )
 flags_store:					// flags! ( n cfa -- )
     FROM_CFA(TOS)->flags = NOS; DROP(2); goto next;
