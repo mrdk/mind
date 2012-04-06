@@ -38,6 +38,7 @@ E(num_eos, "#eos", 0)
 E(lineno, "line#", 0)
 E(file_get_char, "file-get-char", 0)
 E(file_eof, "file-eof", 0)
+E(do_stream, "do-stream", 0)
 
 // Dictionary
 E(align, "align", 0)

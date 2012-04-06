@@ -195,8 +195,7 @@ abort:
 quit:
     rp = (cell*)sys.r0;
     {
-	static cell interpreter[] = // BEGIN interpret REPEAT ;
-	    { C(interpret), C(branch), (cell)interpreter };
+	static cell interpreter[] = { C(do_stream), C(bye) };
 	ip = interpreter;
 	goto next;
     }
@@ -286,11 +285,11 @@ rbrack:	// ]
     sys.state = 1; goto next;
 
 parse_to: // : parse-to ( addr string -- )
-	  //   >r BEGIN get-char r@ append-notfrom  0= UNTIL  rdrop
+	  //   >r BEGIN get-char r@ append-notfrom  0=  eos or UNTIL  rdrop
 	  //   0 swap c! ;
     CODE(C(rto),
-	 C(get_char), C(rfetch), C(append_notfrom),
-	 C(zero_equal), C(zbranch), (cell)(start + 1),
+	 C(get_char), C(rfetch), C(append_notfrom), C(zero_equal),
+	 C(eos), C(or), C(zbranch), (cell)(start + 1),
 	 C(rdrop), C(zero), C(swap), C(cstore));
 
 parse: // : parse ( -- addr )
@@ -330,6 +329,9 @@ file_get_char: // ( stream -- char )
     FUNC1(get_file_char((textfile_t*)TOS));
 file_eof:      // ( stream -- flag )
     FUNC1(BOOL(feof(((textfile_t*)TOS)->input)));
+
+do_stream: // : do-stream   BEGIN interpret  eos UNTIL ;
+    CODE(C(interpret), C(eos), C(zbranch), (cell)(start));
 
 // ---------------------------------------------------------------------------
 // Dictionary
@@ -548,7 +550,7 @@ append: // ( a char -- a' )
 
 append_from: // ( a inchar str -- a' flag )
     {
-	cell appending = BOOL(TOS != sys.inf.stream.num_eos &&
+	cell appending = BOOL(NOS != sys.inf.stream.num_eos &&
 			      strchr((char*)TOS, NOS));
 	if (appending) {
 	    *(char*)ST(2) = NOS; ST(2)++;
@@ -558,7 +560,7 @@ append_from: // ( a inchar str -- a' flag )
 
 append_notfrom: // ( a inchar str -- a' flag )
     {
-	cell appending = BOOL(TOS != sys.inf.stream.num_eos &&
+	cell appending = BOOL(NOS != sys.inf.stream.num_eos &&
 			      !strchr((char*)TOS, NOS));
 	if (appending) {
 	    *(char*)ST(2) = NOS; ST(2)++;

@@ -109,6 +109,8 @@
       stack. `line#` is updated if necessary.
 ***** file-eof		( stream -- flag )
       Test whether the end of the file stream is reached.
+***** do-stream
+      Execute the code in the current input stream.
 *** Compilation
 ***** [ 							  :immediate:
       Switch the interpreter to interpreting mode. All words are now

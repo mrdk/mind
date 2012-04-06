@@ -188,8 +188,6 @@ Create linebuf  /linebuf 1+ allot
 \ Last page
 .( Line: ) line# @ .  cr
 
-bye
-
 \ Local Variables:
 \ comment-start: "\\ "
 \ End:
