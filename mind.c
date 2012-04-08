@@ -86,7 +86,7 @@ typedef struct {
 
 typedef struct {
     textstream_t stream;
-    FILE *input;		/* Input file */
+    cell input;			// (FILE*) Input file
 } textfile_t;
 
 static void open_textfile(textfile_t *inf, char* name, entry_t dict[])
@@ -95,12 +95,12 @@ static void open_textfile(textfile_t *inf, char* name, entry_t dict[])
     inf->stream.eos = C(file_eof);
     inf->stream.num_eos = EOF;
     inf->stream.lineno = 1;
-    inf->input = fopen(name, "r");
+    inf->input = (cell)fopen(name, "r");
 }
 
 static int get_file_char(textfile_t *inf)
 {
-    int cin = fgetc(inf->input);
+    int cin = fgetc((FILE*)inf->input);
 
     if (cin == '\n')
 	inf->stream.lineno++;
@@ -269,7 +269,7 @@ notfound: // Tell that the word at sys.dp could not be interpreted
     {
 	printf("l%"PRIdCELL": not found: %s\n",
 	       sys.inf.stream.lineno, (char*)sys.dp);
-	fclose(sys.inf.input);
+	fclose((FILE*)sys.inf.input);
 	goto abort;
     }
 
@@ -313,6 +313,15 @@ paren:     // : (    BEGIN get-char
 // ---------------------------------------------------------------------------
 // Text streams
 
+to_get_char: FUNC1(TOS + offsetof(textstream_t, get_char)); // >get-char
+to_eos:      FUNC1(TOS + offsetof(textstream_t, eos));	    // >eos
+to_num_eos:  FUNC1(TOS + offsetof(textstream_t, num_eos));  // >#eos
+to_lineno:   FUNC1(TOS + offsetof(textstream_t, lineno));   // >line#
+per_textstream: FUNC0(sizeof(textstream_t));                // /textstream
+
+to_infile: FUNC1(TOS + offsetof(textfile_t, input)); // >infile
+per_textfile: FUNC0(sizeof(textfile_t));             // /textfile
+
 lineno: FUNC0(&sys.inf.stream.lineno);
 
 get_char: // ( -- char )
@@ -328,7 +337,7 @@ num_eos: FUNC0(sys.inf.stream.num_eos);
 file_get_char: // ( stream -- char )
     FUNC1(get_file_char((textfile_t*)TOS));
 file_eof:      // ( stream -- flag )
-    FUNC1(BOOL(feof(((textfile_t*)TOS)->input)));
+    FUNC1(BOOL(feof((FILE*)((textfile_t*)TOS)->input)));
 
 do_stream: // : do-stream   BEGIN interpret  eos UNTIL ;
     CODE(C(interpret), C(eos), C(zbranch), (cell)(start));

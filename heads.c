@@ -32,6 +32,13 @@ E(backslash, "\\", IMMEDIATE)
 E(paren, "(", IMMEDIATE)
 
 // Text streams
+E(to_get_char, ">get-char", 0)
+E(to_eos, ">eos", 0)
+E(to_num_eos, ">#eos", 0)
+E(to_lineno, ">line#", 0)
+E(per_textstream, "/textstream", 0)
+E(to_infile, ">infile", 0)
+E(per_textfile, "/textfile", 0)
 E(get_char, "get-char", 0)
 E(eos, "eos", 0)
 E(num_eos, "#eos", 0)

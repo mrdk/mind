@@ -92,6 +92,43 @@
 *** Text streams
     Text streams are an abstraction for the input of program text -
     both from a file and from strings stored in memory.
+***** Text streams
+      These are the basic data structures for reading program text.
+******* >get-char	( 'textstream -- addr )
+      	The TOS contains the address of a textstream structure: compute the
+      	address of its `getchar` routine. The routine has the signature
+      	( stream -- char ).
+******* >eos		( 'textstream -- addr )
+      	The TOS contains the address of a textstream structure: compute
+      	the address of its `eos` routine. The routine has the signature
+      	( stream -- bool ).	
+******* >#eos		( 'textstream -- addr )
+      	The TOS contains the address of a textstream structure: compute the
+      	address of its `eos` field. The field is one cell wide and
+      	contains the "end of stream" constant of this textstream.
+******* >line#		( 'textstream -- addr )
+      	The TOS contains the address of a textstream structure: compute the
+      	address of its `line#` field. The field is one cell wide and
+      	contains the current line number of this textstream.
+******* /textstream	( -- n )
+      	Number of bytes in a text stream structure.
+***** File streams
+      A file stream is an extension of the text stream interface for
+      reading from a file (or another stream in a Unix system).
+
+      A file stream contains all the fields of a text stream, plus
+      `intext-file`.
+******* >intext-file	( 'filestream -- addr )
+      	The TOS contains the address of a filestream structure: compute the
+      	address of its file field. The field is one cell wide and
+      	contains the underlying C file pointer (FILE*) for this stream.
+******* /filestream	( -- n )
+      	Number of bytes in a file stream structure.
+******* file-get-char	( stream -- char )
+      	Read one character from a file stream and return it on the
+      	stack. `line#` is updated if necessary.
+******* file-eof	( stream -- flag )
+      	Test whether the end of the file stream is reached.
 ***** get-char		( -- inchar )
       Read one character from the current stream and return it on the
       stack. `line#` is updated if necessary. If the end of the stream
@@ -104,11 +141,6 @@
 ***** line#		( -- addr )
       Address of the current line number in the current stream. The
       first line of a file has the number 1.
-***** file-get-char	( stream -- char )
-      Read one character from a file stream and return it on the
-      stack. `line#` is updated if necessary.
-***** file-eof		( stream -- flag )
-      Test whether the end of the file stream is reached.
 ***** do-stream
       Execute the code in the current input stream.
 *** Compilation
