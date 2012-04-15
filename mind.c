@@ -158,6 +158,10 @@ static void init_sys(entry_t dict[])
 #define FUNC1(x)  TOS = (cell)(x); goto next            // ( n1 -- n2 )
 #define FUNC2(x)  NOS = (cell)(x); DROP(1); goto next   // ( n1 n2 -- n3 )
 
+// Macro for a word that computes the address of a field from the
+// address of a struct
+#define OFFSET(type, field)   FUNC1(TOS + offsetof(type, field))
+
 /* ---------------------------------------------------------------------- */
 /* Code and dictionary */
 
@@ -315,16 +319,16 @@ paren:     // : (    BEGIN get-char
 // ---------------------------------------------------------------------------
 // Text streams
 
-to_get_char: FUNC1(TOS + offsetof(textstream_t, get_char)); // >get-char
-to_eos:      FUNC1(TOS + offsetof(textstream_t, eos));	    // >eos
-to_num_eos:  FUNC1(TOS + offsetof(textstream_t, num_eos));  // >#eos
-to_lineno:   FUNC1(TOS + offsetof(textstream_t, lineno));   // >line#
-per_textstream: FUNC0(sizeof(textstream_t));                // /textstream
+to_get_char: OFFSET(textstream_t, get_char); // >get-char
+to_eos:      OFFSET(textstream_t, eos);	     // >eos
+to_num_eos:  OFFSET(textstream_t, num_eos);  // >#eos
+to_lineno:   OFFSET(textstream_t, lineno);   // >line#
+per_textstream: FUNC0(sizeof(textstream_t)); // /textstream
 
 tick_instream: FUNC0(&sys.instream);
 
-to_infile: FUNC1(TOS + offsetof(textfile_t, input)); // >infile
-per_textfile: FUNC0(sizeof(textfile_t));             // /textfile
+to_infile: OFFSET(textfile_t, input);	 // >infile
+per_textfile: FUNC0(sizeof(textfile_t)); // /textfile
 
 lineno: FUNC0(&((textstream_t*)sys.instream)->lineno);
 
