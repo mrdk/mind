@@ -149,9 +149,9 @@ static void init_sys(entry_t dict[])
 #define DROP(n)		sp += (n)
 #define PUSH(x) 	EXTEND(1), TOS = (cell)(x)
 
-#define TOS	(*sp)		/* Top of Stack */
-#define NOS     (*(sp + 1))	/* Next in Stack */
-#define ST(n)   (*(sp + (n)))
+// Stack positions
+#define TOS	(*sp)		// Top of Stack
+#define NOS     sp[1]		// Next in Stack
 
 // Macros for "functions": words with 1 parameter a result
 #define FUNC0(x)  EXTEND(1); TOS = (cell)(x); goto next // ( -- n )
@@ -459,20 +459,20 @@ dup: // ( n -- n n )
     EXTEND(1); TOS = NOS; goto next;
 
 twodup: // a b -- a b a b
-    EXTEND(2); NOS = ST(3); TOS = ST(2); goto next;
+    EXTEND(2); NOS = sp[3]; TOS = sp[2]; goto next;
 
 over: // ( a b -- a b a )
-    EXTEND(1); TOS = ST(2); goto next;
+    EXTEND(1); TOS = sp[2]; goto next;
 under: // ( a b -- b a b )
-    { cell a = NOS, b = TOS; EXTEND(1); ST(2) = TOS = b; NOS = a; goto next; }
+    { cell a = NOS, b = TOS; EXTEND(1); sp[2] = TOS = b; NOS = a; goto next; }
 
 swap: // ( a b -- b a )
     { cell tmp = TOS; TOS = NOS; NOS = tmp; goto next; }
 
 rot: // ( a b c -- b c a )
-    { cell tmp = ST(2); ST(2) = NOS; NOS = TOS; TOS = tmp; goto next; }
+    { cell tmp = sp[2]; sp[2] = NOS; NOS = TOS; TOS = tmp; goto next; }
 minus_rot: // ( a b c -- c a b )
-    { cell tmp = TOS; TOS = NOS; NOS = ST(2); ST(2) = tmp; goto next; }
+    { cell tmp = TOS; TOS = NOS; NOS = sp[2]; sp[2] = tmp; goto next; }
 
 
 spfetch: FUNC0(&NOS); // sp@ ( -- addr )
@@ -541,7 +541,7 @@ ugreater_eq: FUNC2(BOOL((ucell)NOS >= (ucell)TOS)); // u>=
 
 within: // ( n n0 n1 -- flag )  true when  n0 <= n < n1, with wraparound
     {
-	ucell n = ST(2), n0 = NOS, n1 = TOS;
+	ucell n = sp[2], n0 = NOS, n1 = TOS;
 	DROP(2);
 	TOS = BOOL(n - n0 < n1 - n0);
 	goto next;
@@ -570,7 +570,7 @@ append_from: // ( a inchar str -- a' flag )
 	cell appending = BOOL(NOS != ((textstream_t*)sys.instream)->num_eos &&
 			      strchr((char*)TOS, NOS));
 	if (appending) {
-	    *(char*)ST(2) = NOS; ST(2)++;
+	    *(char*)sp[2] = NOS; sp[2]++;
 	}
 	DROP(1); TOS = appending; goto next;
     }
@@ -580,7 +580,7 @@ append_notfrom: // ( a inchar str -- a' flag )
 	cell appending = BOOL(NOS != ((textstream_t*)sys.instream)->num_eos &&
 			      !strchr((char*)TOS, NOS));
 	if (appending) {
-	    *(char*)ST(2) = NOS; ST(2)++;
+	    *(char*)sp[2] = NOS; sp[2]++;
 	}
 	DROP(1); TOS = appending; goto next;
     }
