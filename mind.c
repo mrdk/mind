@@ -108,30 +108,32 @@ static int get_file_char(textfile_t *inf)
     return cin;
 }
 
-/* ---------------------------------------------------------------------- */
-/* Memory */
+// ---------------------------------------------------------------------------
+// Memory
 
-/* System variables */
+// System variables
 struct {
-    cell r0;		  /* (cell*) Start of the return stack */
-    cell dp;		  /* (cell*) Dictionary pointer */
-    cell s0;		  /* (cell*) Start of the parameter stack */
-    cell latest;	  /* (entry_t*) The latest definition */
-    cell state;		  /* Compiler state */
-    cell wordq;		  /* Called if word not found (Name: Retro) */
-    textfile_t inf;		/* Input file */
-    cell mem[MEMCELLS];		/* The memory */
+    cell r0;		     // (cell*) Start of the return stack
+    cell dp;		     // (cell*) Dictionary pointer
+    cell s0;		     // (cell*) Start of the parameter stack
+    cell latest;	     // (entry_t*) The latest definition
+    cell state;		     // Compiler state
+    cell wordq;		     // Called if word not found (Name: Retro)
+    textfile_t inf;	     // Input file
+    cell instream;	     // (textstream_t*) Current input stream
+    cell mem[MEMCELLS];	     // The memory
 } sys;
 
 static void init_sys(entry_t dict[])
 {
     sys.r0 = (cell)(sys.mem + 100);
     sys.dp = sys.r0 + sizeof(cell);
-    sys.s0 = (cell)(sys.mem + MEMCELLS - 0x10); // Top of memory + safety space 
+    sys.s0 = (cell)(sys.mem + MEMCELLS - 0x10); // Top of memory + safety space
     sys.latest = (cell)&dict[num_words - 1];
     sys.state = 0;
     sys.wordq = C(notfound);
     open_textfile(&sys.inf, "start.mind", dict);
+    sys.instream = (cell)&sys.inf.stream;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -268,7 +270,7 @@ interpret:  // : interpret   parse (interpret) ;
 notfound: // Tell that the word at sys.dp could not be interpreted
     {
 	printf("l%"PRIdCELL": not found: %s\n",
-	       sys.inf.stream.lineno, (char*)sys.dp);
+	       ((textstream_t*)sys.instream)->lineno, (char*)sys.dp);
 	fclose((FILE*)sys.inf.input);
 	goto abort;
     }
@@ -319,20 +321,22 @@ to_num_eos:  FUNC1(TOS + offsetof(textstream_t, num_eos));  // >#eos
 to_lineno:   FUNC1(TOS + offsetof(textstream_t, lineno));   // >line#
 per_textstream: FUNC0(sizeof(textstream_t));                // /textstream
 
+tick_instream: FUNC0(&sys.instream);
+
 to_infile: FUNC1(TOS + offsetof(textfile_t, input)); // >infile
 per_textfile: FUNC0(sizeof(textfile_t));             // /textfile
 
-lineno: FUNC0(&sys.inf.stream.lineno);
+lineno: FUNC0(&((textstream_t*)sys.instream)->lineno);
 
 get_char: // ( -- char )
-    EXTEND(1); TOS = (cell)&sys.inf;
-    w = (label_t*)sys.inf.stream.get_char; goto **w;
+    EXTEND(1); TOS = sys.instream;
+    w = (label_t*)((textstream_t*)sys.instream)->get_char; goto **w;
 
 eos: // ( -- char )
-    EXTEND(1); TOS = (cell)&sys.inf;
-    w = (label_t*)sys.inf.stream.eos; goto **w;
+    EXTEND(1); TOS = sys.instream;
+    w = (label_t*)((textstream_t*)sys.instream)->eos; goto **w;
 
-num_eos: FUNC0(sys.inf.stream.num_eos);
+num_eos: FUNC0(((textstream_t*)sys.instream)->num_eos);
 
 file_get_char: // ( stream -- char )
     FUNC1(get_file_char((textfile_t*)TOS));
@@ -559,7 +563,7 @@ append: // ( a char -- a' )
 
 append_from: // ( a inchar str -- a' flag )
     {
-	cell appending = BOOL(NOS != sys.inf.stream.num_eos &&
+	cell appending = BOOL(NOS != ((textstream_t*)sys.instream)->num_eos &&
 			      strchr((char*)TOS, NOS));
 	if (appending) {
 	    *(char*)ST(2) = NOS; ST(2)++;
@@ -569,7 +573,7 @@ append_from: // ( a inchar str -- a' flag )
 
 append_notfrom: // ( a inchar str -- a' flag )
     {
-	cell appending = BOOL(NOS != sys.inf.stream.num_eos &&
+	cell appending = BOOL(NOS != ((textstream_t*)sys.instream)->num_eos &&
 			      !strchr((char*)TOS, NOS));
 	if (appending) {
 	    *(char*)ST(2) = NOS; ST(2)++;
