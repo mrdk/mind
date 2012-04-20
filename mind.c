@@ -98,7 +98,7 @@ static void open_textfile(textfile_t *inf, char* name, entry_t dict[])
     inf->input = (cell)fopen(name, "r");
 }
 
-static int get_file_char(textfile_t *inf)
+static int file_get_char(textfile_t *inf)
 {
     int cin = fgetc((FILE*)inf->input);
 
@@ -119,6 +119,7 @@ struct {
     cell latest;	     // (entry_t*) The latest definition
     cell state;		     // Compiler state
     cell wordq;		     // Called if word not found (Name: Retro)
+    cell tick_abort;	     // Called by `abort` to get an interactive prompt
     textfile_t inf;	     // Input file
     cell instream;	     // (textstream_t*) Current input stream
     cell mem[MEMCELLS];	     // The memory
@@ -132,6 +133,7 @@ static void init_sys(entry_t dict[])
     sys.latest = (cell)&dict[num_words - 1];
     sys.state = 0;
     sys.wordq = C(notfound);
+    sys.tick_abort = C(bye);
     open_textfile(&sys.inf, "start.mind", dict);
     sys.instream = (cell)&sys.inf.stream;
 }
@@ -196,15 +198,19 @@ int main(int argc, char *argv[])
 // Starting and ending
 boot:
     init_sys(dict);
-abort:
     sp = (cell*)sys.s0;
-quit:
     rp = (cell*)sys.r0;
     {
-	static cell interpreter[] = { C(do_stream), C(bye) };
+	static cell interpreter[] = {
+	    C(do_stream), C(tick_abort), C(fetch), C(execute) };
 	ip = interpreter;
 	goto next;
     }
+
+abort:
+    w = (label_t*)sys.tick_abort; goto **w;
+
+tick_abort: FUNC0(&sys.tick_abort);
 
 bye:
     return 0;
@@ -343,7 +349,7 @@ eos: // ( -- char )
 num_eos: FUNC0(((textstream_t*)sys.instream)->num_eos);
 
 file_get_char: // ( stream -- char )
-    FUNC1(get_file_char((textfile_t*)TOS));
+    FUNC1(file_get_char((textfile_t*)TOS));
 file_eof:      // ( stream -- flag )
     FUNC1(BOOL(feof((FILE*)((textfile_t*)TOS)->input)));
 

@@ -34,10 +34,12 @@
       Initialise the system completely and start the outer
       interpreter.
 ***** abort
-      Reset the stack and the return stack and start the outer
-      interpreter.
-***** quit
-      Reset the return stack and start the outer interpreter.
+      Stop the interpretation of the currently read text stream and
+      return to the interactive mode by executing `'abort`.
+***** 'abort		( -- addr )
+      Variable that contains a word that does is called after an error
+      has occured; it is expected to reset the parameter stack and the
+      return stack and then to start an interactive prompt.
 ***** bye
       Leave the Forth system immediately.
 *** Inner Interpreter
