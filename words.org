@@ -99,10 +99,18 @@
     both from a file and from strings stored in memory.
 ***** Text streams
       These are the basic data structures for reading program text.
+******* >next	( 'textstream -- addr )
+      	The TOS contains the address of a textstream structure:
+      	compute the address of its `next` routine. The routine has
+      	the signature ( stream -- ).
+******* >current@	( 'textstream -- addr )
+      	The TOS contains the address of a textstream structure:
+      	compute the address of its `current@` routine. The routine has
+      	the signature ( stream -- char ).
 ******* >get-char	( 'textstream -- addr )
-      	The TOS contains the address of a textstream structure: compute the
-      	address of its `getchar` routine. The routine has the signature
-      	( stream -- char ).
+      	The TOS contains the address of a textstream structure:
+      	compute the address of its `get-char` routine. The routine has
+      	the signature ( stream -- char ).
 ******* >eos		( 'textstream -- addr )
       	The TOS contains the address of a textstream structure: compute
       	the address of its `eos` routine. The routine has the signature
@@ -126,16 +134,35 @@
       A file stream contains all the fields of a text stream, plus
       `intext-file`.
 ******* >intext-file	( 'filestream -- addr )
-      	The TOS contains the address of a filestream structure: compute the
-      	address of its file field. The field is one cell wide and
-      	contains the underlying C file pointer (FILE*) for this stream.
+      	The TOS contains the address of a filestream structure:
+      	compute the address of its `file` field. The field is one cell
+      	wide and contains the underlying C file pointer (FILE*) for
+      	this stream.
+******* >current	( 'filestream -- addr )
+      	The TOS contains the address of a filestream structure:
+      	compute the address of its `current` field. The field is one
+      	cell wide and contains the last character read from the file
+      	or the "end of file" constant. 
 ******* /filestream	( -- n )
       	Number of bytes in a file stream structure.
+******* file-next	( stream -- )
+      	Read one character from a file stream and store it in the
+      	`current` field. `line#` is updated if the character is an
+      	"end of line" symbol.
+******* file-current@	( stream -- char )
+	Put the character at the current position of the file stream
+	onto the stack.
 ******* file-get-char	( stream -- char )
       	Read one character from a file stream and return it on the
       	stack. `line#` is updated if necessary.
 ******* file-eof	( stream -- flag )
       	Test whether the end of the file stream is reached.
+***** next		( stream -- )
+      Read one character from the current stream. `line#` is updated
+      if the character is an "end of line" symbol.
+***** current@		( stream -- char )
+      Put the character at the current position of the current stream
+      onto the stack.
 ***** get-char		( -- inchar )
       Read one character from the current stream and return it on the
       stack. `line#` is updated if necessary. If the end of the stream
