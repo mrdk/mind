@@ -99,9 +99,9 @@
     both from a file and from strings stored in memory.
 ***** Text streams
       These are the basic data structures for reading program text.
-******* >next	( 'textstream -- addr )
+******* >forward	( 'textstream -- addr )
       	The TOS contains the address of a textstream structure:
-      	compute the address of its `next` routine. The routine has
+      	compute the address of its `forward` routine. The routine has
       	the signature ( stream -- ).
 ******* >current@	( 'textstream -- addr )
       	The TOS contains the address of a textstream structure:
@@ -145,7 +145,7 @@
       	or the "end of file" constant. 
 ******* /filestream	( -- n )
       	Number of bytes in a file stream structure.
-******* file-next	( stream -- )
+******* file-forward	( stream -- )
       	Read one character from a file stream and store it in the
       	`current` field. `line#` is updated if the character is an
       	"end of line" symbol.
@@ -157,7 +157,7 @@
       	stack. `line#` is updated if necessary.
 ******* file-eof	( stream -- flag )
       	Test whether the end of the file stream is reached.
-***** next		( stream -- )
+***** forward		( stream -- )
       Read one character from the current stream. `line#` is updated
       if the character is an "end of line" symbol.
 ***** current@		( stream -- char )

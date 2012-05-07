@@ -78,7 +78,7 @@ static cell* find_cfa(entry_t *e, char *name)
 // Reading text files and interactive input
 
 typedef struct {
-    cell next;			// Forth word ( stream -- )
+    cell forward;		// Forth word ( stream -- )
     cell current_fetch;		// Forth word ( stream -- char )
     cell eos;			// Forth word ( stream -- flag )
     cell get_char;		// Forth word ( stream -- char )
@@ -94,7 +94,7 @@ typedef struct {
 
 static void open_textfile(textfile_t *inf, char* name, entry_t dict[])
 {
-    inf->stream.next = C(next_);
+    inf->stream.forward = C(forward);
     inf->stream.current_fetch = C(current_fetch);
     inf->stream.get_char = C(file_get_char);
     inf->stream.eos = C(file_eof);
@@ -104,7 +104,7 @@ static void open_textfile(textfile_t *inf, char* name, entry_t dict[])
     inf->current = fgetc((FILE*)inf->input);
 }
 
-static void file_next(textfile_t *inf)
+static void file_forward(textfile_t *inf)
 {
     inf->current = fgetc((FILE*)inf->input);
 
@@ -116,7 +116,7 @@ static int file_get_char(textfile_t *inf)
 {
     int current = inf->current;
 
-    file_next(inf);
+    file_forward(inf);
 
     return current;
 }
@@ -338,7 +338,7 @@ paren:     // : (    BEGIN get-char
 // ---------------------------------------------------------------------------
 // Text streams
 
-to_next:     OFFSET(textstream_t, next);	       // >next
+to_forward:     OFFSET(textstream_t, forward);	       // >forward
 to_current_fetch: OFFSET(textstream_t, current_fetch); // >current@
 to_eos:      OFFSET(textstream_t, eos);	     // >eos
 to_get_char: OFFSET(textstream_t, get_char); // >get-char
@@ -354,9 +354,9 @@ per_textfile: FUNC0(sizeof(textfile_t)); // /textfile
 
 lineno: FUNC0(&((textstream_t*)sys.instream)->lineno);
 
-next_:				// ( -- )
+forward:			// ( -- )
     EXTEND(1); TOS = sys.instream;
-    w = (label_t*)((textstream_t*)sys.instream)->next; goto **w;
+    w = (label_t*)((textstream_t*)sys.instream)->forward; goto **w;
 current_fetch:			// current@ ( -- char )
     EXTEND(1); TOS = sys.instream;
     w = (label_t*)((textstream_t*)sys.instream)->current_fetch; goto **w;
@@ -369,13 +369,13 @@ eos: // ( -- char )
 
 num_eos: FUNC0(((textstream_t*)sys.instream)->num_eos);
 
-file_next:     // ( stream -- )
-    file_next((textfile_t*)TOS); DROP(1); goto next;
+file_forward:       // ( stream -- )
+    file_forward((textfile_t*)TOS); DROP(1); goto next;
 file_current_fetch: // ( stream -- char )
     FUNC1(((textfile_t*)TOS)->current);
-file_get_char: // ( stream -- char )
+file_get_char:      // ( stream -- char )
     FUNC1(file_get_char((textfile_t*)TOS));
-file_eof:      // ( stream -- flag )
+file_eof:           // ( stream -- flag )
     FUNC1(BOOL(((textfile_t*)TOS)->current == EOF));
 
 do_stream: // : do-stream   BEGIN interpret  eos UNTIL ;
