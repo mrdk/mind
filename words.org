@@ -47,9 +47,17 @@
       Do nothing.
 ***** ;;
       End the execution of the current word.
+
+      - Source :: retroforth
+***** if;		( n -- )
+      Leave the execution of the current word if the TOS is nonzero.
+
+      - Source :: retroforth
 ***** 0; 		( 0 -- | n -- n )
       If the TOS is zero, drop it and end the execution of the current
       word.
+
+      - Source :: retroforth
 ***** execute		( addr -- )
       Execute the word at addr.
 *** Outer Interpreter
@@ -107,10 +115,6 @@
       	The TOS contains the address of a textstream structure:
       	compute the address of its `current@` routine. The routine has
       	the signature ( stream -- char ).
-******* >get-char	( 'textstream -- addr )
-      	The TOS contains the address of a textstream structure:
-      	compute the address of its `get-char` routine. The routine has
-      	the signature ( stream -- char ).
 ******* >eos		( 'textstream -- addr )
       	The TOS contains the address of a textstream structure: compute
       	the address of its `eos` routine. The routine has the signature
@@ -152,9 +156,6 @@
 ******* file-current@	( stream -- char )
 	Put the character at the current position of the file stream
 	onto the stack.
-******* file-get-char	( stream -- char )
-      	Read one character from a file stream and return it on the
-      	stack. `line#` is updated if necessary.
 ******* file-eof	( stream -- flag )
       	Test whether the end of the file stream is reached.
 ***** forward		( stream -- )
@@ -163,11 +164,6 @@
 ***** current@		( stream -- char )
       Put the character at the current position of the current stream
       onto the stack.
-***** get-char		( -- inchar )
-      Read one character from the current stream and return it on the
-      stack. `line#` is updated if necessary. If the end of the stream
-      is reached and no other characters can be read, `#eos` is
-      returned.
 ***** eos		( -- flag )
       Test whether the end of the current stream is reached.
 ***** #eos		( -- inchar)
@@ -184,6 +180,10 @@
 ***** ]
       Switch the interpreter to compiling mode. All words are now
       compiled, except for those that are immediate.
+***** skip-whitespace
+      Read from the current stream until the character at the current
+      position is no longer an element of `whitespace`. If this is
+      already the case, then do nothing.
 ***** state		( -- addr )
       State of the compiler. If the value is zero, all words are
       interpreted; if it is nonzero, words are compiled and only those
@@ -378,14 +378,6 @@
 ***** append		( addr char -- addr' )
       Store *char* at *addr* and add 1 to *addr*. This word can be
       used to build incrementally a string in memory.
-***** append-from	( addr inchar str -- addr' )
-      If *inchar* is contained in *str* and it is not the current
-      `eos` constant, store it at *addr* and add 1 to *addr*.
-      Otherwise do nothing.
-***** append-notfrom	( addr inchar str -- addr' )
-      If *inchar* is not contained in *str* and it is not the current
-      `eos` constant, store it at *addr* and add 1 to *addr*.
-      Otherwise do nothing.
 ***** strlen		( addr -- n )
       Return the length of the string starting at *addr*, without the
       trailing 0 byte.

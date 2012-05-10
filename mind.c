@@ -81,7 +81,6 @@ typedef struct {
     cell forward;		// Forth word ( stream -- )
     cell current_fetch;		// Forth word ( stream -- char )
     cell eos;			// Forth word ( stream -- flag )
-    cell get_char;		// Forth word ( stream -- char )
     cell num_eos;		// integer: "end of stream constant"
     cell lineno;		// integer: line number
 } textstream_t;
@@ -94,9 +93,8 @@ typedef struct {
 
 static void open_textfile(textfile_t *inf, char* name, entry_t dict[])
 {
-    inf->stream.forward = C(forward);
-    inf->stream.current_fetch = C(current_fetch);
-    inf->stream.get_char = C(file_get_char);
+    inf->stream.forward = C(file_forward);
+    inf->stream.current_fetch = C(file_current_fetch);
     inf->stream.eos = C(file_eof);
     inf->stream.num_eos = EOF;
     inf->stream.lineno = 1;
@@ -110,15 +108,6 @@ static void file_forward(textfile_t *inf)
 
     if (inf->current == '\n')
 	inf->stream.lineno++;
-}
-
-static int file_get_char(textfile_t *inf)
-{
-    int current = inf->current;
-
-    file_forward(inf);
-
-    return current;
 }
 
 // ---------------------------------------------------------------------------
@@ -256,6 +245,12 @@ dodoes_addr:  FUNC0(&&dodoes);
 semi:	// ;;		    end of colon definition		[Name: Retro]
     ip = (cell*)RPOP; goto next;
 
+if_semi: // if; ( n -- )  exit if TOS <> 0			[Name: Retro]
+    if (*sp++) {
+	ip = (cell*)RPOP;
+    }
+    goto next;
+
 zero_semi:  // 0;  ( 0 -- | n -- n ) exit if TOS = 0		[Name: Retro]
     if (!TOS) {
 	DROP(1);
@@ -310,30 +305,31 @@ rbrack:	// ]
     sys.state = 1; goto next;
 
 parse_to: // : parse-to ( addr string -- )
-	  //   >r BEGIN get-char r@ append-notfrom  0=  eos or UNTIL  rdrop
-	  //   0 swap c! ;
+          //   >r BEGIN current@ append  forward
+          //            r@ current@ strchr  eos or UNTIL rdrop
+          //      0 over c!  forward ;
     CODE(C(rto),
-	 C(get_char), C(rfetch), C(append_notfrom), C(zero_equal),
-	 C(eos), C(or), C(zbranch), (cell)(start + 1),
-	 C(rdrop), C(zero), C(swap), C(cstore));
+	 C(current_fetch), C(append), C(forward),
+	 C(rfetch), C(current_fetch), C(strchr), C(eos), C(or),
+	 C(zbranch), (cell)(start + 1), C(rdrop),
+	 C(zero), C(swap), C(cstore), C(forward));
+    
+skip_whitespace: // : skip-whitespace ( -- )
+	         //   BEGIN  whitespace current@ strchr 0= if;  forward AGAIN ;
+    CODE(C(whitespace), C(current_fetch), C(strchr), C(zero_equal),
+	 C(if_semi), C(forward), C(branch), (cell)(start));
 
 parse: // : parse ( -- addr )
-       //   here  BEGIN get-char whitespace append-notfrom UNTIL
-       //   whitespace parse-to  here ;
-    CODE(C(here),
-	 C(get_char), C(whitespace), C(append_notfrom),
-	 C(zbranch), (cell)(start + 1),
-	 C(whitespace), C(parse_to), C(here));
+       //   skip-whitespace  here whitespace parse-to  here ;
+    CODE(C(skip_whitespace), C(here), C(whitespace), C(parse_to), C(here));
 
-backslash: // : \    BEGIN get-char
-	   //              dup #eos =  swap #eol =  or UNTIL ; immediate
-    CODE(C(get_char), C(dup), C(num_eos), C(equal),
-	 C(swap), C(num_eol), C(equal), C(or), C(zbranch), (cell)start);
+backslash: // : \   BEGIN current@ forward  #eol = if;  eos UNTIL ; immediate
+    CODE(C(current_fetch), C(forward), C(num_eol), C(equal), C(if_semi),
+	 C(eos), C(zbranch), (cell)start);
 
-paren:     // : (    BEGIN get-char
-	   //        dup #eos =  swap [char] ) =  or UNTIL ; immediate
-    CODE(C(get_char), C(dup), C(num_eos), C(equal),
-	 C(swap), C(lit), ')', C(equal), C(or), C(zbranch), (cell)start);
+paren: // : (   BEGIN current@ forward  [char] ) = if;  eos UNTIL ; immediate
+    CODE(C(current_fetch), C(forward), C(lit), ')', C(equal), C(if_semi),
+	 C(eos), C(zbranch), (cell)start);
 
 // ---------------------------------------------------------------------------
 // Text streams
@@ -341,7 +337,6 @@ paren:     // : (    BEGIN get-char
 to_forward:     OFFSET(textstream_t, forward);	       // >forward
 to_current_fetch: OFFSET(textstream_t, current_fetch); // >current@
 to_eos:      OFFSET(textstream_t, eos);	     // >eos
-to_get_char: OFFSET(textstream_t, get_char); // >get-char
 to_num_eos:  OFFSET(textstream_t, num_eos);  // >#eos
 to_lineno:   OFFSET(textstream_t, lineno);   // >line#
 per_textstream: FUNC0(sizeof(textstream_t)); // /textstream
@@ -360,9 +355,6 @@ forward:			// ( -- )
 current_fetch:			// current@ ( -- char )
     EXTEND(1); TOS = sys.instream;
     w = (label_t*)((textstream_t*)sys.instream)->current_fetch; goto **w;
-get_char:			// get-char ( -- char )
-    EXTEND(1); TOS = sys.instream;
-    w = (label_t*)((textstream_t*)sys.instream)->get_char; goto **w;
 eos: // ( -- char )
     EXTEND(1); TOS = sys.instream;
     w = (label_t*)((textstream_t*)sys.instream)->eos; goto **w;
@@ -373,8 +365,6 @@ file_forward:       // ( stream -- )
     file_forward((textfile_t*)TOS); DROP(1); goto next;
 file_current_fetch: // ( stream -- char )
     FUNC1(((textfile_t*)TOS)->current);
-file_get_char:      // ( stream -- char )
-    FUNC1(file_get_char((textfile_t*)TOS));
 file_eof:           // ( stream -- flag )
     FUNC1(BOOL(((textfile_t*)TOS)->current == EOF));
 
@@ -595,26 +585,6 @@ cstore: // c! ( n a -- )
 
 append: // ( a char -- a' )
     *(char*)NOS = TOS; NOS++; DROP(1); goto next;
-
-append_from: // ( a inchar str -- a' flag )
-    {
-	cell appending = BOOL(NOS != ((textstream_t*)sys.instream)->num_eos &&
-			      strchr((char*)TOS, NOS));
-	if (appending) {
-	    *(char*)sp[2] = NOS; sp[2]++;
-	}
-	DROP(1); TOS = appending; goto next;
-    }
-
-append_notfrom: // ( a inchar str -- a' flag )
-    {
-	cell appending = BOOL(NOS != ((textstream_t*)sys.instream)->num_eos &&
-			      !strchr((char*)TOS, NOS));
-	if (appending) {
-	    *(char*)sp[2] = NOS; sp[2]++;
-	}
-	DROP(1); TOS = appending; goto next;
-    }
 
 malloc: FUNC1(malloc(TOS)); // ( n -- addr )
 free:                       // ( addr -- )
