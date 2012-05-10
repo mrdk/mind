@@ -50,7 +50,7 @@ typedef struct {
 /* Find string *name* in dictionary, starting at *e*. */
 static entry_t *find_word(entry_t *e, char *name)
 {
-    for (; e->link; e = (entry_t*)e->link) {
+    for (; e; e = (entry_t*)e->link) {
 	if (!strcmp((char*)e->name, name))
 	    return e;
     }
