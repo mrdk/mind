@@ -459,6 +459,12 @@ rto: // >r ( n -- )
 rfrom: // r> ( -- n )
     EXTEND(1); TOS = RPOP; goto next;
 
+rrto: // >rr ( n -- )
+    rp--; rp[0] = rp[1]; rp[1] = TOS; DROP(1); goto next;
+
+rrfrom: // rr> ( -- n )
+    EXTEND(1); TOS = rp[1]; rp[1] = rp[0]; rp++;  goto next;
+
 rfetch: FUNC0(*rp);
 
 // ---------------------------------------------------------------------------

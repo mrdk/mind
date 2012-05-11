@@ -245,6 +245,14 @@
       Move the TOS to the top of the return stack.
 ***** r>		( -- n )
       Move the top of the return stack to the TOS.
+***** >rr		( n -- )
+      Move the TOS to the second position of the return stack.
+
+      - Source :: Reva
+***** rr>		( -- n )
+      Move the second entry of the return stack to the TOS.
+
+      - Source :: Reva
 ***** r@		( -- n )
       Copy the top of the return stack to the TOS.
 ***** r0		( -- addr )
