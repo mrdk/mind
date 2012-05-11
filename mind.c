@@ -307,12 +307,13 @@ rbrack:	// ]
 parse_to: // : parse-to ( addr string -- )
           //   >r BEGIN current@ append  forward
           //            r@ current@ strchr  eos or UNTIL rdrop
-          //      0 over c!  forward ;
+          //      0 over c!  eos if; forward ;
     CODE(C(rto),
 	 C(current_fetch), C(append), C(forward),
 	 C(rfetch), C(current_fetch), C(strchr), C(eos), C(or),
 	 C(zbranch), (cell)(start + 1), C(rdrop),
-	 C(zero), C(swap), C(cstore), C(forward));
+	 C(zero), C(swap), C(cstore),
+         C(eos), C(if_semi), C(forward));
     
 skip_whitespace: // : skip-whitespace ( -- )
 	         //   BEGIN  whitespace current@ strchr 0= if;  forward AGAIN ;
