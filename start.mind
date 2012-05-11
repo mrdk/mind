@@ -179,6 +179,48 @@ Variable 'num	    \ points to the beginning of the generated string.
 Create linebuf  /linebuf 1+ allot
 
 
+0 cell+ Constant /cell
+
+: perform ( `xt -- )   @ execute ;
+
+: later   rr> >r ;
+: push ( addr -- )   dup >rr @ >rr  later  r> r> ! ;
+
+: h. ( n -- )   base push  hex . ;
+
+
+: Textstream	Create /textstream allot ;
+
+: Field  ( offset size -- offset' )   Create over ,  +
+  does>  ( 'base -- 'field )          @ + ;
+
+/textstream
+  /cell Field >'current-char         \ points to the current character
+Constant /stringstream
+
+: strstream-forward   ( 'stream -- )        >'current-char  1 swap +! ;
+: strstream-current@  ( 'stream -- char )   >'current-char @ c@ ;
+: strstream-eos       ( 'stream -- flag )   strstream-current@ 0= ;
+
+: Stringstream  Create here  /stringstream allot
+  ['] strstream-forward  over >forward !
+  ['] strstream-current@ over >current@ !
+  ['] strstream-eos      over >eos !
+  0 over >#eos !
+  drop ;
+
+: interpret-stream ( 'string 'stream -- )
+  'instream push  dup 'instream !  >'current-char !  do-stream ;
+
+Stringstream line-stream
+
+: line-interpret
+  BEGIN  linebuf /linebuf accept drop
+         linebuf line-stream interpret-stream
+         ." ok" cr  REPEAT ;
+
+' line-interpret 'abort !
+
 \ Words
 
 : .name   ( cfa -- )   >name puts ;
