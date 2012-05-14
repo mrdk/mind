@@ -1,5 +1,4 @@
 \ Defining words						. o ( mind )
-.( Line: ) line# @ h.  cr
 
 here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 	] parse  dup strlen 1+ allot  swap entry,  ;; [
@@ -8,36 +7,41 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 (') 2drop  (') ?pairs >doer !
 
 ^docol Create-as :			( "name" -- )
-	] ^docol Create-as  1 state !   lit :  ;; [
-: ;	lit : ?pairs   lit ;; ,   0 state !   ;; [
-        drop                                    \ drop flag created by :
-	#immediate  latest @ link>  flags!	\ make immediate
+	] ^docol Create-as  1 state !   lit :  ;; [ drop
+: ;	   lit : ?pairs   lit ;; ,   0 state !   ;; [
+    drop                               \ drop flag created by `:`
+	#immediate  latest @ link>  flags! \ make immediate
+
 
 : 'latest ( -- cfa )    latest @ link> ;
 : immediate   'latest dup flags@  #immediate or  swap flags! ;
 
-: Create  ^dovar Create-as ;
-: does>   'latest  ^dodoes over !   r> swap >doer ! ;
+: Create   ^dovar Create-as ;
+: does>    ^dodoes 'latest !   r> 'latest >doer ! ;
 
 : Variable ( -- )     Create  1 cells allot ;
 : Constant ( n -- )   Create ,  does> @ ;
 
 : Defer    ( cfa -- )   ^dodefer Create-as  'latest >doer ! ;
 
+
 \ Literals
 
 (') drop Defer ?exists ( cfa -- ) \ Abort if word does not exist
 
-: '	  ( -- cfa )   (') dup ?exists ;
-: literal,  ( n -- )   lit lit ,  , ; \ create { ' lit | n } in dict.
+: '	  ( "word" -- cfa )   (')  dup ?exists ;
+
+: literal,  ( n -- )            \ create { ' lit | n } in code.
+  lit lit ,  , ;
 
 ' literal, Defer literal ( n -- ) immediate
 
-: [']   ' literal, ; immediate
-: [compile]  	' , ; immediate
-
-: is       ( cfa "word" -- )   ' >doer ! ;   \ to set behaviour of Defer word
-
+: [']       ( "word" -- )       \ Compile the CFA of the following word
+  ' literal, ; immediate
+: [compile] ( "word" -- )       \ Compile the following word
+  ' , ;        immediate
+: is    ( cfa "word" -- )       \ Set behaviour of Defer word
+  ' >doer ! ;
 
 \ Control structures
 
@@ -60,15 +64,23 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
     ['] branch ,  <resolve  >resolve-all ;  immediate
 
 
+\ Number Comparison
+
+: within+  ( n n0 n1 -- flag )	1+ within ; \ true if n0 <= n <= n1
+
+: max ( n1 n2 -- n3 )   2dup <  IF nip ELSE drop THEN ; \ Maximum of n1 and n2
+: min ( n1 n2 -- n3 )   2dup <  IF drop ELSE nip THEN ; \ Minimum of n1 and n2
+
+
 \ Inlined strings
 
 \ data structure: { ' inline-data | ' end | data ... | }
 \ return address of data following in code, relative to the word
-\ calling inline-data
-: inline-data ( -- a )   r> r>   dup @ >r  cell+  swap >r ;
+\ calling `inline-data`
+: inline-data ( -- addr )   rr> dup @ >rr  cell+ ;
 
-: (.")  ( -- )     inline-data puts ;
-: (")   ( -- a )   inline-data ;
+: (.")  ( -- )       inline-data puts ; \ Print inlined string
+: (")   ( -- addr )  inline-data ;      \ Address of inlined string
 
 : Stringlit ( cfa -- )   Create ,  immediate  does>  @ ,  >mark  ," >resolve ;
 
@@ -78,11 +90,14 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 \ Characters
 
-: char ( -- c )		parse c@ ;
-: [char]	char literal, ;  immediate
+: char   ( "char" -- c )        \  Ascii (or other) code for "char"
+  parse c@ ;
+: [char] ( Compile: "char" -- c ) \ Compile code for "char"
+  char literal, ;  immediate
 
-: space    bl emit ;
-: spaces ( n -- )  BEGIN  ?dup WHILE 1- space REPEAT ;
+: space    bl emit ;            \ Print a single space
+: spaces  ( n -- )              \ Print n spaces
+  0 max  BEGIN  ?dup WHILE 1- space REPEAT ;
 
 
 \ Debug tools
@@ -92,48 +107,50 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 : (abort")  ( f -- )   inline-data do-abort ;
 ' (abort") Stringlit abort"
 
-: depth ( -- n )   s0 @ cell-  sp@ - [ 1 cells ] literal  / ;
+: depth ( -- n )   s0 @   sp@ - [ 1 cells ] literal  / ;
 : ?stack   depth 0< abort" Stack empty" ;
 
 : (?pairs)  ( n1 n2 -- )    <> abort" Mismatching control structure" ;
 ' (?pairs) is ?pairs
 
-: .s    ?stack  sp@ >r  s0 @
-    BEGIN  dup r@ u> WHILE  cell-  dup @ h.  REPEAT  drop rdrop ;
 
+\ Conversion: string to number
 
-\ Conversion: string > number
-
-: within+  ( n n0 n1 -- flag )	1+ within ; \ true if n0 <= n <= n1
-
-Variable base	2 base !	\ Base for number conversion.
+Variable base		    \ Base for number conversion.
 
 Variable #acc			\ Number accumulator
-: accumulate ( n -- )	#acc @  base @ u* +  #acc ! ;
+: accumulate ( n -- )   \ Put n as new last digit into #acc
+  #acc @  base @ u* +  #acc ! ;
 
-: digit?     ( n -- ? )	base @ u< ;
-: digit>#  ( c -- n ? )
+: digit?   ( n -- ? )	base @ u< ; \ is n a digit under the current base?
+: digit>#  ( char -- n ? )
   dup  [char] 0 [char] 9 within+  IF  [char] 0 -  dup digit? ;; THEN
   dup  [char] a [char] z within+  IF  [char] a -
-                     [ 1 2* 2* 1+ 2* ] literal +  dup digit? ;; THEN
+                [ char 9 char 0 - 1+ ] literal +  dup digit? ;; THEN
   false ;			 
 
-: udigits    ( a -- a' )	\ Accumulate first unsigned digits
+: udigits  ( str -- str' )      \ accumulate unsigned digits as long as possible
   BEGIN dup c@  digit># IF accumulate ELSE drop ;; THEN  1+ REPEAT ;
-: ?rest    ( a -- )	c@ abort" not found" ;	\ Abort if not a number
-: >unumber ( a -- n )	0 #acc !  udigits ?rest  #acc @ ;
+: ?rest    ( str -- )           \ abort if there are unconverted characters
+  c@ abort" not found" ;
+: >unumber ( str -- n )         \ convert string to unsigned number
+  0 #acc !  udigits ?rest  #acc @ ;
 
-: get-sign ( a -- a' sign )	dup c@  [char] - =  IF 1+  -1 ELSE 1 THEN ;
-: >number  ( a -- n ) 	   	get-sign swap  >unumber  * ;
+: get-sign ( str -- a' sign )   \ read leading minus sign if it is there
+  dup c@  [char] - =  IF 1+  -1 ELSE 1 THEN ;
+: >number  ( str -- n )         \ convert string to signed number
+  get-sign swap  >unumber  * ;
 
 
 \ Add number conversion to the outer interpreter
 
-: convert-number   here >number  state @ IF literal, THEN ;
+: convert-number             \ Convert number at `here`, compile it if necessary
+  here >number  state @ IF literal, THEN ;
 
-' convert-number word? !     \ Activate number conversion
+' convert-number word? !        \ Activate number conversion
 
 
+2 base !
 1010 base !   \ going decimal
 
 : binary     2 base ! ;
@@ -142,11 +159,11 @@ Variable #acc			\ Number accumulator
 : hex       16 base ! ;
 
 
-\ Conversion: numbers > string (Modified f.i.g. model.)
+\ Conversion: numbers to string (Modified f.i.g. model.)
 
 128 Constant /numbuf
 Create numbuf  /numbuf 1+ allot 
-Variable 'num	    \ points to the beginning of the generated string.
+Variable 'num                  \ points to the beginning of the generated string
 
 : #>digit ( n - char )
   dup 10 <  IF [char] 0 +  ELSE  10 - [char] a +  THEN ;
@@ -167,9 +184,9 @@ Variable 'num	    \ points to the beginning of the generated string.
 
 \ Line input
 
-: ?split   ( addr c -- ) \ if character at `addr` is `c`, split string there
+: ?split   ( addr c -- )     \ if character at `addr` is `c`, split string there
   over c@ = IF  0 swap c!  ELSE drop THEN ;
-: chomp  ( str -- )      \ remove trailing end-of-line character.
+: chomp  ( str -- )             \ remove trailing end-of-line character.
   dup strlen + 1-  #eol  ?split ;
 
 : accept  ( addr n -- n' )
@@ -184,7 +201,8 @@ Create linebuf  /linebuf 1+ allot
 : perform ( `xt -- )   @ execute ;
 
 : later   rr> >r ;
-: push ( addr -- )   dup >rr @ >rr  later  r> r> ! ;
+: push ( addr -- )       \ Save content of addr during execution of current word
+  dup >rr @ >rr  later  r> r> ! ;
 
 : h. ( n -- )   base push  hex . ;
 
@@ -221,14 +239,15 @@ Stringstream line-stream
 
 ' line-interpret 'abort !
 
-\ Words
+\ Debug and Display
+
+: .s                            \ print content of stack
+  ?stack  sp@ >r  s0 @  BEGIN  dup r@ u>= WHILE  dup @ h.  cell- REPEAT
+  drop rdrop ;
 
 : .name   ( cfa -- )   >name puts ;
 : words   latest  BEGIN @  ?dup WHILE  dup link> .name space  REPEAT ;
 
-
-\ Last page
-.( Line: ) line# @ .  cr
 
 \ Local Variables:
 \ comment-start: "\\ "

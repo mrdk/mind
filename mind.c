@@ -631,7 +631,7 @@ gets: // ( a n -- a' )
 puts: // ( a -- )               print null-terminated string
     fputs((char*)TOS, stdout); DROP(1); goto next;
 
-hdot: // h. ( n -- )		print hexadecimal
+uhdot: // uh. ( n -- )		print unsigned hexadecimal
     printf("%"PRIxCELL" ", TOS); DROP(1); goto next;
 
 bl:  FUNC0(' ');

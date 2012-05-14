@@ -442,5 +442,5 @@
       printed.
 ***** cr
       Begin a new output line.
-***** h.		( addr -- )
-      Print the TOS as a hexadecimal number, followed by a space.
+***** uh.		( addr -- )
+      Print the TOS as unsigned hexadecimal number, followed by a space.
