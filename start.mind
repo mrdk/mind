@@ -27,7 +27,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 \ Literals
 
-(') drop Defer ?exists ( cfa -- ) \ Abort if word does not exist
+(') drop Defer ?exists ( cfa -- ) \ abort if word does not exist
 
 : '	  ( "word" -- cfa )   (')  dup ?exists ;
 
@@ -36,12 +36,13 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 ' literal, Defer literal ( n -- ) immediate
 
-: [']       ( "word" -- )       \ Compile the CFA of the following word
-  ' literal, ; immediate
+: ['] ( "word" --; Compile: -- xt )
+  ' literal, ; immediate        \ Compile the CFA of the following word
 : [compile] ( "word" -- )       \ Compile the following word
   ' , ;        immediate
-: is    ( cfa "word" -- )       \ Set behaviour of Defer word
+: is    ( cfa "word" -- )       \ Set behaviour of `Defer` word
   ' >doer ! ;
+
 
 \ Control structures
 
@@ -74,13 +75,13 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 \ Inlined strings
 
-\ data structure: { ' inline-data | ' end | data ... | }
+\ data structure: { ' 'inlined | ' end | data ... | }
 \ return address of data following in code, relative to the word
-\ calling `inline-data`
-: inline-data ( -- addr )   rr> dup @ >rr  cell+ ;
+\ calling `'inlined`
+: 'inlined ( -- addr )   rr> dup @ >rr  cell+ ;
 
-: (.")  ( -- )       inline-data puts ; \ Print inlined string
-: (")   ( -- addr )  inline-data ;      \ Address of inlined string
+: (.")  ( -- )       'inlined puts ; \ Print inlined string
+: (")   ( -- addr )  'inlined ;      \ Address of inlined string
 
 : Stringlit ( cfa -- )   Create ,  immediate  does>  @ ,  >mark  ," >resolve ;
 
@@ -92,7 +93,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 : char   ( "char" -- c )        \  Ascii (or other) code for "char"
   parse c@ ;
-: [char] ( Compile: "char" -- c ) \ Compile code for "char"
+: [char] ( "char" --; Compile: -- c ) \ Compile code for "char"
   char literal, ;  immediate
 
 : space    bl emit ;            \ Print a single space
@@ -103,11 +104,12 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 \ Debug tools
 
 : .abort    ( str -- )	       ." Abort: "  here puts  space  puts  cr ;
-: do-abort  ( flag str -- )    swap IF .abort  abort  ELSE drop THEN ;
-: (abort")  ( f -- )   inline-data do-abort ;
+: do-abort  ( flag str -- )    swap IF  .abort abort  ELSE drop THEN ;
+: (abort")  ( flag -- )        'inlined do-abort ;
 ' (abort") Stringlit abort"
 
-: depth ( -- n )   s0 @   sp@ - [ 1 cells ] literal  / ;
+: depth ( -- n )                \ Number of entries on the stack
+  s0 @   sp@ - [ 1 cells ] literal  / ;
 : ?stack   depth 0< abort" Stack empty" ;
 
 : (?pairs)  ( n1 n2 -- )    <> abort" Mismatching control structure" ;
@@ -116,10 +118,10 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 \ Conversion: string to number
 
-Variable base		    \ Base for number conversion.
+Variable base                   \ Base for number conversion.
 
-Variable #acc			\ Number accumulator
-: accumulate ( n -- )   \ Put n as new last digit into #acc
+Variable #acc                   \ Number accumulator
+: accumulate ( n -- )           \ Put n as new last digit into #acc
   #acc @  base @ u* +  #acc ! ;
 
 : digit?   ( n -- ? )	base @ u< ; \ is n a digit under the current base?
