@@ -1,4 +1,11 @@
-\ Defining words						. o ( mind )
+\ mind -- a Forth interpreter					. o ( mind )
+\ Copyright 2011-2012 Markus Redeker <cep@ibp.de>
+\
+\ Published under the GNU General Public License version 2 or any
+\ later version, at your choice. There is NO WARRANY, not at all. See
+\ the file "copying" for details.
+
+\ Defining words
 
 here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 	] parse  dup strlen 1+ allot  swap entry,  ;; [

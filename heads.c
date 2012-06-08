@@ -1,4 +1,10 @@
-/* -*- mode:c; c-syntactic-indentation: nil -*- */
+// mind -- a Forth interpreter
+// Copyright 2011-2012 Markus Redeker <cep@ibp.de>
+//
+// Published under the GNU General Public License version 2 or any
+// later version, at your choice. There is NO WARRANY, not at all. See
+// the file "copying" for details.
+
 
 /* E(label, name, flags); */
 
@@ -175,3 +181,7 @@ E(whitespace, "whitespace", 0)
 
 // Others
 E(dotparen, ".(", 0)
+
+// Local Variables:
+// c-syntactic-indentation: nil
+// End:
