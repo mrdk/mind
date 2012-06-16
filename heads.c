@@ -39,6 +39,10 @@ E(parse, "parse", 0)
 E(backslash, "\\", IMMEDIATE)
 E(paren, "(", IMMEDIATE)
 
+// Command line parameters
+E(start_command, "start-command", 0)
+E(interactive_mode, "interactive-mode", 0)
+
 // Text streams
 E(to_forward, ">forward", 0)
 E(to_current_fetch, ">current@", 0)

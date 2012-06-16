@@ -13,6 +13,10 @@
     This will make it possible to interface to C functions in a
     machine-independent and efficient way: It will always be possible
     to store an int, a char or any pointer e.g. on the stack.
+*** The core of the program should rely only on ANSI C
+    Exception:
+    - getopt(), which is POSIX. (It may later be replaced by Forth
+      code.)
 *** We assume that signed integers are always in two's complement
     This choice has influence on the Forth code: it means that we need
     only one kind of addition and subtraction; only multiplication and

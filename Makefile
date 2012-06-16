@@ -1,3 +1,4 @@
+CC=gcc
 CFLAGS=-Wall -std=gnu99 -O3 -fno-strict-aliasing -fno-gcse
 
 all: mind
@@ -8,7 +9,7 @@ mind.s: mind.c heads.c types.h
 	$(CC) -S $(CFLAGS) -fverbose-asm $<
 
 test: mind
-	@./mind
+	@./mind -e '.( Finished.) cr'
 
 stats:
 	@wc *.mind *.c Makefile *.org

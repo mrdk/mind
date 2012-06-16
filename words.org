@@ -102,6 +102,29 @@
 ***** ( 							  :immediate:
       Start a comment that reaches to the next ")" symbol or to the
       end of the page. Note that brackets are not nested.
+*** Command Line Parameters
+    "mind" has the following command line parameters:
+
+    | Parameter | Effect                                   |
+    |-----------+------------------------------------------|
+    | -e cmd    | Execute "cmd" and finish.                |
+    | -x cmd    | Execute "cmd" and start interactive mode |
+    | -h        | Print help text.                         |
+    
+    The parameters set the following Forth variables:
+***** start-command	( -- addr )
+      Variable containing the address of a string that is set by the
+      command options "-e" and "-x"; otherwise its value is 0.
+
+      If the value of `start-command` is nonzero, then it contains a
+      string that is executed after the file "start.mind" is read and
+      before the system switches to interactive mode (if it does).
+***** interactive-mode	( -- addr )
+      Variable containing a flag that is set to `false` by the command
+      line options "-e". By default its value is `true`.
+
+      If the value of `interactive-mode` is `true`, then "mind"
+      switches to an interactive mode after startup.
 *** Text streams
     Text streams are an abstraction for the input of program text -
     both from a file and from strings stored in memory.
@@ -118,7 +141,7 @@
 ******* >eos		( 'textstream -- addr )
       	The TOS contains the address of a textstream structure: compute
       	the address of its `eos` routine. The routine has the signature
-      	( stream -- bool ).	
+      	( stream -- bool ).
 ******* >#eos		( 'textstream -- addr )
       	The TOS contains the address of a textstream structure: compute the
       	address of its `eos` field. The field is one cell wide and
@@ -146,7 +169,7 @@
       	The TOS contains the address of a filestream structure:
       	compute the address of its `current` field. The field is one
       	cell wide and contains the last character read from the file
-      	or the "end of file" constant. 
+      	or the "end of file" constant.
 ******* /filestream	( -- n )
       	Number of bytes in a file stream structure.
 ******* file-forward	( stream -- )
@@ -166,7 +189,7 @@
       onto the stack.
 ***** eos		( -- flag )
       Test whether the end of the current stream is reached.
-***** #eos		( -- inchar)
+***** #eos		( -- inchar )
       The "end of stream" constant for the current stream.
 ***** line#		( -- addr )
       Address of the current line number in the current stream. The

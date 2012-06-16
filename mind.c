@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "types.h"
 
@@ -147,6 +148,11 @@ static void init_sys(entry_t dict[])
     sys.instream = (cell)&sys.inf.stream;
 }
 
+static struct {			// Program arguments:
+    cell command;		// (char*) command parameter
+    cell interactive;		// flag: start the interactive mode
+} args;
+
 /* ---------------------------------------------------------------------- */
 /* Stack manipulation */
 
@@ -190,7 +196,7 @@ static cell aligned(cell addr, cell align)
 
 /* ---------------------------------------------------------------------- */
 
-int main(int argc, char *argv[])
+void mind()
 {
     cell *ip;			/* Instruction Pointer */
     label_t *w;			/* Word Pointer */
@@ -222,7 +228,7 @@ abort:
 tick_abort: FUNC0(&sys.tick_abort);
 
 bye:
-    return 0;
+    return;
 
 // ---------------------------------------------------------------------------
 // Inner interpreter
@@ -321,7 +327,7 @@ parse_to: // : parse-to ( addr string -- )
 	 C(zbranch), (cell)(start + 1), C(rdrop),
 	 C(zero), C(swap), C(cstore),
          C(eos), C(if_semi), C(forward));
-    
+
 skip_whitespace: // : skip-whitespace ( -- )
 	         //   BEGIN  whitespace current@ strchr 0= if;  forward AGAIN ;
     CODE(C(whitespace), C(current_fetch), C(strchr), C(zero_equal),
@@ -338,6 +344,12 @@ backslash: // : \   BEGIN current@ forward  #eol = if;  eos UNTIL ; immediate
 paren: // : (   BEGIN current@ forward  [char] ) = if;  eos UNTIL ; immediate
     CODE(C(current_fetch), C(forward), C(lit), ')', C(equal), C(if_semi),
 	 C(eos), C(zbranch), (cell)start);
+
+// ---------------------------------------------------------------------------
+// Command line parameters
+
+start_command:    FUNC0(&args.command);
+interactive_mode: FUNC0(&args.interactive);
 
 // ---------------------------------------------------------------------------
 // Text streams
@@ -651,4 +663,40 @@ whitespace: FUNC0("\n\t ");
 
 dotparen: // : .(   here " )" parse-to  here puts ;
     CODE(C(here), C(lit), (cell)")", C(parse_to), C(here), C(puts));
+}
+
+// ---------------------------------------------------------------------------
+// Main program
+
+int main(int argc, char *argv[])
+{
+    int opt;
+
+    // Default: start in interactive mode
+    args.command = 0;
+    args.interactive = TRUE;
+
+    while ((opt = getopt(argc, argv, "he:x:")) != -1) {
+	switch (opt) {
+	case 'h':
+	    printf("Usage: %s [-e cmd | -x cmd | -h ]\n", argv[0]);
+	    printf("Options and arguments:\n");
+	    printf("-e cmd: Execute cmd and then stop\n");
+	    printf("-x cmd: Execute cmd, then start command prompt.\n");
+	    printf("-h    : Print this help text\n");
+	    return 0;
+	case 'e':
+	    args.command = (cell)optarg;
+	    args.interactive = FALSE;
+	    break;
+	case 'x':
+	    args.command = (cell)optarg;
+	    args.interactive = TRUE;
+	    break;
+	default:
+	    return -1;
+	}
+    }
+
+    mind();
 }
