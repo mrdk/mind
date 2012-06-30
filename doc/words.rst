@@ -90,20 +90,20 @@ Inner Interpreter
 
       End the execution of the current word.
 
-      - Source :: retroforth
+      .. source:: retroforth
 
 .. word:: if;		( n -- )
 
       Leave the execution of the current word if the TOS is nonzero.
 
-      - Source :: retroforth
+      .. source:: retroforth
 
 .. word:: 0; 		( 0 -- | n -- n )
 
       If the TOS is zero, drop it and end the execution of the current
       word.
 
-      - Source :: retroforth
+      .. source:: retroforth
 
 .. word:: execute		( addr -- )
 
@@ -457,13 +457,13 @@ Return stack
 
       Move the TOS to the second position of the return stack.
 
-      - Source :: Reva
+      .. source:: Reva
 
 .. word:: rr>		( -- n )
 
       Move the second entry of the return stack to the TOS.
 
-      - Source :: Reva
+      .. source:: Reva
 
 .. word:: r@		( -- n )
 
@@ -736,7 +736,7 @@ Strings
 .. word:: bl		( -- char )
       Code for the "blank" character.
 
-      - Source :: Forth 83
+      .. source:: Forth 83
 
 .. word:: #eol		( -- char )
 
@@ -794,7 +794,7 @@ Input/Output
 
       The return value is the number of bytes actually read.
 
-      - Source :: Reva, ANSI. Modified for zero-terminated strings.
+      .. source:: Reva, ANSI. Modified for zero-terminated strings.
 
 .. word:: .(
 
