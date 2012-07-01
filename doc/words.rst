@@ -192,22 +192,25 @@ Command Line Parameters
 
     "mind" has the following command line parameters:
 
-    +-----------+------------------------------------------+
-    | Parameter | Effect                                   |
-    +===========+==========================================+
-    | -e cmd    | Execute "cmd" and finish.                |
-    +-----------+------------------------------------------+
-    | -x cmd    | Execute "cmd" and start interactive mode |
-    +-----------+------------------------------------------+
-    | -h        | Print help text.                         |
-    +-----------+------------------------------------------+
+    .. option:: -e <cmd>
+
+       Execute <cmd> and finish.
         
+    .. option:: -x <cmd>
+
+       Execute <cmd> and start interactive mode.
+
+    .. option:: -h
+
+       Print help text.
+
     The parameters set the following Forth variables:
 
 .. word:: start-command	( -- addr )
 
       Variable containing the address of a string that is set by the
-      command options "-e" and "-x"; otherwise its value is 0.
+      command options :option:`-e` and :option:`-x`; otherwise its
+      value is 0.
 
       If the value of :word:`start-command` is nonzero, then it
       contains a string that is executed after the file "start.mind"
@@ -217,7 +220,8 @@ Command Line Parameters
 .. word:: interactive-mode	( -- addr )
 
       Variable containing a flag that is set to :word:`false` by the
-      command line options "-e". By default its value is :word:`true`.
+      command line options :option:`-e`. By default its value is
+      :word:`true`.
 
       If the value of :word:`interactive-mode` is :word:`true`, then
       "mind" switches to an interactive mode after startup.
