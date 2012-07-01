@@ -67,7 +67,7 @@ Starting and Ending
 .. word:: abort
 
       Stop the interpretation of the currently read text stream and
-      return to the interactive mode by executing `'abort`.
+      return to the interactive mode by executing :word:`'abort`.
 
 .. word:: 'abort		( -- addr )
 
@@ -117,30 +117,30 @@ Outer Interpreter
 .. word:: (interpret)	( addr -- )
 
       Search the string at *addr* in the dictionary and interpret or
-      compile it, depending on the value of `state`.
+      compile it, depending on the value of :word:`state`.
 
 .. word:: interpret
 
       Read one word from the input and execute or compile it,
-      depending on the the value of `state`.
+      depending on the the value of :word:`state`.
 
 .. word:: word?		( -- addr )
 
       Contains a word that is executed when a string that cannot be
-      found in the dictionary by `(interpret)`. At system startup, its
-      value is `notfound`.
+      found in the dictionary by :word:`(interpret)`. At system
+      start, its value is :word:`notfound`.
 
-      The Forth word stored in `word` has the signature `--`; it
-      expects the searched string at `here`.
+      The Forth word stored in :word:`word` has the signature `--`; it
+      expects the searched string at :word:`here`.
 
 .. word:: notfound
 
       This word is called by default if a word is not found in the
       dictionary. It prints an error message and closes the input
       file. The word that was searched for is expected as a string at
-      `here`.
+      :word:`here`.
 
-      This word is the value of `word?` at startup.
+      This word is the value of :word:`word?` at startup.
 
 .. word:: parse-to		( addr str -- )
 
@@ -192,22 +192,23 @@ Command Line Parameters
       Variable containing the address of a string that is set by the
       command options "-e" and "-x"; otherwise its value is 0.
 
-      If the value of `start-command` is nonzero, then it contains a
-      string that is executed after the file "start.mind" is read and
-      before the system switches to interactive mode (if it does).
+      If the value of :word:`start-command` is nonzero, then it
+      contains a string that is executed after the file "start.mind"
+      is read and before the system switches to interactive mode (if
+      it does).
 
 .. word:: interactive-mode	( -- addr )
 
-      Variable containing a flag that is set to `false` by the command
-      line options "-e". By default its value is `true`.
+      Variable containing a flag that is set to :word:`false` by the
+      command line options "-e". By default its value is :word:`true`.
 
-      If the value of `interactive-mode` is `true`, then "mind"
-      switches to an interactive mode after startup.
+      If the value of :word:`interactive-mode` is :word:`true`, then
+      "mind" switches to an interactive mode after startup.
 
 Text streams
 ------------
 
-    Text streams are an abstraction for the input of program text -
+    Text streams are an abstraction for the input of program text --
     both from a file and from strings stored in memory.
 
 Text streams
@@ -218,35 +219,38 @@ Text streams
 .. word:: >forward	( 'textstream -- addr )
 
       	The TOS contains the address of a textstream structure:
-      	compute the address of its `forward` routine. The routine has
-      	the signature ( stream -- ).
+      	compute the address of its :word:`forward` routine. The
+      	routine has the signature ( stream -- ).
 
 .. word:: >current@	( 'textstream -- addr )
 
       	The TOS contains the address of a textstream structure:
-      	compute the address of its `current@` routine. The routine has
-      	the signature ( stream -- char ).
+      	compute the address of its :word:`current@` routine. The
+      	routine has the signature ( stream -- char ).
 
 .. word:: >eos		( 'textstream -- addr )
 
-      	The TOS contains the address of a textstream structure: compute
-      	the address of its `eos` routine. The routine has the signature
-      	( stream -- bool ).
+      	The TOS contains the address of a textstream structure:
+      	compute the address of its :word:`eos` routine. The routine
+      	has the signature ( stream -- bool ).
 
 .. word:: >#eos		( 'textstream -- addr )
 
-      	The TOS contains the address of a textstream structure: compute the
-      	address of its `eos` field. The field is one cell wide and
-      	contains the "end of stream" constant of this textstream.
+      	The TOS contains the address of a textstream structure:
+      	compute the address of its :word:`eos` field. The field is one
+      	cell wide and contains the "end of stream" constant of this
+      	textstream.
 
-.. word:: >line#		( 'textstream -- addr )
+.. word:: >line#	( 'textstream -- addr )
 
-      	The TOS contains the address of a textstream structure: compute the
-      	address of its `line#` field. The field is one cell wide and
-      	contains the current line number of this textstream.
+      	The TOS contains the address of a textstream structure:
+      	compute the address of its :word:`line#` field. The field is
+      	one cell wide and contains the current line number of this
+      	textstream.
 
 .. word:: /textstream	( -- n )
-      	Number of bytes in a text stream structure.
+
+         	Number of bytes in a text stream structure.
 
 .. word:: 'instream	( -- addr )
 
@@ -259,21 +263,21 @@ File streams
       reading from a file (or any other stream in a Unix system).
 
       A file stream contains all the fields of a text stream, plus
-      `intext-file`.
+      :word:`intext-file`.
 
 .. word:: >intext-file	( 'filestream -- addr )
 
       	The TOS contains the address of a filestream structure:
-      	compute the address of its `file` field. The field is one cell
-      	wide and contains the underlying C file pointer (FILE*) for
-      	this stream.
+      	compute the address of its :word:`file` field. The field is
+      	one cell wide and contains the underlying C file pointer
+      	(FILE*) for this stream.
 
 .. word:: >current	( 'filestream -- addr )
 
       	The TOS contains the address of a filestream structure:
-      	compute the address of its `current` field. The field is one
-      	cell wide and contains the last character read from the file
-      	or the "end of file" constant.
+      	compute the address of its `current` field. The field is
+      	one cell wide and contains the last character read from the
+      	file or the "end of file" constant.
 
 .. word:: /filestream	( -- n )
 
@@ -282,8 +286,8 @@ File streams
 .. word:: file-forward	( stream -- )
 
       	Read one character from a file stream and store it in the
-      	`current` field. `line#` is updated if the character is an
-      	"end of line" symbol.
+      	:word:`current` field. :word:`line#` is updated if the
+      	character is an "end of line" symbol.
 
 .. word:: file-current@	( stream -- char )
 
@@ -296,8 +300,8 @@ File streams
 
 .. word:: forward		( stream -- )
 
-      Read one character from the current stream. `line#` is updated
-      if the character is an "end of line" symbol.
+      Read one character from the current stream. :word:`line#` is
+      updated if the character is an "end of line" symbol.
 
 .. word:: current@		( stream -- char )
 
@@ -337,8 +341,8 @@ Compilation
 .. word:: skip-whitespace
 
       Read from the current stream until the character at the current
-      position is no longer an element of `whitespace`. If this is
-      already the case, then do nothing.
+      position is no longer an element of :word:`whitespace`. If this
+      is already the case, then do nothing.
 
 .. word:: state		( -- addr )
 
@@ -366,8 +370,8 @@ Dictionary
 
 .. word:: align
 
-      Increment (if necessary) the content of `dp` so that it points
-      to a valid address for a cell.
+      Increment (if necessary) the content of :word:`dp` so that it
+      points to a valid address for a cell.
 
 .. word:: allot		( n -- )
 
@@ -501,7 +505,8 @@ Stack
 
 .. word:: sp@		( -- addr )
 
-      Get the value of the stack pointer. `sp@ @` is equivalent to `dup`.
+      Get the value of the stack pointer. `sp@ @` is equivalent to
+      :word:`dup`.
 
 .. word:: sp!		( addr -- )
       Make *addr* the new value of the stack pointer.
@@ -701,7 +706,7 @@ Memory
 .. word:: free		( addr -- )
 
       Free the memory space at *addr*, which must have been allocated
-      by `malloc`.
+      by :word:`malloc`.
 
 .. word:: cells		( n1 -- n2 )
 
