@@ -4,15 +4,32 @@ Vocabulary
 Abbreviations in stack diagrams
 -------------------------------
 
-  - addr :: an address in memory.
-  - char :: a text character: a number that fits into one byte.
-  - inchar :: an "input characte": either a *char* or the constant `#eof`.
-  - flag :: a boolean flag, either 0 or -1.
-  - str :: the start address of an zero-terminated string
-  - cfa :: "Code Field Address": The address of a word that can be
-           executed.
-  - n :: a number, or sometimes an arbitrary value
-  - a, b, c :: arbitray values.
+   *addr*
+        an address in memory.
+
+   *char*
+        a text character: a number that fits into one byte.
+
+   *inchar*
+        an "input characte": either a *char* or the constant
+        :word:`#eof`.
+
+   *flag*
+	a boolean flag, either 0 or -1.
+
+   *str*
+	the start address of an zero-terminated string
+
+   *cfa*
+	"Code Field Address": The address of a word that can be
+	executed.
+
+   *n*
+	a number, or sometimes an arbitrary value
+
+   *a*, *b*, *c*
+	arbitray values.
+
 
 Glossary
 --------
@@ -509,6 +526,7 @@ Stack
       :word:`dup`.
 
 .. word:: sp!		( addr -- )
+
       Make *addr* the new value of the stack pointer.
 
 .. word:: s0		( -- addr )
