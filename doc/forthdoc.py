@@ -71,7 +71,7 @@ def forth_heading(c):
     if c in string.letters or c in string.digits:
         return c.upper()
     else:
-        return 'Symbols'
+        return u'Symbols'
 
 class ForthWord(object):
 
