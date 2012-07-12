@@ -3,6 +3,7 @@
 import re
 import string
 import itertools
+import base64
 
 from docutils import nodes
 from sphinx import addnodes
@@ -76,12 +77,14 @@ class ForthWord(object):
 
     def __init__(self, name, docname):
         self.name = name
-        self.fullname = 'word-' + name
         self.docname = docname
+
+        # A somewhat brutal method to enforce a valid HTML anchor for
+        # every Forth word is to encode it in base 64.
+        self.fullname = 'word-' + base64.b64encode(name)
 
         self.sortname = forth_sortname(name)
         self.heading = forth_heading(self.sortname[1][0])
-        # self.heading = self.sortname[0][0].upper()
 
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.name)
@@ -165,8 +168,4 @@ class ForthDomain(Domain):
  
 def setup(app):
     # *app* is a Sphinx object in sphinx/application.py
-
-    app.add_object_type('word', 'word', 'single: %s', parse_node=parse_worddef)
-    app.add_directive('source', SourceDirective)
-
     app.add_domain(ForthDomain)
