@@ -27,33 +27,6 @@ def extras(i):
     return [nodes.raw('', tex_extra[i], format='latex'),
             nodes.raw('', html_extra[i], format='html')]
 
-def parse_worddef(env, sig, signode):
-    match = re.match(r'(\S+)\s+'
-                     r'(\(.*\)|)\s*'
-                     r'([^"]*?)\s*'
-                     r'(".*"|)\s*'
-                     r'$', sig + ' ')
-    if not match:
-        raise ValueError
-
-    name, stack, flags, say = match.groups()
-
-    signode += extras(0)
-    signode += addnodes.desc_name(name, name)
-    signode += extras(1)
-    for s in stack.split():
-        if s in ['(', '--', ')'] or s.endswith(':'):
-            signode += nodes.inline(s, s)
-        else:
-            signode += nodes.emphasis(s, s)
-        signode += nodes.inline(' ', ' ')
-    signode += extras(2)
-    signode += nodes.inline(flags, flags)
-    signode += nodes.inline(' ', ' ')
-    signode += nodes.emphasis(say, say)
-    signode += extras(3)
-    return name
-
 def forth_sortname(name):
     match = re.match('([^a-zA-Z0-9]+)([a-zA-Z0-9].*)$', name)
     if match:
@@ -75,9 +48,10 @@ def forth_heading(c):
 
 class ForthWord(object):
 
-    def __init__(self, name, docname):
+    def __init__(self, name, docname, stack):
         self.name = name
         self.docname = docname
+        self.stack = stack
 
         # A somewhat brutal method to enforce a valid HTML anchor for
         # every Forth word is to encode it in base 64.
@@ -95,10 +69,35 @@ class ForthWord(object):
 class WordDirective(ObjectDescription):
 
     def handle_signature(self, sig, signode):
-        return parse_worddef(self.env, sig, signode)
+        match = re.match(r'(\S+)\s+'
+                         r'(\(.*\)|)\s*'
+                         r'([^"]*?)\s*'
+                         r'(".*"|)\s*'
+                         r'$', sig + ' ')
+        if not match:
+            raise ValueError
+
+        name, stack, flags, say = match.groups()
+        self.stack = stack
+
+        signode += extras(0)
+        signode += addnodes.desc_name(name, name)
+        signode += extras(1)
+        for s in stack.split():
+            if s in ['(', '--', ')'] or s.endswith(':'):
+                signode += nodes.inline(s, s)
+            else:
+                signode += nodes.emphasis(s, s)
+            signode += nodes.inline(' ', ' ')
+        signode += extras(2)
+        signode += nodes.inline(flags, flags)
+        signode += nodes.inline(' ', ' ')
+        signode += nodes.emphasis(say, say)
+        signode += extras(3)
+        return name
 
     def add_target_and_index(self, name_cls, sig, signode):
-        word = ForthWord(name_cls, self.env.docname)
+        word = ForthWord(name_cls, self.env.docname, self.stack)
 
         signode['ids'].append(word.fullname)
         self.env.domaindata['forth']['words'][name_cls] = word
@@ -133,7 +132,8 @@ class ForthIndex(Index):
         for head, g in itertools.groupby(words, lambda w: w.heading):
             entries = []
             for w in g:
-                entries += [(w.name, 0, w.docname, w.fullname, '', '', '')]
+                entries += [(w.name, 0, w.docname, w.fullname,
+                             '', '', w.stack)]
             content += [(head, entries)]
         return (content, True)
 
