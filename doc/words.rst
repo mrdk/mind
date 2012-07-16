@@ -53,9 +53,9 @@ Glossary
         Top of Stack.
 
    word
-        (a) a Forth procedure,
+        #. a Forth procedure,
 
-	(b) a sequence of non-space characters surrounded by spaces.
+	#. a sequence of non-space characters surrounded by spaces.
 
    variable
         A memory region to store the value of one cell (unless another
@@ -65,10 +65,10 @@ Glossary
 Tags
 ----
 
- - immediate
+immediate
 
-    The word is always executed, even during compilation
-    It has the "immediate" flag set in its header.
+    The word is always executed, even during compilation. It has the
+    "immediate" flag set in its header.
 
 Kernel words
 ============
@@ -86,7 +86,7 @@ Starting and Ending
       Stop the interpretation of the currently read text stream and
       return to the interactive mode by executing :word:`'abort`.
 
-.. word:: 'abort		( -- addr )
+.. word:: 'abort	( -- addr )
 
       Variable that contains a word that does is called after an error
       has occured; it is expected to reset the parameter stack and the
@@ -122,7 +122,7 @@ Inner Interpreter
 
       .. source:: retroforth
 
-.. word:: execute		( addr -- )
+.. word:: execute	( addr -- )
 
       Execute the word at addr.
 
@@ -147,8 +147,8 @@ Outer Interpreter
       found in the dictionary by :word:`(interpret)`. At system
       start, its value is :word:`notfound`.
 
-      The Forth word stored in :word:`word` has the signature `--`; it
-      expects the searched string at :word:`here`.
+      The Forth word stored in :word:`word?` has the signature `( --
+      )`; it expects the searched string at :word:`here`.
 
 .. word:: notfound
 
@@ -159,7 +159,7 @@ Outer Interpreter
 
       This word is the value of :word:`word?` at startup.
 
-.. word:: parse-to		( addr str -- )
+.. word:: parse-to	( addr str -- )
 
       Read a character sequence from the input stream and store it as
       a zero-terminated string at *addr*. The character sequence
@@ -178,19 +178,20 @@ Outer Interpreter
       Currently the parsed word is located directly at the end of the
       dictionary.
 
-.. word:: \\ 							  :immediate:
+.. word:: \\ 		immediate
 
       Start a comment that reaches to the end of the line.
 
-.. word:: ( 							  :immediate:
+.. word:: ( 		immediate
 
-      Start a comment that reaches to the next ")" symbol or to the
-      end of the page. Note that brackets are not nested.
+   Start a comment that reaches to the next ``)`` symbol or to the end
+   of the page. Note that brackets are not nested.
+
 
 Command Line Parameters
 -----------------------
 
-    "mind" has the following command line parameters:
+:program:`mind` has the following command line parameters:
 
     .. option:: -e <cmd>
 
@@ -213,9 +214,9 @@ Command Line Parameters
       value is 0.
 
       If the value of :word:`start-command` is nonzero, then it
-      contains a string that is executed after the file "start.mind"
-      is read and before the system switches to interactive mode (if
-      it does).
+      contains a string that is executed after the file
+      :file:`start.mind` is read and before the system switches to
+      interactive mode (if it does).
 
 .. word:: interactive-mode	( -- addr )
 
@@ -224,36 +225,38 @@ Command Line Parameters
       :word:`true`.
 
       If the value of :word:`interactive-mode` is :word:`true`, then
-      "mind" switches to an interactive mode after startup.
+      :program:`mind` switches to an interactive mode after startup.
+
 
 Text streams
 ------------
 
-    Text streams are an abstraction for the input of program text --
-    both from a file and from strings stored in memory.
+Text streams are an abstraction for the input of program text -- both
+from a file and from strings stored in memory.
+
 
 Text streams
 ^^^^^^^^^^^^
 
-      These are the basic data structures for reading program text.
+These are the basic data structures for reading program text.
 
 .. word:: >forward	( 'textstream -- addr )
 
-      	The TOS contains the address of a textstream structure:
-      	compute the address of its :word:`forward` routine. The
-      	routine has the signature ( stream -- ).
+   The TOS contains the address of a textstream structure: compute the
+   address of its :word:`forward` routine. The routine has the
+   signature ( *stream* -- ).
 
 .. word:: >current@	( 'textstream -- addr )
 
-      	The TOS contains the address of a textstream structure:
-      	compute the address of its :word:`current@` routine. The
-      	routine has the signature ( stream -- char ).
+   The TOS contains the address of a textstream structure: compute the
+   address of its :word:`current@` routine. The routine has the
+   signature ( *stream* -- *char* ).
 
 .. word:: >eos		( 'textstream -- addr )
 
-      	The TOS contains the address of a textstream structure:
-      	compute the address of its :word:`eos` routine. The routine
-      	has the signature ( stream -- bool ).
+   The TOS contains the address of a textstream structure: compute the
+   address of its :word:`eos` routine. The routine has the signature (
+   *stream* -- *bool* ).
 
 .. word:: >#eos		( 'textstream -- addr )
 
@@ -280,25 +283,25 @@ Text streams
 File streams
 ^^^^^^^^^^^^
 
-      A file stream is an extension of the text stream interface for
-      reading from a file (or any other stream in a Unix system).
+A file stream is an extension of the text stream interface for reading
+from a file (or any other stream in a Unix system).
 
-      A file stream contains all the fields of a text stream, plus
-      :word:`intext-file`.
+A file stream contains all the fields of a text stream, plus
+:word:`>intext-file`.
 
 .. word:: >intext-file	( 'filestream -- addr )
 
-      	The TOS contains the address of a filestream structure:
-      	compute the address of its :word:`file` field. The field is
-      	one cell wide and contains the underlying C file pointer
-      	(FILE*) for this stream.
+   The TOS contains the address of a filestream structure: compute the
+   address of its :word:`>file` field. The field is one cell wide and
+   contains the underlying C file pointer :c:type:`FILE*` for this
+   stream.
 
 .. word:: >current	( 'filestream -- addr )
 
-      	The TOS contains the address of a filestream structure:
-      	compute the address of its `current` field. The field is
-      	one cell wide and contains the last character read from the
-      	file or the "end of file" constant.
+   The TOS contains the address of a filestream structure: compute the
+   address of its :word:`>current` field. This field is one cell wide
+   and contains the last character read from the file or the "end of
+   file" constant.
 
 .. word:: /filestream	( -- n )
 
@@ -306,9 +309,9 @@ File streams
 
 .. word:: file-forward	( stream -- )
 
-      	Read one character from a file stream and store it in the
-      	:word:`current` field. :word:`line#` is updated if the
-      	character is an "end of line" symbol.
+   Read one character from a file stream and store it in the
+   :word:`>current` field. :word:`line#` is updated if the character
+   is an "end of line" symbol.
 
 .. word:: file-current@	( stream -- char )
 
@@ -319,12 +322,12 @@ File streams
 
       	Test whether the end of the file stream is reached.
 
-.. word:: forward		( stream -- )
+.. word:: forward	( stream -- )
 
       Read one character from the current stream. :word:`line#` is
       updated if the character is an "end of line" symbol.
 
-.. word:: current@		( stream -- char )
+.. word:: current@	( stream -- char )
 
       Put the character at the current position of the current stream
       onto the stack.
@@ -349,7 +352,7 @@ File streams
 Compilation
 -----------
 
-.. word:: [ 							  :immediate:
+.. word:: [ 		immediate
 
       Switch the interpreter to interpreting mode. All words are now
       executed.
@@ -376,7 +379,7 @@ Compilation
       Unconditional jump. The cell following this word contains the
       address of the jump target.
 
-.. word:: 0branch		( n -- )
+.. word:: 0branch	( n -- )
 
       Conditional jump. If *n* is zero, jump to the address in the
       next cell. If *n* is nonzero, continue with the execution of the
@@ -385,6 +388,7 @@ Compilation
 .. word:: lit		( -- n )
 
       Push the content of the cell after this word onto the stack.
+
 
 Dictionary
 ----------
@@ -396,10 +400,10 @@ Dictionary
 
 .. word:: allot		( n -- )
 
-      Allocate n bytes at the end of the dictionary. (Afterwards, it
-      may be no longer aligned.
+   Allocate *n* bytes at the end of the dictionary. (Afterwards it
+   may be no longer aligned.
 
-.. word:: ,			( n -- )
+.. word:: ,		( n -- )
 
       Align the dictionary and put the cell n at its end.
 
@@ -409,16 +413,16 @@ Dictionary
 
 .. word:: ,"
 
-      Read until the next `"` and put the resulting string at the end
-      of the dictionary. The space character immediately after the
-      word does not belong to the string.
+   Read until the next ``"`` char and put the resulting string at the
+   end of the dictionary. The space character immediately after the
+   word does not belong to the string.
 
-.. word:: entry,		( str addr -- )
+.. word:: entry,	( str addr -- )
 
-      Put a new entry at the end of the end of the dictionary. *str*
-      is its name and addr is stored in its CFA field.
+   Put a new entry at the end of the end of the dictionary. *str* is
+   its name and *addr* is stored in its CFA field.
 
-.. word:: latest		( -- addr )
+.. word:: latest	( -- addr )
 
       Variable for the address of the latest dictionary entry.
 
@@ -435,7 +439,7 @@ Dictionary
       Read a word from the input and return its CFA. If it is not
       found, return 0.
 
-.. word:: (find)		( addr -- cfa )
+.. word:: (find)	( addr -- cfa )
 
       Search the string at addr in the dictionary and return its CFA.
       If it is not found, return 0.
@@ -526,8 +530,8 @@ Stack
 
 .. word:: sp@		( -- addr )
 
-      Get the value of the stack pointer. `sp@ @` is equivalent to
-      :word:`dup`.
+   Get the value of the stack pointer. ``sp@ @`` is equivalent to
+   :word:`dup`.
 
 .. word:: sp!		( addr -- )
 
@@ -541,17 +545,17 @@ Stack
 Integer Arithmetic
 ------------------
 
-.. word:: 0			( -- 0 )
+.. word:: 0		( -- 0 )
 
       This and other numbers are defined as Forth words to shorten the
       compiled code and to make the bootstrapping of the language
       easier.
 
-.. word:: 1			( -- 1 )
+.. word:: 1		( -- 1 )
 
 .. word:: -1		( -- -1 )
 
-.. word:: 2			( -- 2 )
+.. word:: 2		( -- 2 )
 
 .. word:: 1+		( n -- n' )
 
@@ -569,51 +573,52 @@ Integer Arithmetic
 
       Division by 2, as signed integer.
 
-.. word:: -			( n1 n2 -- n3 )
+.. word:: -		( n1 n2 -- n3 )
 
-      Compute the difference n1 - n2.
+   Compute the difference *n1* - *n2*.
 
-.. word:: +			( n1 n2 -- n3 )
+.. word:: +		( n1 n2 -- n3 )
 
-      Compute the sum of n1 and n2.
+   Compute the sum of *n1* and *n2*.
 
-.. word:: *			( n1 n2 -- n3 )
+.. word:: *		( n1 n2 -- n3 )
 
-      Compute the product of n1 and n2
+   Compute the product of *n1* and *n2*
 
-.. word:: /			( n1 n2 -- n3 )
+.. word:: /		( n1 n2 -- n3 )
 
-      Compute the quotient n1 / n2 as integer.
+   Compute the quotient *n1* / *n2* as integer.
 
-      Currently this is C arithmetics, with rounding towards 0. (It
-      may be changed later.)
+   Currently this is C arithmetics, with rounding towards 0. (It may
+   be changed later.)
 
 .. word:: mod		( n1 n2 -- n3 )
 
-      Compute n1 mod n2
+   Compute *n1* modulo *n2*
 
 .. word:: /mod		( n1 n2 -- quot rem )
 
-      *quot* is n1 / n2 and *rem* is n1 mod n2.
+   *quot* is *n1* / *n2* and *rem* is *n1* modulo *n2*.
 
 .. word:: u*		( n1 n2 -- n3 )
 
-      Product of n1 and n2 as unsigned integers.
+   Product of *n1* and *n2* as unsigned integers.
 
 .. word:: u/		( n1 n2 -- n3 )
 
-      Quotient of n1 and n2 as unsigned integer.
+   Quotient of n1 and n2 as unsigned integers.
 
 .. word:: abs		( n -- u )
 
-      Compute the absolute value
+   Compute the absolute value of the TOS.
+
 
 Binary Arithmetic
 -----------------
 
 .. word:: false		( -- flag )
 
-      Boolean flag for false,
+   Boolean flag for false.
 
 .. word:: true		( -- flag )
 
@@ -621,30 +626,31 @@ Binary Arithmetic
 
 .. word:: or		( n1 n2 -- n3 )
 
-      Bitwise "or" of n1 and n2.
+   Bitwise "or" of *n1* and *n2*.
 
 .. word:: and		( n1 n2 -- n3 )
 
-      Bitwise "and" of n1 and n2.
+   Bitwise "and" of *n1* and *n2*.
 
 .. word:: xor		( n1 n2 -- n3 )
 
-      Bitwise exclusive "or" of n1 and n2.
+   Bitwise exclusive "or" of *n1* and *n2*.
 
-.. word:: invert		( n1 -- n2 )
+.. word:: invert	( n1 -- n2 )
 
-      Bitwise nagation of the TOS.
+   Bitwise negation of the TOS.
+
 
 Comparisons
 -----------
 
-.. word:: =			( n1 n2 -- flag )
+.. word:: =		( n1 n2 -- flag )
 
-      Test whether n1 and n2 are equal.
+   Test whether *n1* and *n2* are equal.
 
 .. word:: <>		( n1 n2 -- flag )
 
-      Test whether n1 and n2 are unequal.
+   Test whether *n1* and *n2* are different.
 
 .. word:: 0=		( n -- flag )
 
@@ -659,48 +665,49 @@ Comparisons
 
       Test whether TOS > 0
 
-.. word:: <			( n1 n2 -- flag )
+.. word:: <		( n1 n2 -- flag )
 
-      Test whether n1 < n2.
+   Test whether *n1* < *n2*.
 
 .. word:: <=		( n1 n2 -- flag )
 
-      Test whether n1 <= n2.
+   Test whether *n1* <= *n2*.
 
-.. word:: >			( n1 n2 -- flag )
+.. word:: >		( n1 n2 -- flag )
 
-      Test whether n1 > n2.
+   Test whether *n1* > *n2*.
 
 .. word:: >=		( n1 n2 -- flag )
 
-      Test whether n1 >= n2.
+   Test whether *n1* >= *n2*.
 
 .. word:: u<		( n1 n2 -- flag )
 
-      Test whether n1 < n2 as unsigned integers.
+   Test whether *n1* < *n2* as unsigned integers.
 
 .. word:: u<=		( n1 n2 -- flag )
 
-      Test whether n1 <= n2 as unsigned integers.
+   Test whether *n1* <= *n2* as unsigned integers.
 
 .. word:: u>		( n1 n2 -- flag )
 
-      Test whether n1 > n2 as unsigned integers.
+   Test whether *n1* > *n2* as unsigned integers.
 
 .. word:: u>=		( n1 n2 -- flag )
 
-      Test whether n1 >= n2 as unsigned integers.
+   Test whether *n1* >= *n2* as unsigned integers.
 
 .. word:: within		( n n0 n1 -- flag )
 
-      True if n0 <= n <= n1. The sequence of integers is here viewed
-      as cyclic; the word works therefore with unsigned integers as
-      well as with signed ones.
+   True if *n0* <= *n* <= *n1*. The sequence of integers is here
+   viewed as cyclic; the word works therefore with unsigned integers
+   as well as with signed ones.
+
 
 Memory
 ------
 
-.. word:: @			( addr -- n )
+.. word:: @		( addr -- n )
 
       Fetch the cell at *addr*.
 
@@ -708,7 +715,7 @@ Memory
 
       Fetch the byte at *addr*.
 
-.. word:: !			( n addr -- )
+.. word:: !		( n addr -- )
 
       Store one cell at *addr*.
 
@@ -720,7 +727,7 @@ Memory
 
       Store one byte at *addr*.
 
-.. word:: malloc		( n -- addr )
+.. word:: malloc	( n -- addr )
 
       Allocate *n* bytes of memory and return its address. Return 0 if
       the allocation fails.
@@ -742,6 +749,7 @@ Memory
 
       Decrement the TOS by the size of one cell.
 
+
 Strings
 -------
 
@@ -761,6 +769,7 @@ Strings
       first occurrence. Othewise return 0.
 
 .. word:: bl		( -- char )
+
       Code for the "blank" character.
 
       .. source:: Forth 83
@@ -775,8 +784,9 @@ Strings
 
 .. word:: whitespace	( -- str )
 
-      Zero-terminated string that contains all the characters that are
-      viewed as whitespace by Mind.
+   Zero-terminated string that contains all the characters that are
+   viewed as whitespace by :program:`mind`.
+
 
 Input/Output
 ------------
@@ -797,18 +807,18 @@ Input/Output
 
 .. word:: gets		( addr n -- str )
 
-      An interface to the function `fgets()` from libc.
+   An interface to the function :c:func:`fgets()` from libc.
 
-      The word reads characters from standard input until a return
-      character is encountered or *n* - 1 characters are read. A
-      zero-terminated string with these characters is created at
-      *addr*. The string contains the terminating end-of-line
-      character, if one has been typed.
+   The word reads characters from standard input until a return
+   character is encountered or *n* - 1 characters are read. A
+   zero-terminated string with these characters is created at *addr*.
+   The string contains the terminating end-of-line character, if one
+   has been typed.
 
-      If no characters could be read from standard input because the
-      standard input is in an end-of-file state, the return value is
-      0, and nothing is written to the buffer at *addr*, not even a
-      terminating zero.
+   If no characters could be read from standard input because the
+   standard input is in an end-of-file state, the return value is 0,
+   and nothing is written to the buffer at *addr*, not even a
+   terminating zero.
 
 .. word:: accept		( addr n -- n' )
 
@@ -825,9 +835,8 @@ Input/Output
 
 .. word:: .(
 
-      Print the characters that follow this word in the input file to
-      the output, until the next ")". The closing bracket is not
-      printed.
+   Print the characters that follow this word in the input file to the
+   output, until the next ``)``. The closing bracket is not printed.
 
 .. word:: cr
 
