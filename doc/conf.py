@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'forthdoc'
+project = u'mind'
 copyright = u'2012, Markus Redeker'
 
 # The version info for the project you're documenting, acts as replacement for
