@@ -11,11 +11,6 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   design
    words
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
 
