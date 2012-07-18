@@ -9,24 +9,25 @@ C Code
 + Use gcc specific extensions only when necessary.
   Currently used:
 
-    - computed goto
-    - __alignof
+    - computed ``goto``
+    - :c:macro:`__alignof`
 
-+ A cell may contain both an int and a pointer
++ A cell may contain both an :c:type:`int` and a pointer
   
   The basic Forth data type, the cell, becomes the smallest integer
   type with at least as many bytes to store both an int or a void*.
 
   This will make it possible to interface to C functions in a
   machine-independent and efficient way: It will always be possible to
-  store an int, a char or any pointer e.g. on the stack.
+  store an :c:type:`int`, a :c:type:`char` or any pointer e.g. on the
+  stack.
 
 + The core of the program should rely only on ANSI C
 
   Exception:
 
-  - getopt(), which is POSIX. (It may later be replaced by Forth
-    code.)
+  - :c:func:`getopt()`, which is POSIX. (It may later be replaced by
+    Forth code.)
 
 + We assume that signed integers are always in two's complement
     
@@ -39,6 +40,7 @@ C Code
   complement, so this may be the future quasi-standard. (This includes
   some guessing, I didn't find yet explicit information in the
   internet. - mr)
+
 
 Forth vocabulary
 ----------------
