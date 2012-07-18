@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to mind's documentation!
-====================================
+================================
 
 Contents:
 
@@ -13,4 +13,4 @@ Contents:
 
    design
    words
-
+   glossary
