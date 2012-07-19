@@ -151,7 +151,7 @@ Outer Interpreter
 
       Start a comment that reaches to the end of the line.
 
-.. word:: ( 		immediate
+.. word:: ( 		immediate, "paren"
 
    Start a comment that reaches to the next ``)`` symbol or to the end
    of the page. Note that brackets are not nested.
@@ -321,12 +321,12 @@ A file stream contains all the fields of a text stream, plus
 Compilation
 -----------
 
-.. word:: [ 		immediate
+.. word:: [ 		immediate, "left-bracket"
 
       Switch the interpreter to interpreting mode. All words are now
       executed.
 
-.. word:: ]
+.. word:: ]             "right-bracket"
 
       Switch the interpreter to compiling mode. All words are now
       compiled, except for those that are immediate.
@@ -372,11 +372,11 @@ Dictionary
    Allocate *n* bytes at the end of the dictionary. (Afterwards it
    may be no longer aligned.
 
-.. word:: ,		( n -- )
+.. word:: ,		( n -- ) "comma"
 
       Align the dictionary and put the cell n at its end.
 
-.. word:: c,		( b -- )
+.. word:: c,		( b -- ) "c-comma"
 
       Put the byte b at the end of the dictionary.
 
@@ -443,11 +443,11 @@ Return stack
 
       Remove the top value of the return stack.
 
-.. word:: >r		( n -- )
+.. word:: >r		( n -- ) "to-r"
 
       Move the TOS to the top of the return stack.
 
-.. word:: r>		( -- n )
+.. word:: r>		( -- n ) "r-from"
 
       Move the top of the return stack to the TOS.
 
@@ -463,7 +463,7 @@ Return stack
 
       .. source:: Reva
 
-.. word:: r@		( -- n )
+.. word:: r@		( -- n ) "r-fetch"
 
       Copy the top of the return stack to the TOS.
 
@@ -479,13 +479,13 @@ Stack
 
 .. word:: nip		( a b -- b )
 
-.. word:: 2drop		( a b -- )
+.. word:: 2drop		( a b -- ) "two-drop"
 
-.. word:: ?dup		( 0 -- 0 | n -- n n )
+.. word:: ?dup		( 0 -- 0 | n -- n n ) "question-dupe"
 
       Duplicate the TOS only if it is nonzero
 
-.. word:: dup		( a -- a a )
+.. word:: dup		( a -- a a ) "dupe"
 
 .. word:: over		( a b -- a b a )
 
@@ -493,11 +493,11 @@ Stack
 
 .. word:: swap		( a b -- b a )
 
-.. word:: rot		( a b c -- b c a )
+.. word:: rot		( a b c -- b c a ) "rote"
 
 .. word:: -rot		( a b c -- c a b )
 
-.. word:: sp@		( -- addr )
+.. word:: sp@		( -- addr ) "s-p-fetch"
 
    Get the value of the stack pointer. ``sp@ @`` is equivalent to
    :word:`dup`.
@@ -526,19 +526,19 @@ Integer Arithmetic
 
 .. word:: 2		( -- 2 )
 
-.. word:: 1+		( n -- n' )
+.. word:: 1+		( n -- n' ) "one-plus"
 
       Add 1 to the TOS.
 
-.. word:: 1-		( n -- n' )
+.. word:: 1-		( n -- n' ) "one-minus"
 
       Subtract 1 from the TOS.
 
-.. word:: 2*		( n -- n' )
+.. word:: 2*		( n -- n' ) "two-times"
 
       Multiplication with 2, as signed integer.
 
-.. word:: 2/		( n -- n' )
+.. word:: 2/		( n -- n' ) "two-divide"
 
       Division by 2, as signed integer.
 
@@ -546,15 +546,15 @@ Integer Arithmetic
 
    Compute the difference *n1* - *n2*.
 
-.. word:: +		( n1 n2 -- n3 )
+.. word:: +		( n1 n2 -- n3 ) "plus"
 
    Compute the sum of *n1* and *n2*.
 
-.. word:: *		( n1 n2 -- n3 )
+.. word:: *		( n1 n2 -- n3 ) "times"
 
    Compute the product of *n1* and *n2*
 
-.. word:: /		( n1 n2 -- n3 )
+.. word:: /		( n1 n2 -- n3 ) "divide"
 
    Compute the quotient *n1* / *n2* as integer.
 
@@ -565,7 +565,7 @@ Integer Arithmetic
 
    Compute *n1* modulo *n2*
 
-.. word:: /mod		( n1 n2 -- quot rem )
+.. word:: /mod		( n1 n2 -- quot rem ) "divide-mod"
 
    *quot* is *n1* / *n2* and *rem* is *n1* modulo *n2*.
 
@@ -577,7 +577,7 @@ Integer Arithmetic
 
    Quotient of n1 and n2 as unsigned integers.
 
-.. word:: abs		( n -- u )
+.. word:: abs		( n -- u ) "absolute"
 
    Compute the absolute value of the TOS.
 
@@ -601,7 +601,7 @@ Binary Arithmetic
 
    Bitwise "and" of *n1* and *n2*.
 
-.. word:: xor		( n1 n2 -- n3 )
+.. word:: xor		( n1 n2 -- n3 ) "x-or"
 
    Bitwise exclusive "or" of *n1* and *n2*.
 
@@ -613,7 +613,7 @@ Binary Arithmetic
 Comparisons
 -----------
 
-.. word:: =		( n1 n2 -- flag )
+.. word:: =		( n1 n2 -- flag ) "equals"
 
    Test whether *n1* and *n2* are equal.
 
@@ -621,20 +621,20 @@ Comparisons
 
    Test whether *n1* and *n2* are different.
 
-.. word:: 0=		( n -- flag )
+.. word:: 0=		( n -- flag ) "zero-equals"
 
       Test whether the TOS is equal to 0. (This also inverts boolean
       flags.)
 
-.. word:: 0<		( n -- flag )
+.. word:: 0<		( n -- flag ) "zero-less"
 
       Test whether TOS < 0
 
-.. word:: 0>		( n -- flag )
+.. word:: 0>		( n -- flag ) "zero-greater"
 
       Test whether TOS > 0
 
-.. word:: <		( n1 n2 -- flag )
+.. word:: <		( n1 n2 -- flag ) "less-than"
 
    Test whether *n1* < *n2*.
 
@@ -642,7 +642,7 @@ Comparisons
 
    Test whether *n1* <= *n2*.
 
-.. word:: >		( n1 n2 -- flag )
+.. word:: >		( n1 n2 -- flag ) "greater-than"
 
    Test whether *n1* > *n2*.
 
@@ -650,7 +650,7 @@ Comparisons
 
    Test whether *n1* >= *n2*.
 
-.. word:: u<		( n1 n2 -- flag )
+.. word:: u<		( n1 n2 -- flag ) "u-less-than"
 
    Test whether *n1* < *n2* as unsigned integers.
 
@@ -676,23 +676,23 @@ Comparisons
 Memory
 ------
 
-.. word:: @		( addr -- n )
+.. word:: @		( addr -- n ) "fetch"
 
       Fetch the cell at *addr*.
 
-.. word:: c@		( addr -- n )
+.. word:: c@		( addr -- n ) "c-fetch"
 
       Fetch the byte at *addr*.
 
-.. word:: !		( n addr -- )
+.. word:: !		( n addr -- ) "store"
 
       Store one cell at *addr*.
 
-.. word:: +!		( n addr -- )
+.. word:: +!		( n addr -- ) "plus-store"
 
       Add *n* to the cell at *addr*.
 
-.. word:: c!		( n addr -- )
+.. word:: c!		( n addr -- ) "c-store"
 
       Store one byte at *addr*.
 
@@ -727,17 +727,17 @@ Strings
       Store *char* at *addr* and add 1 to *addr*. This word can be
       used to build incrementally a string in memory.
 
-.. word:: strlen		( addr -- n )
+.. word:: strlen	( addr -- n )
 
       Return the length of the string starting at *addr*, without the
       trailing 0 byte.
 
-.. word:: strchr		( str char -- addr )
+.. word:: strchr	( str char -- addr )
 
       If *char* is contained in *str*, then return the position of its
       first occurrence. Othewise return 0.
 
-.. word:: bl		( -- char )
+.. word:: bl		( -- char ) "b-l"
 
       Code for the "blank" character.
 
@@ -802,12 +802,12 @@ Input/Output
 
       .. source:: Reva, ANSI. Modified for zero-terminated strings.
 
-.. word:: .(
+.. word:: .( "dot-paren"
 
    Print the characters that follow this word in the input file to the
    output, until the next ``)``. The closing bracket is not printed.
 
-.. word:: cr
+.. word:: cr "c-r"
 
       Begin a new output line.
 
