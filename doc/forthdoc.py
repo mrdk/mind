@@ -111,9 +111,12 @@ class SourceDirective(Directive):
     has_content = False
 
     def run(self):
-        return [nodes.paragraph(),
-                nodes.emphasis(text='Source: '),
-                nodes.inline(text=self.arguments[0] + '.')]
+        subnode = nodes.paragraph()
+        subnode += [nodes.emphasis(text='Source: ')]
+        inodes, messages = self.state.inline_text(self.arguments[0],
+                                                  self.lineno)
+        subnode.extend(inodes)
+        return [subnode] + messages
 
 class ForthXRefRole(XRefRole):
     pass
