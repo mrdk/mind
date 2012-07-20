@@ -14,7 +14,7 @@ from sphinx.util.nodes import make_refnode
 from sphinx.util.compat import Directive
 
 
-html_extra = ['<table width="100%"><tr><td style="width:20%">',
+html_extra = ['<table width="96%" style="display:inline-table"><tr><td style="width:20%">',
               '</td><td>',
               '</td><td style="text-align:right">',
               '</td></tr></table>']
