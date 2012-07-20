@@ -11,7 +11,7 @@ Abbreviations in stack diagrams
         a text character: a number that fits into one byte.
 
    *inchar*
-        an "input characte": either a *char* or the constant
+        an "input character": either a *char* or the constant
         :word:`#eof`.
 
    *flag*
@@ -28,7 +28,7 @@ Abbreviations in stack diagrams
 	a number, or sometimes an arbitrary value
 
    *a*, *b*, *c*
-	arbitray values.
+	arbitrary values.
 
 
 Tags
@@ -57,9 +57,9 @@ Starting and Ending
 
 .. word:: 'abort	( -- addr )
 
-      Variable that contains a word that does is called after an error
-      has occured; it is expected to reset the parameter stack and the
-      return stack and then to start an interactive prompt.
+   Variable that contains a word that does is called after an error
+   has occurred; it is expected to reset the parameter stack and the
+   return stack and then to start an interactive prompt.
 
 .. word:: bye
 
@@ -734,8 +734,8 @@ Strings
 
 .. word:: strchr	( str char -- addr )
 
-      If *char* is contained in *str*, then return the position of its
-      first occurrence. Othewise return 0.
+   If *char* is contained in *str*, then return the position of its
+   first occurrence. Otherwise return 0.
 
 .. word:: bl		( -- char ) "b-l"
 

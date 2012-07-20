@@ -39,7 +39,7 @@ C Code
   they are rarely used, if at all. And Java explicitly requires two's
   complement, so this may be the future quasi-standard. (This includes
   some guessing, I didn't find yet explicit information in the
-  internet. - mr)
+  Internet. - mr)
 
 
 Forth vocabulary
