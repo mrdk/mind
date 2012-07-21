@@ -156,6 +156,8 @@ Outer Interpreter
    Start a comment that reaches to the next ``)`` symbol or to the end
    of the page. Note that brackets are not nested.
 
+   .. source:: [Forth83]_
+
 
 Command Line Parameters
 -----------------------
@@ -323,13 +325,17 @@ Compilation
 
 .. word:: [ 		immediate, "left-bracket"
 
-      Switch the interpreter to interpreting mode. All words are now
-      executed.
+   Switch the interpreter to interpreting mode. All words are now
+   executed.
+
+   .. source:: [Forth83]_
 
 .. word:: ]             "right-bracket"
 
-      Switch the interpreter to compiling mode. All words are now
-      compiled, except for those that are immediate.
+   Switch the interpreter to compiling mode. All words are now
+   compiled, except for those that are immediate.
+
+   .. source:: [Forth83]_
 
 .. word:: skip-whitespace
 
@@ -374,11 +380,15 @@ Dictionary
 
 .. word:: ,		( n -- ) "comma"
 
-      Align the dictionary and put the cell n at its end.
+   Align the dictionary and put the cell n at its end.
+
+   .. source:: [Forth83]_
 
 .. word:: c,		( b -- ) "c-comma"
 
-      Put the byte b at the end of the dictionary.
+   Put the byte b at the end of the dictionary.
+
+   .. source:: [Forth83]_
 
 .. word:: ,"
 
@@ -445,11 +455,15 @@ Return stack
 
 .. word:: >r		( n -- ) "to-r"
 
-      Move the TOS to the top of the return stack.
+   Move the TOS to the top of the return stack.
+
+   .. source:: [Forth83]_
 
 .. word:: r>		( -- n ) "r-from"
 
-      Move the top of the return stack to the TOS.
+   Move the top of the return stack to the TOS.
+
+   .. source:: [Forth83]_
 
 .. word:: >rr		( n -- )
 
@@ -465,7 +479,9 @@ Return stack
 
 .. word:: r@		( -- n ) "r-fetch"
 
-      Copy the top of the return stack to the TOS.
+   Copy the top of the return stack to the TOS.
+
+   .. source:: [Forth83]_
 
 .. word:: r0		( -- addr )
 
@@ -481,11 +497,15 @@ Stack
 
 .. word:: 2drop		( a b -- ) "two-drop"
 
+   .. source:: [Forth83]_
+
 .. word:: ?dup		( 0 -- 0 | n -- n n ) "question-dupe"
 
       Duplicate the TOS only if it is nonzero
 
 .. word:: dup		( a -- a a ) "dupe"
+
+   .. source:: [Forth83]_
 
 .. word:: over		( a b -- a b a )
 
@@ -495,12 +515,16 @@ Stack
 
 .. word:: rot		( a b c -- b c a ) "rote"
 
+   .. source:: [Forth83]_
+
 .. word:: -rot		( a b c -- c a b )
 
 .. word:: sp@		( -- addr ) "s-p-fetch"
 
    Get the value of the stack pointer. ``sp@ @`` is equivalent to
    :word:`dup`.
+
+   .. source:: [Forth83]_
 
 .. word:: sp!		( addr -- )
 
@@ -528,31 +552,45 @@ Integer Arithmetic
 
 .. word:: 1+		( n -- n' ) "one-plus"
 
-      Add 1 to the TOS.
+   Add 1 to the TOS.
+
+   .. source:: [Forth83]_
 
 .. word:: 1-		( n -- n' ) "one-minus"
 
-      Subtract 1 from the TOS.
+   Subtract 1 from the TOS.
+
+   .. source:: [Forth83]_
 
 .. word:: 2*		( n -- n' ) "two-times"
 
-      Multiplication with 2, as signed integer.
+   Multiplication with 2, as signed integer.
+
+   .. source:: [Forth83]_
 
 .. word:: 2/		( n -- n' ) "two-divide"
 
-      Division by 2, as signed integer.
+   Division by 2, as signed integer.
 
-.. word:: -		( n1 n2 -- n3 )
+   .. source:: [Forth83]_
+
+.. word:: -		( n1 n2 -- n3 ) "minus"
 
    Compute the difference *n1* - *n2*.
+
+   .. source:: [Forth83]_
 
 .. word:: +		( n1 n2 -- n3 ) "plus"
 
    Compute the sum of *n1* and *n2*.
 
+   .. source:: [Forth83]_
+
 .. word:: *		( n1 n2 -- n3 ) "times"
 
    Compute the product of *n1* and *n2*
+
+   .. source:: [Forth83]_
 
 .. word:: /		( n1 n2 -- n3 ) "divide"
 
@@ -561,6 +599,8 @@ Integer Arithmetic
    Currently this is C arithmetics, with rounding towards 0. (It may
    be changed later.)
 
+   .. source:: [Forth83]_
+
 .. word:: mod		( n1 n2 -- n3 )
 
    Compute *n1* modulo *n2*
@@ -568,6 +608,8 @@ Integer Arithmetic
 .. word:: /mod		( n1 n2 -- quot rem ) "divide-mod"
 
    *quot* is *n1* / *n2* and *rem* is *n1* modulo *n2*.
+
+   .. source:: [Forth83]_
 
 .. word:: u*		( n1 n2 -- n3 )
 
@@ -580,6 +622,8 @@ Integer Arithmetic
 .. word:: abs		( n -- u ) "absolute"
 
    Compute the absolute value of the TOS.
+
+   .. source:: [Forth83]_
 
 
 Binary Arithmetic
@@ -605,6 +649,8 @@ Binary Arithmetic
 
    Bitwise exclusive "or" of *n1* and *n2*.
 
+   .. source:: [Forth83]_
+
 .. word:: invert	( n1 -- n2 )
 
    Bitwise negation of the TOS.
@@ -617,26 +663,36 @@ Comparisons
 
    Test whether *n1* and *n2* are equal.
 
+   .. source:: [Forth83]_
+
 .. word:: <>		( n1 n2 -- flag )
 
    Test whether *n1* and *n2* are different.
 
 .. word:: 0=		( n -- flag ) "zero-equals"
 
-      Test whether the TOS is equal to 0. (This also inverts boolean
-      flags.)
+   Test whether the TOS is equal to 0. (This also inverts boolean
+   flags.)
+
+   .. source:: [Forth83]_
 
 .. word:: 0<		( n -- flag ) "zero-less"
 
-      Test whether TOS < 0
+   Test whether TOS < 0
+
+   .. source:: [Forth83]_
 
 .. word:: 0>		( n -- flag ) "zero-greater"
 
-      Test whether TOS > 0
+   Test whether TOS > 0
+
+   .. source:: [Forth83]_
 
 .. word:: <		( n1 n2 -- flag ) "less-than"
 
    Test whether *n1* < *n2*.
+
+   .. source:: [Forth83]_
 
 .. word:: <=		( n1 n2 -- flag )
 
@@ -646,6 +702,8 @@ Comparisons
 
    Test whether *n1* > *n2*.
 
+   .. source:: [Forth83]_
+
 .. word:: >=		( n1 n2 -- flag )
 
    Test whether *n1* >= *n2*.
@@ -653,6 +711,8 @@ Comparisons
 .. word:: u<		( n1 n2 -- flag ) "u-less-than"
 
    Test whether *n1* < *n2* as unsigned integers.
+
+   .. source:: [Forth83]_
 
 .. word:: u<=		( n1 n2 -- flag )
 
@@ -678,23 +738,33 @@ Memory
 
 .. word:: @		( addr -- n ) "fetch"
 
-      Fetch the cell at *addr*.
+   Fetch the cell at *addr*.
+
+   .. source:: [Forth83]_
 
 .. word:: c@		( addr -- n ) "c-fetch"
 
-      Fetch the byte at *addr*.
+   Fetch the byte at *addr*.
+
+   .. source:: [Forth83]_
 
 .. word:: !		( n addr -- ) "store"
 
-      Store one cell at *addr*.
+   Store one cell at *addr*.
+
+   .. source:: [Forth83]_
 
 .. word:: +!		( n addr -- ) "plus-store"
 
-      Add *n* to the cell at *addr*.
+   Add *n* to the cell at *addr*.
+
+   .. source:: [Forth83]_
 
 .. word:: c!		( n addr -- ) "c-store"
 
-      Store one byte at *addr*.
+   Store one byte at *addr*.
+
+   .. source:: [Forth83]_
 
 .. word:: malloc	( n -- addr )
 
@@ -722,7 +792,7 @@ Memory
 Strings
 -------
 
-.. word:: append		( addr char -- addr' )
+.. word:: append	( addr char -- addr' )
 
       Store *char* at *addr* and add 1 to *addr*. This word can be
       used to build incrementally a string in memory.
@@ -807,9 +877,13 @@ Input/Output
    Print the characters that follow this word in the input file to the
    output, until the next ``)``. The closing bracket is not printed.
 
+   .. source:: [Forth83]_
+
 .. word:: cr "c-r"
 
-      Begin a new output line.
+   Begin a new output line.
+
+   .. source:: [Forth83]_
 
 .. word:: uh.		( addr -- )
 
