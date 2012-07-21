@@ -739,9 +739,9 @@ Strings
 
 .. word:: bl		( -- char ) "b-l"
 
-      Code for the "blank" character.
+   Code for the "blank" character.
 
-      .. source:: Forth 83
+   .. source:: [Forth83]_
 
 .. word:: #eol		( -- char )
 
