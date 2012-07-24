@@ -52,8 +52,10 @@ Starting and Ending
 
 .. word:: abort
 
-      Stop the interpretation of the currently read text stream and
-      return to the interactive mode by executing :word:`'abort`.
+   Stop the interpretation of the currently read text stream and
+   return to the interactive mode by executing :word:`'abort`.
+
+   .. source:: [Forth83]_
 
 .. word:: 'abort	( -- addr )
 
@@ -64,6 +66,7 @@ Starting and Ending
 .. word:: bye
 
       Leave the Forth system immediately.
+
 
 Inner Interpreter
 -----------------
@@ -93,7 +96,10 @@ Inner Interpreter
 
 .. word:: execute	( addr -- )
 
-      Execute the word at addr.
+   Execute the word at addr.
+
+   .. source:: [Forth83]_
+
 
 Outer Interpreter
 -----------------
@@ -107,8 +113,10 @@ Outer Interpreter
 
 .. word:: interpret
 
-      Read one word from the input and execute or compile it,
-      depending on the the value of :word:`state`.
+   Read one word from the input and execute or compile it, depending
+   on the the value of :word:`state`.
+
+   .. source:: [Forth83]_, but different behaviour.
 
 .. word:: word?		( -- addr )
 
@@ -251,6 +259,7 @@ These are the basic data structures for reading program text.
 
 	Variable that contains the address of the current text stream.
 
+
 File streams
 ^^^^^^^^^^^^
 
@@ -320,6 +329,7 @@ A file stream contains all the fields of a text stream, plus
 
       Execute the code in the current input stream.
 
+
 Compilation
 -----------
 
@@ -345,14 +355,18 @@ Compilation
 
 .. word:: state		( -- addr )
 
-      State of the compiler. If the value is zero, all words are
-      interpreted; if it is nonzero, words are compiled and only those
-      with an immediate flag are executed.
+   State of the compiler. If the value is zero, all words are
+   interpreted; if it is nonzero, words are compiled and only those
+   with an immediate flag are executed.
+
+   .. source:: [Forth83]_
 
 .. word:: branch
 
-      Unconditional jump. The cell following this word contains the
-      address of the jump target.
+   Unconditional jump. The cell following this word contains the
+   address of the jump target.
+
+   .. source:: [Forth83]_
 
 .. word:: 0branch	( n -- )
 
@@ -377,6 +391,8 @@ Dictionary
 
    Allocate *n* bytes at the end of the dictionary. (Afterwards it
    may be no longer aligned.
+
+   .. source:: [Forth83]_
 
 .. word:: ,		( n -- ) "comma"
 
@@ -411,7 +427,9 @@ Dictionary
 
 .. word:: here		( -- addr )
 
-      Put the current value of the dictionary pointer onto the stack.
+   Put the current value of the dictionary pointer onto the stack.
+
+   .. source:: [Forth83]_
 
 .. word:: (') 		( -- cfa )
 
@@ -422,6 +440,7 @@ Dictionary
 
       Search the string at addr in the dictionary and return its CFA.
       If it is not found, return 0.
+
 
 Dictionary Headers
 ------------------
@@ -434,17 +453,22 @@ Dictionary Headers
 
 .. word:: ^dodoes
 
-.. word:: link>
+.. word:: link>        "from-link"
+
+   .. source:: [Forth83]_
 
 .. word:: flags@
 
 .. word:: flags!
 
-.. word:: >name
+.. word:: >name         "to-name"
+
+   .. source:: [Forth83]_
 
 .. word:: >doer
 
 .. word:: #immediate
+
 
 Return stack
 ------------
@@ -488,10 +512,13 @@ Return stack
       Variable for the position of the return stack pointer when the
       stack is empty
 
+
 Stack
 -----
 
 .. word:: drop		( a -- )
+
+   .. source:: [Forth83]_
 
 .. word:: nip		( a b -- b )
 
@@ -509,9 +536,13 @@ Stack
 
 .. word:: over		( a b -- a b a )
 
+   .. source:: [Forth83]_
+
 .. word:: under		( a b -- b a b )
 
 .. word:: swap		( a b -- b a )
+
+   .. source:: [Forth83]_
 
 .. word:: rot		( a b c -- b c a ) "rote"
 
@@ -530,10 +561,13 @@ Stack
 
       Make *addr* the new value of the stack pointer.
 
-.. word:: s0		( -- addr )
+.. word:: s0		( -- addr ) "s-zero"
 
-      Variable for the position of the stack pointer when the stack is
-      empty
+   Variable for the position of the stack pointer when the stack is
+   empty
+
+   .. source:: [Forth83]_
+
 
 Integer Arithmetic
 ------------------
@@ -641,9 +675,13 @@ Binary Arithmetic
 
    Bitwise "or" of *n1* and *n2*.
 
+   .. source:: [Forth83]_
+
 .. word:: and		( n1 n2 -- n3 )
 
    Bitwise "and" of *n1* and *n2*.
+
+   .. source:: [Forth83]_
 
 .. word:: xor		( n1 n2 -- n3 ) "x-or"
 
@@ -832,12 +870,16 @@ Input/Output
 
 .. word:: emit		( n -- )
 
-      Send the character with number *n* to the output.
+   Send the character with number *n* to the output.
+
+   .. source:: [Forth83]_
 
 .. word:: type		( addr n -- )
 
-      Send the sequence of characters of length *n* starting at *addr*
-      to the output.
+   Send the sequence of characters of length *n* starting at *addr* to
+   the output.
+
+   .. source:: [Forth83]_
 
 .. word:: puts		( addr -- )
 
