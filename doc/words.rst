@@ -491,15 +491,15 @@ Return stack
 
 .. word:: >rr		( n -- )
 
-      Move the TOS to the second position of the return stack.
+   Move the TOS to the second position of the return stack.
 
-      .. source:: Reva
+   .. source:: [Reva]_
 
 .. word:: rr>		( -- n )
 
-      Move the second entry of the return stack to the TOS.
+   Move the second entry of the return stack to the TOS.
 
-      .. source:: Reva
+   .. source:: [Reva]_
 
 .. word:: r@		( -- n ) "r-fetch"
 
@@ -903,16 +903,16 @@ Input/Output
 
 .. word:: accept		( addr n -- n' )
 
-      Read a line from the standard input and store it as a
-      zero-terminated string with maximal length *n* in the buffer at
-      *addr*. The buffer must therefore be at least *n* + 1 bytes
-      wide. A line ends if the maximal number of characters is read, a
-      return character is encountered, or the input stream has ended.
-      If a return has been typed, it is not part of the string.
+   Read a line from the standard input and store it as a
+   zero-terminated string with maximal length *n* in the buffer at
+   *addr*. The buffer must therefore be at least *n* + 1 bytes wide. A
+   line ends if the maximal number of characters is read, a return
+   character is encountered, or the input stream has ended. If a
+   return has been typed, it is not part of the string.
 
-      The return value is the number of bytes actually read.
+   The return value is the number of bytes actually read.
 
-      .. source:: Reva, ANSI. Modified for zero-terminated strings.
+   .. source:: [Reva]_, ANSI. Modified for zero-terminated strings.
 
 .. word:: .( "dot-paren"
 
