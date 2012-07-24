@@ -59,7 +59,7 @@ Forth vocabulary
 
 + There are no words that handle double integers.
 
-  The C integers are large enough for us. [From GraspForth]
+  The C integers are large enough for us. (From [graspForth]_.)
 
 + Strings are null-terminated, as in C
 
