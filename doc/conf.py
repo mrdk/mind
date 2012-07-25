@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# forthdoc documentation build configuration file, created by
+# mind documentation build configuration file, created by
 # sphinx-quickstart on Sun Apr 15 19:28:06 2012.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -165,7 +165,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'forthdocdoc'
+htmlhelp_basename = 'minddoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -179,7 +179,7 @@ htmlhelp_basename = 'forthdocdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'forthdoc.tex', u'forthdoc Documentation',
+  ('index', 'mind.tex', u'mind Documentation',
    u'Markus Redeker', 'manual'),
 ]
 
@@ -212,7 +212,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index1', 'forthdoc', u'forthdoc Documentation',
+    ('index1', 'mind', u'mind Documentation',
      [u'Markus Redeker'], 1)
 ]
 
@@ -220,7 +220,7 @@ man_pages = [
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'forthdoc'
+epub_title = u'mind'
 epub_author = u'Markus Redeker'
 epub_publisher = u'Markus Redeker'
 epub_copyright = u'2012, Markus Redeker'
