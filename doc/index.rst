@@ -15,3 +15,4 @@ Contents:
    design
    glossary
    references
+   copyright
