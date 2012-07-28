@@ -1,7 +1,7 @@
-Vocabulary
-==========
+Notation
+========
 
-Abbreviations in stack diagrams
+Abbreviations in Stack Diagrams
 -------------------------------
 
    *addr*
@@ -39,538 +39,15 @@ immediate
     The word is always executed, even during compilation. It has the
     "immediate" flag set in its header.
 
-Kernel words
-============
 
-Starting and Ending
--------------------
+Word List
+=========
 
-.. word:: boot
-
-      Initialise the system completely and start the outer
-      interpreter.
-
-.. word:: abort
-
-   Stop the interpretation of the currently read text stream and
-   return to the interactive mode by executing :word:`'abort`.
-
-   .. source:: [Forth83]_
-
-.. word:: 'abort	( -- addr )
-
-   Variable that contains a word that does is called after an error
-   has occurred; it is expected to reset the parameter stack and the
-   return stack and then to start an interactive prompt.
-
-.. word:: bye
-
-      Leave the Forth system immediately.
-
-
-Inner Interpreter
------------------
-
-.. word:: noop
-
-      Do nothing.
-
-.. word:: ;;
-
-      End the execution of the current word.
-
-      .. source:: retroforth
-
-.. word:: if;		( n -- )
-
-      Leave the execution of the current word if the TOS is nonzero.
-
-      .. source:: retroforth
-
-.. word:: 0; 		( 0 -- | n -- n )
-
-      If the TOS is zero, drop it and end the execution of the current
-      word.
-
-      .. source:: retroforth
-
-.. word:: execute	( addr -- )
-
-   Execute the word at addr.
-
-   .. source:: [Forth83]_
-
-
-Outer Interpreter
------------------
-
-    These words are about reading and interpreting program text.
-
-.. word:: (interpret)	( addr -- )
-
-      Search the string at *addr* in the dictionary and interpret or
-      compile it, depending on the value of :word:`state`.
-
-.. word:: interpret
-
-   Read one word from the input and execute or compile it, depending
-   on the the value of :word:`state`.
-
-   .. source:: [Forth83]_, but different behaviour.
-
-.. word:: word?		( -- addr )
-
-      Contains a word that is executed when a string that cannot be
-      found in the dictionary by :word:`(interpret)`. At system
-      start, its value is :word:`notfound`.
-
-      The Forth word stored in :word:`word?` has the signature `( --
-      )`; it expects the searched string at :word:`here`.
-
-.. word:: notfound
-
-      This word is called by default if a word is not found in the
-      dictionary. It prints an error message and closes the input
-      file. The word that was searched for is expected as a string at
-      :word:`here`.
-
-      This word is the value of :word:`word?` at startup.
-
-.. word:: parse-to	( addr str -- )
-
-      Read a character sequence from the input stream and store it as
-      a zero-terminated string at *addr*. The character sequence
-      consists of characters not contained in the zero-terminated
-      string at *str*. After reading, the reading position in the
-      input stream is directly after the first character not contained
-      in *str*.
-
-.. word:: parse		( -- addr )
-
-      Read a whitespace-terminated word from the input stream and
-      return its address. Afterwards, the reading position in the
-      input stream is directly behind the first space character
-      *after* that word.
-
-      Currently the parsed word is located directly at the end of the
-      dictionary.
-
-.. word:: \\ 		immediate
-
-      Start a comment that reaches to the end of the line.
-
-.. word:: ( 		immediate, "paren"
-
-   Start a comment that reaches to the next ``)`` symbol or to the end
-   of the page. Note that brackets are not nested.
-
-   .. source:: [Forth83]_
-
-
-Command Line Parameters
------------------------
-
-:program:`mind` has the following command line parameters:
-
-    .. option:: -e <cmd>
-
-       Execute <cmd> and finish.
-        
-    .. option:: -x <cmd>
-
-       Execute <cmd> and start interactive mode.
-
-    .. option:: -h
-
-       Print help text.
-
-    The parameters set the following Forth variables:
-
-.. word:: start-command	( -- addr )
-
-      Variable containing the address of a string that is set by the
-      command options :option:`-e` and :option:`-x`; otherwise its
-      value is 0.
-
-      If the value of :word:`start-command` is nonzero, then it
-      contains a string that is executed after the file
-      :file:`start.mind` is read and before the system switches to
-      interactive mode (if it does).
-
-.. word:: interactive-mode	( -- addr )
-
-      Variable containing a flag that is set to :word:`false` by the
-      command line options :option:`-e`. By default its value is
-      :word:`true`.
-
-      If the value of :word:`interactive-mode` is :word:`true`, then
-      :program:`mind` switches to an interactive mode after startup.
-
-
-Text streams
-------------
-
-Text streams are an abstraction for the input of program text -- both
-from a file and from strings stored in memory.
-
-
-Text streams
-^^^^^^^^^^^^
-
-These are the basic data structures for reading program text.
-
-.. word:: >forward	( 'textstream -- addr )
-
-   The TOS contains the address of a textstream structure: compute the
-   address of its :word:`forward` routine. The routine has the
-   signature ( *stream* -- ).
-
-.. word:: >current@	( 'textstream -- addr )
-
-   The TOS contains the address of a textstream structure: compute the
-   address of its :word:`current@` routine. The routine has the
-   signature ( *stream* -- *char* ).
-
-.. word:: >eos		( 'textstream -- addr )
-
-   The TOS contains the address of a textstream structure: compute the
-   address of its :word:`eos` routine. The routine has the signature (
-   *stream* -- *bool* ).
-
-.. word:: >#eos		( 'textstream -- addr )
-
-      	The TOS contains the address of a textstream structure:
-      	compute the address of its :word:`eos` field. The field is one
-      	cell wide and contains the "end of stream" constant of this
-      	textstream.
-
-.. word:: >line#	( 'textstream -- addr )
-
-      	The TOS contains the address of a textstream structure:
-      	compute the address of its :word:`line#` field. The field is
-      	one cell wide and contains the current line number of this
-      	textstream.
-
-.. word:: /textstream	( -- n )
-
-         	Number of bytes in a text stream structure.
-
-.. word:: 'instream	( -- addr )
-
-	Variable that contains the address of the current text stream.
-
-
-File streams
-^^^^^^^^^^^^
-
-A file stream is an extension of the text stream interface for reading
-from a file (or any other stream in a Unix system).
-
-A file stream contains all the fields of a text stream, plus
-:word:`>intext-file`.
-
-.. word:: >intext-file	( 'filestream -- addr )
-
-   The TOS contains the address of a filestream structure: compute the
-   address of its :word:`>file` field. The field is one cell wide and
-   contains the underlying C file pointer :c:type:`FILE*` for this
-   stream.
-
-.. word:: >current	( 'filestream -- addr )
-
-   The TOS contains the address of a filestream structure: compute the
-   address of its :word:`>current` field. This field is one cell wide
-   and contains the last character read from the file or the "end of
-   file" constant.
-
-.. word:: /filestream	( -- n )
-
-      	Number of bytes in a file stream structure.
-
-.. word:: file-forward	( stream -- )
-
-   Read one character from a file stream and store it in the
-   :word:`>current` field. :word:`line#` is updated if the character
-   is an "end of line" symbol.
-
-.. word:: file-current@	( stream -- char )
-
-	Put the character at the current position of the file stream
-	onto the stack.
-
-.. word:: file-eof	( stream -- flag )
-
-      	Test whether the end of the file stream is reached.
-
-.. word:: forward	( stream -- )
-
-      Read one character from the current stream. :word:`line#` is
-      updated if the character is an "end of line" symbol.
-
-.. word:: current@	( stream -- char )
-
-      Put the character at the current position of the current stream
-      onto the stack.
-
-.. word:: eos		( -- flag )
-
-      Test whether the end of the current stream is reached.
-
-.. word:: #eos		( -- inchar )
-
-      The "end of stream" constant for the current stream.
-
-.. word:: line#		( -- addr )
-
-      Address of the current line number in the current stream. The
-      first line of a file has the number 1.
-
-.. word:: do-stream
-
-      Execute the code in the current input stream.
-
-
-Compilation
+Arithmetics
 -----------
 
-.. word:: [ 		immediate, "left-bracket"
-
-   Switch the interpreter to interpreting mode. All words are now
-   executed.
-
-   .. source:: [Forth83]_
-
-.. word:: ]             "right-bracket"
-
-   Switch the interpreter to compiling mode. All words are now
-   compiled, except for those that are immediate.
-
-   .. source:: [Forth83]_
-
-.. word:: skip-whitespace
-
-      Read from the current stream until the character at the current
-      position is no longer an element of :word:`whitespace`. If this
-      is already the case, then do nothing.
-
-.. word:: state		( -- addr )
-
-   State of the compiler. If the value is zero, all words are
-   interpreted; if it is nonzero, words are compiled and only those
-   with an immediate flag are executed.
-
-   .. source:: [Forth83]_
-
-.. word:: branch
-
-   Unconditional jump. The cell following this word contains the
-   address of the jump target.
-
-   .. source:: [Forth83]_
-
-.. word:: 0branch	( n -- )
-
-      Conditional jump. If *n* is zero, jump to the address in the
-      next cell. If *n* is nonzero, continue with the execution of the
-      word after the next cell.
-
-.. word:: lit		( -- n )
-
-      Push the content of the cell after this word onto the stack.
-
-
-Dictionary
-----------
-
-.. word:: align
-
-      Increment (if necessary) the content of :word:`dp` so that it
-      points to a valid address for a cell.
-
-.. word:: allot		( n -- )
-
-   Allocate *n* bytes at the end of the dictionary. (Afterwards it
-   may be no longer aligned.
-
-   .. source:: [Forth83]_
-
-.. word:: ,		( n -- ) "comma"
-
-   Align the dictionary and put the cell n at its end.
-
-   .. source:: [Forth83]_
-
-.. word:: c,		( b -- ) "c-comma"
-
-   Put the byte b at the end of the dictionary.
-
-   .. source:: [Forth83]_
-
-.. word:: ,"
-
-   Read until the next ``"`` char and put the resulting string at the
-   end of the dictionary. The space character immediately after the
-   word does not belong to the string.
-
-.. word:: entry,	( str addr -- )
-
-   Put a new entry at the end of the end of the dictionary. *str* is
-   its name and *addr* is stored in its CFA field.
-
-.. word:: latest	( -- addr )
-
-      Variable for the address of the latest dictionary entry.
-
-.. word:: dp		( -- addr )
-
-      Dictionary Pointer. It contains the endpoint of the dictionary.
-
-.. word:: here		( -- addr )
-
-   Put the current value of the dictionary pointer onto the stack.
-
-   .. source:: [Forth83]_
-
-.. word:: (') 		( -- cfa )
-
-      Read a word from the input and return its CFA. If it is not
-      found, return 0.
-
-.. word:: (find)	( addr -- cfa )
-
-      Search the string at addr in the dictionary and return its CFA.
-      If it is not found, return 0.
-
-
-Dictionary Headers
-------------------
-
-.. word:: ^docol
-
-.. word:: ^dodefer
-
-.. word:: ^dovar
-
-.. word:: ^dodoes
-
-.. word:: link>        "from-link"
-
-   .. source:: [Forth83]_
-
-.. word:: flags@
-
-.. word:: flags!
-
-.. word:: >name         "to-name"
-
-   .. source:: [Forth83]_
-
-.. word:: >doer
-
-.. word:: #immediate
-
-
-Return stack
-------------
-
-.. word:: rdrop
-
-      Remove the top value of the return stack.
-
-.. word:: >r		( n -- ) "to-r"
-
-   Move the TOS to the top of the return stack.
-
-   .. source:: [Forth83]_
-
-.. word:: r>		( -- n ) "r-from"
-
-   Move the top of the return stack to the TOS.
-
-   .. source:: [Forth83]_
-
-.. word:: >rr		( n -- )
-
-   Move the TOS to the second position of the return stack.
-
-   .. source:: [Reva]_
-
-.. word:: rr>		( -- n )
-
-   Move the second entry of the return stack to the TOS.
-
-   .. source:: [Reva]_
-
-.. word:: r@		( -- n ) "r-fetch"
-
-   Copy the top of the return stack to the TOS.
-
-   .. source:: [Forth83]_
-
-.. word:: r0		( -- addr )
-
-      Variable for the position of the return stack pointer when the
-      stack is empty
-
-
-Stack
------
-
-.. word:: drop		( a -- )
-
-   .. source:: [Forth83]_
-
-.. word:: nip		( a b -- b )
-
-.. word:: 2drop		( a b -- ) "two-drop"
-
-   .. source:: [Forth83]_
-
-.. word:: ?dup		( 0 -- 0 | n -- n n ) "question-dupe"
-
-      Duplicate the TOS only if it is nonzero
-
-.. word:: dup		( a -- a a ) "dupe"
-
-   .. source:: [Forth83]_
-
-.. word:: over		( a b -- a b a )
-
-   .. source:: [Forth83]_
-
-.. word:: under		( a b -- b a b )
-
-.. word:: swap		( a b -- b a )
-
-   .. source:: [Forth83]_
-
-.. word:: rot		( a b c -- b c a ) "rote"
-
-   .. source:: [Forth83]_
-
-.. word:: -rot		( a b c -- c a b )
-
-.. word:: sp@		( -- addr ) "s-p-fetch"
-
-   Get the value of the stack pointer. ``sp@ @`` is equivalent to
-   :word:`dup`.
-
-   .. source:: [Forth83]_
-
-.. word:: sp!		( addr -- )
-
-      Make *addr* the new value of the stack pointer.
-
-.. word:: s0		( -- addr ) "s-zero"
-
-   Variable for the position of the stack pointer when the stack is
-   empty
-
-   .. source:: [Forth83]_
-
-
-Integer Arithmetic
-------------------
+Numbers
+^^^^^^^
 
 .. word:: 0		( -- 0 )
 
@@ -660,8 +137,8 @@ Integer Arithmetic
    .. source:: [Forth83]_
 
 
-Binary Arithmetic
------------------
+Logic and Comparisons
+^^^^^^^^^^^^^^^^^^^^^
 
 .. word:: false		( -- flag )
 
@@ -692,10 +169,6 @@ Binary Arithmetic
 .. word:: invert	( n1 -- n2 )
 
    Bitwise negation of the TOS.
-
-
-Comparisons
------------
 
 .. word:: =		( n1 n2 -- flag ) "equals"
 
@@ -771,8 +244,113 @@ Comparisons
    as well as with signed ones.
 
 
-Memory
-------
+Stack Operations
+----------------
+
+Parameter Stack
+^^^^^^^^^^^^^^^
+
+.. word:: drop		( a -- )
+
+   .. source:: [Forth83]_
+
+.. word:: nip		( a b -- b )
+
+.. word:: 2drop		( a b -- ) "two-drop"
+
+   .. source:: [Forth83]_
+
+.. word:: ?dup		( 0 -- 0 | n -- n n ) "question-dupe"
+
+      Duplicate the TOS only if it is nonzero
+
+.. word:: dup		( a -- a a ) "dupe"
+
+   .. source:: [Forth83]_
+
+.. word:: over		( a b -- a b a )
+
+   .. source:: [Forth83]_
+
+.. word:: under		( a b -- b a b )
+
+.. word:: swap		( a b -- b a )
+
+   .. source:: [Forth83]_
+
+.. word:: rot		( a b c -- b c a ) "rote"
+
+   .. source:: [Forth83]_
+
+.. word:: -rot		( a b c -- c a b )
+
+.. word:: sp@		( -- addr ) "s-p-fetch"
+
+   Get the value of the stack pointer. ``sp@ @`` is equivalent to
+   :word:`dup`.
+
+   .. source:: [Forth83]_
+
+.. word:: sp!		( addr -- )
+
+      Make *addr* the new value of the stack pointer.
+
+.. word:: s0		( -- addr ) "s-zero"
+
+   Variable for the position of the stack pointer when the stack is
+   empty
+
+   .. source:: [Forth83]_
+
+
+Return Stack
+^^^^^^^^^^^^
+
+.. word:: rdrop
+
+      Remove the top value of the return stack.
+
+.. word:: >r		( n -- ) "to-r"
+
+   Move the TOS to the top of the return stack.
+
+   .. source:: [Forth83]_
+
+.. word:: r>		( -- n ) "r-from"
+
+   Move the top of the return stack to the TOS.
+
+   .. source:: [Forth83]_
+
+.. word:: >rr		( n -- )
+
+   Move the TOS to the second position of the return stack.
+
+   .. source:: [Reva]_
+
+.. word:: rr>		( -- n )
+
+   Move the second entry of the return stack to the TOS.
+
+   .. source:: [Reva]_
+
+.. word:: r@		( -- n ) "r-fetch"
+
+   Copy the top of the return stack to the TOS.
+
+   .. source:: [Forth83]_
+
+.. word:: r0		( -- addr )
+
+      Variable for the position of the return stack pointer when the
+      stack is empty
+
+
+Memory Operations
+-----------------
+
+Memory Access
+^^^^^^^^^^^^^
 
 .. word:: @		( addr -- n ) "fetch"
 
@@ -828,7 +406,7 @@ Memory
 
 
 Strings
--------
+^^^^^^^
 
 .. word:: append	( addr char -- addr' )
 
@@ -863,6 +441,433 @@ Strings
 
    Zero-terminated string that contains all the characters that are
    viewed as whitespace by :program:`mind`.
+
+
+Control Flow
+------------
+
+Control Structures
+^^^^^^^^^^^^^^^^^^
+
+.. word:: ;;
+
+      End the execution of the current word.
+
+      .. source:: retroforth
+
+.. word:: if;		( n -- )
+
+      Leave the execution of the current word if the TOS is nonzero.
+
+      .. source:: retroforth
+
+.. word:: 0; 		( 0 -- | n -- n )
+
+      If the TOS is zero, drop it and end the execution of the current
+      word.
+
+      .. source:: retroforth
+
+.. word:: execute	( addr -- )
+
+   Execute the word at addr.
+
+   .. source:: [Forth83]_
+
+.. word:: branch
+
+   Unconditional jump. The cell following this word contains the
+   address of the jump target.
+
+   .. source:: [Forth83]_
+
+.. word:: 0branch	( n -- )
+
+      Conditional jump. If *n* is zero, jump to the address in the
+      next cell. If *n* is nonzero, continue with the execution of the
+      word after the next cell.
+
+
+Error Handling
+^^^^^^^^^^^^^^
+
+.. word:: abort
+
+   Stop the interpretation of the currently read text stream and
+   return to the interactive mode by executing :word:`'abort`.
+
+   .. source:: [Forth83]_
+
+.. word:: 'abort	( -- addr )
+
+   Variable that contains a word that does is called after an error
+   has occurred; it is expected to reset the parameter stack and the
+   return stack and then to start an interactive prompt.
+
+
+Starting and Ending
+^^^^^^^^^^^^^^^^^^^
+
+.. word:: bye
+
+      Leave the Forth system immediately.
+
+.. word:: boot
+
+      Initialise the system completely and start the outer
+      interpreter.
+
+
+Command Line Parameters
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:program:`mind` has the following command line parameters:
+
+    .. option:: -e <cmd>
+
+       Execute <cmd> and finish.
+        
+    .. option:: -x <cmd>
+
+       Execute <cmd> and start interactive mode.
+
+    .. option:: -h
+
+       Print help text.
+
+    The parameters set the following Forth variables:
+
+.. word:: start-command	( -- addr )
+
+      Variable containing the address of a string that is set by the
+      command options :option:`-e` and :option:`-x`; otherwise its
+      value is 0.
+
+      If the value of :word:`start-command` is nonzero, then it
+      contains a string that is executed after the file
+      :file:`start.mind` is read and before the system switches to
+      interactive mode (if it does).
+
+.. word:: interactive-mode	( -- addr )
+
+      Variable containing a flag that is set to :word:`false` by the
+      command line options :option:`-e`. By default its value is
+      :word:`true`.
+
+      If the value of :word:`interactive-mode` is :word:`true`, then
+      :program:`mind` switches to an interactive mode after startup.
+
+
+Interpreter
+-----------
+
+Compiler Words
+^^^^^^^^^^^^^^
+
+.. word:: [ 		immediate, "left-bracket"
+
+   Switch the interpreter to interpreting mode. All words are now
+   executed.
+
+   .. source:: [Forth83]_
+
+
+Interpreter Words
+^^^^^^^^^^^^^^^^^
+
+These words are about reading and interpreting program text.
+
+.. word:: ]             "right-bracket"
+
+   Switch the interpreter to compiling mode. All words are now
+   compiled, except for those that are immediate.
+
+   .. source:: [Forth83]_
+
+.. word:: skip-whitespace
+
+      Read from the current stream until the character at the current
+      position is no longer an element of :word:`whitespace`. If this
+      is already the case, then do nothing.
+
+.. word:: state		( -- addr )
+
+   State of the compiler. If the value is zero, all words are
+   interpreted; if it is nonzero, words are compiled and only those
+   with an immediate flag are executed.
+
+   .. source:: [Forth83]_
+
+.. word:: (interpret)	( addr -- )
+
+      Search the string at *addr* in the dictionary and interpret or
+      compile it, depending on the value of :word:`state`.
+
+.. word:: interpret
+
+   Read one word from the input and execute or compile it, depending
+   on the the value of :word:`state`.
+
+   .. source:: [Forth83]_, but different behaviour.
+
+.. word:: notfound
+
+      This word is called by default if a word is not found in the
+      dictionary. It prints an error message and closes the input
+      file. The word that was searched for is expected as a string at
+      :word:`here`.
+
+      This word is the value of :word:`word?` at startup.
+
+.. word:: word?		( -- addr )
+
+      Contains a word that is executed when a string that cannot be
+      found in the dictionary by :word:`(interpret)`. At system
+      start, its value is :word:`notfound`.
+
+      The Forth word stored in :word:`word?` has the signature `( --
+      )`; it expects the searched string at :word:`here`.
+
+
+.. word:: parse-to	( addr str -- )
+
+      Read a character sequence from the input stream and store it as
+      a zero-terminated string at *addr*. The character sequence
+      consists of characters not contained in the zero-terminated
+      string at *str*. After reading, the reading position in the
+      input stream is directly after the first character not contained
+      in *str*.
+
+.. word:: parse		( -- addr )
+
+      Read a whitespace-terminated word from the input stream and
+      return its address. Afterwards, the reading position in the
+      input stream is directly behind the first space character
+      *after* that word.
+
+      Currently the parsed word is located directly at the end of the
+      dictionary.
+
+.. word:: (') 		( -- cfa )
+
+      Read a word from the input and return its CFA. If it is not
+      found, return 0.
+
+.. word:: (find)	( addr -- cfa )
+
+      Search the string at addr in the dictionary and return its CFA.
+      If it is not found, return 0.
+
+.. word:: \\ 		immediate
+
+      Start a comment that reaches to the end of the line.
+
+.. word:: ( 		immediate, "paren"
+
+   Start a comment that reaches to the next ``)`` symbol or to the end
+   of the page. Note that brackets are not nested.
+
+   .. source:: [Forth83]_
+
+
+Dictionary Words
+^^^^^^^^^^^^^^^^
+
+.. word:: align
+
+      Increment (if necessary) the content of :word:`dp` so that it
+      points to a valid address for a cell.
+
+.. word:: allot		( n -- )
+
+   Allocate *n* bytes at the end of the dictionary. (Afterwards it
+   may be no longer aligned.
+
+   .. source:: [Forth83]_
+
+.. word:: ,		( n -- ) "comma"
+
+   Align the dictionary and put the cell n at its end.
+
+   .. source:: [Forth83]_
+
+.. word:: c,		( b -- ) "c-comma"
+
+   Put the byte b at the end of the dictionary.
+
+   .. source:: [Forth83]_
+
+.. word:: ,"
+
+   Read until the next ``"`` char and put the resulting string at the
+   end of the dictionary. The space character immediately after the
+   word does not belong to the string.
+
+.. word:: entry,	( str addr -- )
+
+   Put a new entry at the end of the end of the dictionary. *str* is
+   its name and *addr* is stored in its CFA field.
+
+.. word:: latest	( -- addr )
+
+      Variable for the address of the latest dictionary entry.
+
+.. word:: dp		( -- addr )
+
+      Dictionary Pointer. It contains the endpoint of the dictionary.
+
+.. word:: here		( -- addr )
+
+   Put the current value of the dictionary pointer onto the stack.
+
+   .. source:: [Forth83]_
+
+.. word:: ^docol
+
+.. word:: ^dodefer
+
+.. word:: ^dovar
+
+.. word:: ^dodoes
+
+.. word:: link>        "from-link"
+
+   .. source:: [Forth83]_
+
+.. word:: flags@
+
+.. word:: flags!
+
+.. word:: >name         "to-name"
+
+   .. source:: [Forth83]_
+
+.. word:: >doer
+
+.. word:: #immediate
+
+
+Generic Text Streams
+--------------------
+
+Text streams are an abstraction for the input of program text -- both
+from a file and from strings stored in memory.
+
+
+Text Streams
+^^^^^^^^^^^^
+
+These are the basic data structures for reading program text.
+
+.. word:: >forward	( 'textstream -- addr )
+
+   The TOS contains the address of a textstream structure: compute the
+   address of its :word:`forward` routine. The routine has the
+   signature ( *stream* -- ).
+
+.. word:: >current@	( 'textstream -- addr )
+
+   The TOS contains the address of a textstream structure: compute the
+   address of its :word:`current@` routine. The routine has the
+   signature ( *stream* -- *char* ).
+
+.. word:: >eos		( 'textstream -- addr )
+
+   The TOS contains the address of a textstream structure: compute the
+   address of its :word:`eos` routine. The routine has the signature (
+   *stream* -- *bool* ).
+
+.. word:: >#eos		( 'textstream -- addr )
+
+      	The TOS contains the address of a textstream structure:
+      	compute the address of its :word:`eos` field. The field is one
+      	cell wide and contains the "end of stream" constant of this
+      	textstream.
+
+.. word:: >line#	( 'textstream -- addr )
+
+      	The TOS contains the address of a textstream structure:
+      	compute the address of its :word:`line#` field. The field is
+      	one cell wide and contains the current line number of this
+      	textstream.
+
+.. word:: /textstream	( -- n )
+
+         	Number of bytes in a text stream structure.
+
+.. word:: 'instream	( -- addr )
+
+	Variable that contains the address of the current text stream.
+
+
+File Streams
+^^^^^^^^^^^^
+
+A file stream is an extension of the text stream interface for reading
+from a file (or any other stream in a Unix system).
+
+A file stream contains all the fields of a text stream, plus
+:word:`>intext-file`.
+
+.. word:: >intext-file	( 'filestream -- addr )
+
+   The TOS contains the address of a filestream structure: compute the
+   address of its :word:`>file` field. The field is one cell wide and
+   contains the underlying C file pointer :c:type:`FILE*` for this
+   stream.
+
+.. word:: >current	( 'filestream -- addr )
+
+   The TOS contains the address of a filestream structure: compute the
+   address of its :word:`>current` field. This field is one cell wide
+   and contains the last character read from the file or the "end of
+   file" constant.
+
+.. word:: /filestream	( -- n )
+
+      	Number of bytes in a file stream structure.
+
+.. word:: file-forward	( stream -- )
+
+   Read one character from a file stream and store it in the
+   :word:`>current` field. :word:`line#` is updated if the character
+   is an "end of line" symbol.
+
+.. word:: file-current@	( stream -- char )
+
+	Put the character at the current position of the file stream
+	onto the stack.
+
+.. word:: file-eof	( stream -- flag )
+
+      	Test whether the end of the file stream is reached.
+
+.. word:: forward	( stream -- )
+
+      Read one character from the current stream. :word:`line#` is
+      updated if the character is an "end of line" symbol.
+
+.. word:: current@	( stream -- char )
+
+      Put the character at the current position of the current stream
+      onto the stack.
+
+.. word:: eos		( -- flag )
+
+      Test whether the end of the current stream is reached.
+
+.. word:: #eos		( -- inchar )
+
+      The "end of stream" constant for the current stream.
+
+.. word:: line#		( -- addr )
+
+      Address of the current line number in the current stream. The
+      first line of a file has the number 1.
+
+.. word:: do-stream
+
+      Execute the code in the current input stream.
 
 
 Input/Output
@@ -930,3 +935,15 @@ Input/Output
 .. word:: uh.		( addr -- )
 
       Print the TOS as unsigned hexadecimal number, followed by a space.
+
+
+Other
+-----
+
+.. word:: noop
+
+      Do nothing.
+
+.. word:: lit		( -- n )
+
+      Push the content of the cell after this word onto the stack.
