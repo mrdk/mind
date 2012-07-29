@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
    :numbered:
 
+   notation
    words
    design
    glossary
