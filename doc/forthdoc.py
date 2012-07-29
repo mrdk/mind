@@ -26,7 +26,7 @@ html_extra = ['<table width="60%" style="display:inline-table">' +
               '<span style="float:right">',
               '</span>']
 tex_extra = [r'\hbox to 0.3\textwidth{',
-             r'}',
+             r'\hss}',
              r'\hfill',
              r'']
 
