@@ -69,6 +69,7 @@ exclude_patterns = ['_build']
 # Put in front of every file.
 rst_prolog = """
 .. |I| replace:: :ref:`I <immediate>`
+.. |K| replace:: :ref:`K <kernel>`
 """
 
 primary_domain = "forth"

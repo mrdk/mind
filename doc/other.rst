@@ -1,10 +1,10 @@
 Odds and Ends
 -------------
 
-.. word:: noop
+.. word:: noop |K|
 
       Do nothing.
 
-.. word:: lit		( -- n )
+.. word:: lit		( -- n ) |K|
 
       Push the content of the cell after this word onto the stack.

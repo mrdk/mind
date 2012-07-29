@@ -42,3 +42,12 @@ Flags
 
     The word is always executed, even during compilation. It has the
     "immediate" flag set in its header.
+
+.. Abbreviation: |K|, defined in conf.py
+
+.. _kernel:
+
+*K* -- kernel
+
+    The word is defined in the kernel of :program:`mind`.
+

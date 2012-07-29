@@ -1,25 +1,25 @@
 Input/Output
 ------------
 
-.. word:: emit		( n -- )
+.. word:: emit		( n -- ) |K|
 
    Send the character with number *n* to the output.
 
    .. source:: [Forth83]_
 
-.. word:: type		( addr n -- )
+.. word:: type		( addr n -- ) |K|
 
    Send the sequence of characters of length *n* starting at *addr* to
    the output.
 
    .. source:: [Forth83]_
 
-.. word:: puts		( addr -- )
+.. word:: puts		( addr -- ) |K|
 
       Send the zero-terminated string beginning at *addr* to the
       output.
 
-.. word:: gets		( addr n -- str )
+.. word:: gets		( addr n -- str ) |K|
 
    An interface to the function :c:func:`fgets()` from libc.
 
@@ -34,7 +34,7 @@ Input/Output
    and nothing is written to the buffer at *addr*, not even a
    terminating zero.
 
-.. word:: accept		( addr n -- n' )
+.. word:: accept		( addr n -- n' ) |K|
 
    Read a line from the standard input and store it as a
    zero-terminated string with maximal length *n* in the buffer at
@@ -47,19 +47,19 @@ Input/Output
 
    .. source:: [Reva]_, ANSI. Modified for zero-terminated strings.
 
-.. word:: .( "dot-paren"
+.. word:: .( |K|, "dot-paren"
 
    Print the characters that follow this word in the input file to the
    output, until the next ``)``. The closing bracket is not printed.
 
    .. source:: [Forth83]_
 
-.. word:: cr "c-r"
+.. word:: cr |K|, "c-r"
 
    Begin a new output line.
 
    .. source:: [Forth83]_
 
-.. word:: uh.		( addr -- )
+.. word:: uh.		( addr -- ) |K|
 
       Print the TOS as unsigned hexadecimal number, followed by a space.

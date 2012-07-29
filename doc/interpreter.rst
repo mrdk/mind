@@ -4,7 +4,7 @@ Interpreter
 Compiler Words
 ^^^^^^^^^^^^^^
 
-.. word:: [ 		|I|, "left-bracket"
+.. word:: [ 		|I|, |K|, "left-bracket"
 
    Switch the interpreter to interpreting mode. All words are now
    executed.
@@ -17,20 +17,20 @@ Interpreter Words
 
 These words are about reading and interpreting program text.
 
-.. word:: ]             "right-bracket"
+.. word:: ]             |K|, "right-bracket"
 
    Switch the interpreter to compiling mode. All words are now
    compiled, except for those that are immediate.
 
    .. source:: [Forth83]_
 
-.. word:: skip-whitespace
+.. word:: skip-whitespace  |K|
 
       Read from the current stream until the character at the current
       position is no longer an element of :word:`whitespace`. If this
       is already the case, then do nothing.
 
-.. word:: state		( -- addr )
+.. word:: state		( -- addr ) |K|
 
    State of the compiler. If the value is zero, all words are
    interpreted; if it is nonzero, words are compiled and only those
@@ -38,19 +38,19 @@ These words are about reading and interpreting program text.
 
    .. source:: [Forth83]_
 
-.. word:: (interpret)	( addr -- )
+.. word:: (interpret)	( addr -- ) |K|
 
       Search the string at *addr* in the dictionary and interpret or
       compile it, depending on the value of :word:`state`.
 
-.. word:: interpret
+.. word:: interpret |K|
 
    Read one word from the input and execute or compile it, depending
    on the the value of :word:`state`.
 
    .. source:: [Forth83]_, but different behaviour.
 
-.. word:: notfound
+.. word:: notfound |K|
 
       This word is called by default if a word is not found in the
       dictionary. It prints an error message and closes the input
@@ -59,7 +59,7 @@ These words are about reading and interpreting program text.
 
       This word is the value of :word:`word?` at startup.
 
-.. word:: word?		( -- addr )
+.. word:: word?		( -- addr ) |K|
 
       Contains a word that is executed when a string that cannot be
       found in the dictionary by :word:`(interpret)`. At system
@@ -69,7 +69,7 @@ These words are about reading and interpreting program text.
       )`; it expects the searched string at :word:`here`.
 
 
-.. word:: parse-to	( addr str -- )
+.. word:: parse-to	( addr str -- ) |K|
 
       Read a character sequence from the input stream and store it as
       a zero-terminated string at *addr*. The character sequence
@@ -78,7 +78,7 @@ These words are about reading and interpreting program text.
       input stream is directly after the first character not contained
       in *str*.
 
-.. word:: parse		( -- addr )
+.. word:: parse		( -- addr ) |K|
 
       Read a whitespace-terminated word from the input stream and
       return its address. Afterwards, the reading position in the
@@ -88,21 +88,21 @@ These words are about reading and interpreting program text.
       Currently the parsed word is located directly at the end of the
       dictionary.
 
-.. word:: (') 		( -- cfa )
+.. word:: (') 		( -- cfa ) |K|
 
       Read a word from the input and return its CFA. If it is not
       found, return 0.
 
-.. word:: (find)	( addr -- cfa )
+.. word:: (find)	( addr -- cfa ) |K|
 
       Search the string at addr in the dictionary and return its CFA.
       If it is not found, return 0.
 
-.. word:: \\ 		|I|
+.. word:: \\ 		|I|, |K|
 
       Start a comment that reaches to the end of the line.
 
-.. word:: ( 		|I|, "paren"
+.. word:: ( 		|I|, |K| "paren"
 
    Start a comment that reaches to the next ``)`` symbol or to the end
    of the page. Note that brackets are not nested.
@@ -115,25 +115,25 @@ Dictionary
 
 These are words to build data structures in the dictionary.
 
-.. word:: align
+.. word:: align |K|
 
       Increment (if necessary) the content of :word:`dp` so that it
       points to a valid address for a cell.
 
-.. word:: allot		( n -- )
+.. word:: allot		( n -- ) |K|
 
    Allocate *n* bytes at the end of the dictionary. (Afterwards it
    may be no longer aligned.
 
    .. source:: [Forth83]_
 
-.. word:: ,		( n -- ) "comma"
+.. word:: ,		( n -- ) |K|, "comma"
 
    Align the dictionary and put the cell n at its end.
 
    .. source:: [Forth83]_
 
-.. word:: c,		( b -- ) "c-comma"
+.. word:: c,		( b -- ) |K|, "c-comma"
 
    Put the byte b at the end of the dictionary.
 
@@ -145,20 +145,20 @@ These are words to build data structures in the dictionary.
    end of the dictionary. The space character immediately after the
    word does not belong to the string.
 
-.. word:: entry,	( str addr -- )
+.. word:: entry,	( str addr -- ) |K|
 
    Put a new entry at the end of the end of the dictionary. *str* is
    its name and *addr* is stored in its CFA field.
 
-.. word:: latest	( -- addr )
+.. word:: latest	( -- addr ) |K|
 
       Variable for the address of the latest dictionary entry.
 
-.. word:: dp		( -- addr )
+.. word:: dp		( -- addr ) |K|
 
       Dictionary Pointer. It contains the endpoint of the dictionary.
 
-.. word:: here		( -- addr )
+.. word:: here		( -- addr ) |K|
 
    Put the current value of the dictionary pointer onto the stack.
 

@@ -4,39 +4,39 @@ Control Flow
 Control Structures
 ^^^^^^^^^^^^^^^^^^
 
-.. word:: ;;
+.. word:: ;; |K|
 
       End the execution of the current word.
 
       .. source:: retroforth
 
-.. word:: if;		( n -- )
+.. word:: if;		( n -- ) |K|
 
       Leave the execution of the current word if the TOS is nonzero.
 
       .. source:: retroforth
 
-.. word:: 0; 		( 0 -- | n -- n )
+.. word:: 0; 		( 0 -- | n -- n ) |K|
 
       If the TOS is zero, drop it and end the execution of the current
       word.
 
       .. source:: retroforth
 
-.. word:: execute	( addr -- )
+.. word:: execute	( addr -- ) |K|
 
    Execute the word at addr.
 
    .. source:: [Forth83]_
 
-.. word:: branch
+.. word:: branch |K|
 
    Unconditional jump. The cell following this word contains the
    address of the jump target.
 
    .. source:: [Forth83]_
 
-.. word:: 0branch	( n -- )
+.. word:: 0branch	( n -- ) |K|
 
       Conditional jump. If *n* is zero, jump to the address in the
       next cell. If *n* is nonzero, continue with the execution of the
@@ -46,14 +46,14 @@ Control Structures
 Error Handling
 ^^^^^^^^^^^^^^
 
-.. word:: abort
+.. word:: abort |K|
 
    Stop the interpretation of the currently read text stream and
    return to the interactive mode by executing :word:`'abort`.
 
    .. source:: [Forth83]_
 
-.. word:: 'abort	( -- addr )
+.. word:: 'abort	( -- addr ) |K|
 
    Variable that contains a word that does is called after an error
    has occurred; it is expected to reset the parameter stack and the
@@ -63,7 +63,7 @@ Error Handling
 Starting and Ending
 ^^^^^^^^^^^^^^^^^^^
 
-.. word:: bye
+.. word:: bye |K|
 
       Leave the Forth system immediately.
 
@@ -92,7 +92,7 @@ Command Line Parameters
 
     The parameters set the following Forth variables:
 
-.. word:: start-command	( -- addr )
+.. word:: start-command	( -- addr ) |K|
 
       Variable containing the address of a string that is set by the
       command options :option:`-e` and :option:`-x`; otherwise its
@@ -103,7 +103,7 @@ Command Line Parameters
       :file:`start.mind` is read and before the system switches to
       interactive mode (if it does).
 
-.. word:: interactive-mode	( -- addr )
+.. word:: interactive-mode	( -- addr ) |K|
 
       Variable containing a flag that is set to :word:`false` by the
       command line options :option:`-e`. By default its value is
