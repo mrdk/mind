@@ -4,7 +4,7 @@ Interpreter
 Compiler Words
 ^^^^^^^^^^^^^^
 
-.. word:: [ 		immediate, "left-bracket"
+.. word:: [ 		|I|, "left-bracket"
 
    Switch the interpreter to interpreting mode. All words are now
    executed.
@@ -98,11 +98,11 @@ These words are about reading and interpreting program text.
       Search the string at addr in the dictionary and return its CFA.
       If it is not found, return 0.
 
-.. word:: \\ 		immediate
+.. word:: \\ 		|I|
 
       Start a comment that reaches to the end of the line.
 
-.. word:: ( 		immediate, "paren"
+.. word:: ( 		|I|, "paren"
 
    Start a comment that reaches to the next ``)`` symbol or to the end
    of the page. Note that brackets are not nested.

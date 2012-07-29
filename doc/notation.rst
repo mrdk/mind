@@ -31,10 +31,14 @@ Abbreviations in Stack Diagrams
 	arbitrary values.
 
 
-Tags
-----
+Flags
+-----
 
-immediate
+.. Abbreviation: |I|, defined in conf.py
+
+.. _immediate:
+
+*I* -- immediate
 
     The word is always executed, even during compilation. It has the
     "immediate" flag set in its header.
