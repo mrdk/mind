@@ -87,6 +87,9 @@ class WordDirective(ObjectDescription):
         name, stack, flags, say = match.groups()
         self.stack = stack
 
+        # Process flags text
+        flags, messages = self.state.inline_text(flags, self.lineno)
+
         signode += extras(0)
         signode += addnodes.desc_name(name, name)
         signode += extras(1)
@@ -97,7 +100,7 @@ class WordDirective(ObjectDescription):
                 signode += nodes.emphasis(s, s)
             signode += nodes.inline(' ', ' ')
         signode += extras(2)
-        signode += nodes.inline(flags, flags)
+        signode += flags
         signode += nodes.inline(' ', ' ')
         signode += nodes.emphasis(say, say)
         signode += extras(3)
