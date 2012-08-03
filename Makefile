@@ -11,13 +11,18 @@ mind.s: mind.c heads.c types.h
 test: mind
 	@./mind -e '.( Finished.) cr'
 
-stats:
-	@wc *.mind *.c Makefile *.org
-
-clean:
-	rm -f mind mind.o
-
 TAGS:
 	etags *.c *.h start.mind
 
-.PHONY: mind.s clean TAGS
+clean: docclean srclean
+
+srcclean:
+	rm -f mind mind.o
+
+docclean:
+	make -C doc/ clean
+
+html latexpdf linkcheck:
+	make -C doc/ $@
+
+.PHONY: mind.s srcclean docclean html latexpdf linkcheck TAGS
