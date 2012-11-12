@@ -114,13 +114,23 @@ Arithmetic
 Logic and Comparisons
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. word:: false		( -- flag ) |K|
-
-   Boolean flag for false.
-
 .. word:: true		( -- flag ) |K|
+          false		( -- flag ) |K|
 
-      Boolean flag for true.
+   Boolean flags for true and false. The value for :word:`true` is
+   `-1`, the value for :word:`false` is `0`, so that either all bytes
+   are set or all bytes are unset. This allows the replacement of
+   control structures with arithmetic operations, as described in
+   [ThinkingForth]_, p.243: It is then possible to replace code like
+   ::
+
+       IF  200  ELSE  0  THEN
+
+   with ::
+
+       200 and
+
+   .. source:: [Forth83]_
 
 .. word:: or		( n1 n2 -- n3 ) |K|
 
@@ -140,7 +150,7 @@ Logic and Comparisons
 
    .. source:: [Forth83]_
 
-.. word:: invert	( n1 -- n2 ) |K|
+.. word:: not           ( n1 -- n2 ) |K|
 
    Bitwise negation of the TOS.
 
@@ -150,7 +160,7 @@ Logic and Comparisons
 
    .. source:: [Forth83]_
 
-.. word:: <>		( n1 n2 -- flag ) |K|
+.. word:: <>		( n1 n2 -- flag ) |K|, "not-equals"
 
    Test whether *n1* and *n2* are different.
 
@@ -179,7 +189,7 @@ Logic and Comparisons
 
    .. source:: [Forth83]_
 
-.. word:: <=		( n1 n2 -- flag ) |K|
+.. word:: <=		( n1 n2 -- flag ) |K|, "less-than-or-equal"
 
    Test whether *n1* <= *n2*.
 
@@ -189,7 +199,7 @@ Logic and Comparisons
 
    .. source:: [Forth83]_
 
-.. word:: >=		( n1 n2 -- flag ) |K|
+.. word:: >=		( n1 n2 -- flag ) |K|, "greater-than-or-equal"
 
    Test whether *n1* >= *n2*.
 
@@ -199,15 +209,15 @@ Logic and Comparisons
 
    .. source:: [Forth83]_
 
-.. word:: u<=		( n1 n2 -- flag ) |K|
+.. word:: u<=		( n1 n2 -- flag ) |K|, "u-less-than-or-equal"
 
    Test whether *n1* <= *n2* as unsigned integers.
 
-.. word:: u>		( n1 n2 -- flag ) |K|
+.. word:: u>		( n1 n2 -- flag ) |K|, "u-greater-than"
 
    Test whether *n1* > *n2* as unsigned integers.
 
-.. word:: u>=		( n1 n2 -- flag ) |K|
+.. word:: u>=		( n1 n2 -- flag ) |K|, "u-greater-than-or-equal"
 
    Test whether *n1* >= *n2* as unsigned integers.
 
@@ -216,3 +226,5 @@ Logic and Comparisons
    True if *n0* <= *n* <= *n1*. The sequence of integers is here
    viewed as cyclic; the word works therefore with unsigned integers
    as well as with signed ones.
+
+   .. source:: [Retro]_, [volksForth]_

@@ -554,7 +554,7 @@ negate: FUNC1(-TOS);
 or:     FUNC2(NOS | TOS);
 and:    FUNC2(NOS & TOS);
 xor:    FUNC2(NOS ^ TOS);
-invert:	FUNC1(~TOS);
+not:	FUNC1(~TOS);
 
 divmod: // /mod ( n1 n2 -- div mod )
     {
