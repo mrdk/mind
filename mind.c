@@ -548,9 +548,9 @@ plus:   FUNC2(NOS + TOS); // +
 times:  FUNC2(NOS * TOS); // *
 divide: FUNC2(NOS / TOS); // /
 mod: 	FUNC2(NOS % TOS); // mod
-utimes: FUNC2((ucell)NOS * (ucell)TOS);  // u*
 udivide: FUNC2((ucell)NOS / (ucell)TOS); // u/
 abs:    FUNC1(cellabs(TOS));
+negate: FUNC1(-TOS);
 or:     FUNC2(NOS | TOS);
 and:    FUNC2(NOS & TOS);
 xor:    FUNC2(NOS ^ TOS);

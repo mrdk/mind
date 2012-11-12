@@ -5,6 +5,9 @@
 \ later version, at your choice. There is NO WARRANY, not at all. See
 \ the file "copying" for details.
 
+\ The words that are marked with a (L) belong to the core language;
+\ they are not just implementation details.
+
 \ Defining words
 
 here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
@@ -76,8 +79,9 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 : within+  ( n n0 n1 -- flag )	1+ within ; \ true if n0 <= n <= n1
 
-: max ( n1 n2 -- n3 )   2dup <  IF nip ELSE drop THEN ; \ Maximum of n1 and n2
-: min ( n1 n2 -- n3 )   2dup <  IF drop ELSE nip THEN ; \ Minimum of n1 and n2
+: ?nip ( n1 n2 flag -- n3 ) IF nip ELSE drop THEN ;
+: max ( n1 n2 -- n3 )   2dup <  ?nip ; \ Maximum of n1 and n2 (L)
+: min ( n1 n2 -- n3 )   2dup >  ?nip ; \ Minimum of n1 and n2 (L)
 
 
 \ Inlined strings
@@ -129,7 +133,7 @@ Variable base                   \ Base for number conversion.
 
 Variable #acc                   \ Number accumulator
 : accumulate ( n -- )           \ Put n as new last digit into #acc
-  #acc @  base @ u* +  #acc ! ;
+  #acc @  base @ * +  #acc ! ;
 
 : digit?   ( n -- ? )	base @ u< ; \ is n a digit under the current base?
 : digit>#  ( char -- n ? )
