@@ -250,8 +250,8 @@ Stringstream line-stream
          linebuf line-stream interpret-stream
          ." ok" cr  REPEAT ;
 
-: on  ( addr -- )   true swap ! ;
-: off ( addr -- )   false swap ! ;
+: on  ( addr -- )   true swap ! ; \ (L)
+: off ( addr -- )   false swap ! ; \ (L)
 
 Variable start-finished		\ Has start-command been executed?
 start-finished off

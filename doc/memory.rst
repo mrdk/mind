@@ -10,12 +10,6 @@ Memory Access
 
    .. source:: [Forth83]_
 
-.. word:: c@		( addr -- n ) |K|, "c-fetch"
-
-   Fetch the byte at *addr*.
-
-   .. source:: [Forth83]_
-
 .. word:: !		( n addr -- ) |K|, "store"
 
    Store one cell at *addr*.
@@ -28,11 +22,23 @@ Memory Access
 
    .. source:: [Forth83]_
 
+.. word:: c@		( addr -- n ) |K|, "c-fetch"
+
+   Fetch the byte at *addr*.
+
+   .. source:: [Forth83]_
+
 .. word:: c!		( n addr -- ) |K|, "c-store"
 
    Store one byte at *addr*.
 
    .. source:: [Forth83]_
+
+.. word:: on            ( addr -- )
+          off           ( addr -- )
+
+   Use the cell at *addr* as a binary flag. :word:`on` stores
+   :word:`true` at *addr* and :word:`off` stores :word:`false`.
 
 .. word:: malloc	( n -- addr ) |K|
 
@@ -48,11 +54,11 @@ Memory Access
 
       Compute the number of bytes used by *n1* cells.
 
-.. word:: cell+		( addr1 -- addr2 ) |K|
+.. word:: cell+		( addr1 -- addr2 ) |K|, "cell-plus"
 
       Increment the TOS by the size of one cell.
 
-.. word:: cell-		( addr1 -- addr2 ) |K|
+.. word:: cell-		( addr1 -- addr2 ) |K|, "cell-minus"
 
       Decrement the TOS by the size of one cell.
 
