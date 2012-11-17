@@ -99,6 +99,8 @@ E(rfrom, "r>", 0)
 E(rrto, ">rr", 0)
 E(rrfrom, "rr>", 0)
 E(rfetch, "r@", 0)
+E(rpfetch, "rp@", 0)
+E(rpstore, "rp!", 0)
 
 // Stack
 E(drop, "drop", 0)
