@@ -487,6 +487,11 @@ rrfrom: // rr> ( -- n )
 
 rfetch: FUNC0(*rp);
 
+rpfetch: FUNC0(rp); // rp@ ( -- addr )
+
+rpstore: // rp! ( addr -- )
+    rp = (cell*)TOS; DROP(1); goto next;
+
 // ---------------------------------------------------------------------------
 // Stack
 
