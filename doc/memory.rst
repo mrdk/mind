@@ -66,6 +66,10 @@ Memory Access
 Strings
 ^^^^^^^
 
+.. word:: "             ( <string>" -- ) |I|, "quote"
+          
+   String literal.
+
 .. word:: append	( addr char -- addr' ) |K|
 
       Store *char* at *addr* and add 1 to *addr*. This word can be
@@ -87,11 +91,11 @@ Strings
 
    .. source:: [Forth83]_
 
-.. word:: #eol		( -- char ) |K|
+.. word:: #eol		( -- char ) |K|, "number-e-o-l"
 
       Code for the "end of line" character.
 
-.. word:: #eof		( -- inchar ) |K|
+.. word:: #eof		( -- n ) |K|, "number-e-o-f"
 
       Code for the "end of file" constant (which is *not* a character)
 

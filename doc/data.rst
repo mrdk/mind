@@ -1,6 +1,39 @@
 Data structures
 ---------------
 
+Data Definitions
+^^^^^^^^^^^^^^^^
+
+.. word:: Create        ( <word> -- )
+
+   Create a new dictionary header. A statement :samp:`Create {foo}`
+   creates a new header for a word :word:`foo`. When :word:`foo` is
+   executed, it returns the address of the first cell behind its
+   header. This address is also the value of :word:`here` after
+   executing :word:`Create`.
+
+   It is then possible to allocate space in the dictionary with
+   :word:`allot`. A typical use of :word:`Create` is therefore in
+   phrases like :samp:`Create {foo} ... allot`.
+
+.. word:: does>         "does"
+
+   Used together with :word:`Create` or a word that calls it. The
+   typical use is in a definition of the form :samp:`: {Foo} Create
+   ... does> ... ;`.
+
+.. word:: Variable
+
+   :samp:`Variable {xxx}` creates a word :word:`xxx` with signature
+   ``( -- addr )``, where *addr* is the address of a newly allocated
+   cell in the dictionary.
+
+.. word:: Constant      ( n -- )
+
+   :samp:`n Constant {xxx}` creates a word :word:`xxx` with signature
+   `( -- n )`.
+
+
 Dictionary Structure
 ^^^^^^^^^^^^^^^^^^^^
 

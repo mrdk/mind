@@ -11,6 +11,30 @@ Compiler Words
 
    .. source:: [Forth83]_
 
+.. word:: \:            ( <word> -- flag1 ) "colon"
+          ;             ( flag2 -- ) |I|, "semicolon"
+
+   Words for the "colon definition" of further Forth words. A typical
+   colon definition has the form :samp:`: {name} ... ;`, and it
+   defines a new Forth word with the name *name*.
+
+   If the values of *flag1* and *flag2* are different, an error is
+   raised.
+
+.. word:: immediate
+
+   Set the *immediate*-flag for the most recently defined word.
+   Afterwards, this word is executed even during a compliation.
+
+.. word:: (")           ( -- addr ) "paren-quote"
+          (.")          "paren-dot-quote"
+          (abort")      "paren-abort"
+
+   Words that are compiled by words that use an inlined string, like
+   :word:`"`, :word:`."` and :word:`abort"`. In the compiled code they
+   are followed by a pointer to the address after the string and then
+   by the string itself.
+
 
 Interpreter Words
 ^^^^^^^^^^^^^^^^^

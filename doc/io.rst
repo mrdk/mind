@@ -47,6 +47,10 @@ Input/Output
 
    .. source:: [Reva]_, ANSI. Modified for zero-terminated strings.
 
+.. word:: ."            ( <string>" -- ) |I|, "dot-quote"
+
+   Print a string.
+
 .. word:: .( |K|, "dot-paren"
 
    Print the characters that follow this word in the input file to the

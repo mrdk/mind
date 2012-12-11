@@ -16,9 +16,9 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 ^dodefer Create-as ?pairs               ( n1 n2 -- )
 (') 2drop  (') ?pairs >doer !
 
-^docol Create-as :			( "name" -- )
+^docol Create-as :			( "name" -- ) \ (L)
 	] ^docol Create-as  1 state !   lit :  ;; [ drop
-: ;	   lit : ?pairs   lit ;; ,   0 state !   ;; [
+: ;	   lit : ?pairs   lit ;; ,   0 state !   ;; [ \ (L)
     drop                               \ drop flag created by `:`
 	#immediate  latest @ link>  flags! \ make immediate
 
@@ -26,11 +26,11 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 : 'latest ( -- cfa )    latest @ link> ;
 : immediate   'latest dup flags@  #immediate or  swap flags! ;
 
-: Create   ^dovar Create-as ;
-: does>    ^dodoes 'latest !   r> 'latest >doer ! ;
+: Create   ^dovar Create-as ;   \ (L)
+: does>    ^dodoes 'latest !   r> 'latest >doer ! ; \ (L)
 
-: Variable ( -- )     Create  1 cells allot ;
-: Constant ( n -- )   Create ,  does> @ ;
+: Variable ( -- )     Create  1 cells allot ; \ (L)
+: Constant ( n -- )   Create ,  does> @ ;     \ (L)
 
 : Defer    ( cfa -- )   ^dodefer Create-as  'latest >doer ! ;
 
@@ -91,13 +91,13 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 \ calling `'inlined`
 : 'inlined ( -- addr )   rr> dup @ >rr  cell+ ;
 
-: (.")  ( -- )       'inlined puts ; \ Print inlined string
-: (")   ( -- addr )  'inlined ;      \ Address of inlined string
+: (.")  ( -- )       'inlined puts ; \ Print inlined string (L)
+: (")   ( -- addr )  'inlined ;      \ Address of inlined string (L)
 
 : Stringlit ( cfa -- )   Create ,  immediate  does>  @ ,  >mark  ," >resolve ;
 
-' (.") Stringlit ."
-' (")  Stringlit  "
+' (.") Stringlit ."             \ (L)
+' (")  Stringlit  "             \ (L)
 
 
 \ Characters
