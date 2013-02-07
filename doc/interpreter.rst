@@ -112,14 +112,14 @@ These words are about reading and interpreting program text.
       Currently the parsed word is located directly at the end of the
       dictionary.
 
-.. word:: (') 		( -- cfa ) |K|
+.. word:: (') 		( -- xt ) |K|
 
-      Read a word from the input and return its CFA. If it is not
+      Read a word from the input and return its XT. If it is not
       found, return 0.
 
-.. word:: (find)	( addr -- cfa ) |K|
+.. word:: (find)	( addr -- xt ) |K|
 
-      Search the string at addr in the dictionary and return its CFA.
+      Search the string at addr in the dictionary and return its XT.
       If it is not found, return 0.
 
 .. word:: \\ 		|I|, |K|
@@ -172,7 +172,7 @@ These are words to build data structures in the dictionary.
 .. word:: entry,	( str addr -- ) |K|
 
    Put a new entry at the end of the end of the dictionary. *str* is
-   its name and *addr* is stored in its CFA field.
+   its name and *addr* is stored in its XT field.
 
 .. word:: latest	( -- addr ) |K|
 

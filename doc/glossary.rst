@@ -7,9 +7,9 @@ Glossary
         A unit of memory large enough to store an integer or an
         address.
   
-   CFA
-        Code Field Address. This is the address of a word such that
-        it can be executed.
+   XT
+        Execution token. This is the address of a word such that
+        it can be executed by :word:`execute`.
 
    flag
         A boolean value. If a word returns a flag, it is either 0, for

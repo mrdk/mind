@@ -20,8 +20,8 @@ Abbreviations in Stack Diagrams
    *str*
 	the start address of an zero-terminated string
 
-   *cfa*
-	"Code Field Address": The address of a word that can be
+   *xt*
+	"Execution Token": The address of a word that can be
 	executed.
 
    *n*

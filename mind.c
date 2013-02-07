@@ -1,5 +1,5 @@
 // mind -- a Forth interpreter
-// Copyright 2011-2012 Markus Redeker <cep@ibp.de>
+// Copyright 2011-2013 Markus Redeker <cep@ibp.de>
 //
 // Published under the GNU General Public License version 2 or any
 // later version, at your choice. There is NO WARRANY, not at all. See
@@ -37,23 +37,25 @@ enum wordnum_t {
 typedef void *label_t;		/* Target of computed goto. */
 
 typedef struct {
-    cell link;		 /* (entry*) points to previous entry.     */
-    cell name;		 /* (char*)  Pointer to start of word name */
+    cell link;      // (entry*)  Pointer to previous entry.
+    cell name;      // (char*)   Pointer to start of word name.
     char flags;
-    cell cfa;		 /* (label_t) code field address              */
-    cell doer;		 /* (cell*)   Forth routine for `does>` part. */
+    cell exec;      // (label_t) C code that executes this word.
+    cell doer;      // (cell*)   Forth routine for `does>` part.
     cell body[];
 } entry_t;
 
 #define NEW_ENTRY(label, wname, wflags)				\
-{   .link   = i_##label ? (cell)&dict[i_##label - 1] : 0,	\
+{   .link  = i_##label ? (cell)&dict[i_##label - 1] : 0,	\
     .flags = wflags,						\
     .name  = (cell)wname,					\
-    .cfa   = (cell)&&label,					\
+    .exec = (cell)&&label,					\
     .doer  = 0 },
 
-#define FROM_CFA(addr)							\
-    ((entry_t*)((char*)(addr) - offsetof(entry_t, cfa)))
+// Compute the address of an entry_t field when given an execution
+// token instead of the beginning of the struct.
+#define FROM_XT(xt)                                             \
+    ((entry_t*)((char*)(xt) - offsetof(entry_t, exec)))
 
 /* Find string *name* in dictionary, starting at *e*. */
 static entry_t *find_word(entry_t *e, char *name)
@@ -65,11 +67,11 @@ static entry_t *find_word(entry_t *e, char *name)
     return NULL;
 }
 
-/* Find CFA for *name* in dictionary, starting at *e*. */
-static cell* find_cfa(entry_t *e, char *name)
+/* Find XT for *name* in dictionary, starting at *e*. */
+static cell* find_xt(entry_t *e, char *name)
 {
     e = find_word(e, name);
-    return e? &e->cfa : NULL;
+    return e? &e->exec : NULL;
 }
 
 /* ----------------------------------------------------------------------- */
@@ -80,7 +82,7 @@ static cell* find_cfa(entry_t *e, char *name)
 	RPUSH(ip), ip = start; goto next;		\
     }
 
-#define C(label)  ((cell)(&dict[i_##label].cfa)) // Call to Forth word
+#define C(label)  ((cell)(&dict[i_##label].exec)) // Call to Forth word
 
 // ---------------------------------------------------------------------------
 // Reading text files and interactive input
@@ -237,17 +239,17 @@ next:				/* Address Interpreter */
     w = (label_t*)*ip++; goto **w;
 
 docol:				/* Runtime of ":" */
-    RPUSH(ip); ip = FROM_CFA(w)->body; goto next;
+    RPUSH(ip); ip = FROM_XT(w)->body; goto next;
 
 dodefer:			/* Runtime of Defer */
-    RPUSH(ip); w = (label_t*)FROM_CFA(w)->doer; goto **w;
+    RPUSH(ip); w = (label_t*)FROM_XT(w)->doer; goto **w;
 
 dovar:				/* Runtime of Variable */
-    PUSH(FROM_CFA(w)->body); goto next;
+    PUSH(FROM_XT(w)->body); goto next;
 
 dodoes: //			Runtime for Create ... does>
-    PUSH(FROM_CFA(w)->body);
-    RPUSH(ip); ip = (cell*)FROM_CFA(w)->doer; goto next;
+    PUSH(FROM_XT(w)->body);
+    RPUSH(ip); ip = (cell*)FROM_XT(w)->doer; goto next;
 
 docol_addr:   FUNC0(&&docol);
 dodefer_addr: FUNC0(&&dodefer);
@@ -284,11 +286,11 @@ paren_interpret: // (interpret)  ( ... addr -- ... )
 	DROP(1);
 	if (e) {
 	    if (sys.state && !(e->flags & IMMEDIATE)) {
-		COMMA(&e->cfa, cell);
+		COMMA(&e->exec, cell);
 		goto next;
 	    }
 	    else
-		w = (label_t*)&e->cfa;
+		w = (label_t*)&e->exec;
 	} else
 	    w = (label_t*)sys.wordq;
 
@@ -306,11 +308,11 @@ notfound: // Tell that the word at sys.dp could not be interpreted
 	goto abort;
     }
 
-parentick: // (') ( "word" -- cfa | 0 )
+parentick: // (') ( "word" -- xt | 0 )
     CODE(C(parse), C(parenfind));
 
-parenfind: // (find) ( addr -- cfa | 0 )
-    FUNC1(find_cfa((entry_t*)sys.latest, (char*)TOS));
+parenfind: // (find) ( addr -- xt | 0 )
+    FUNC1(find_xt((entry_t*)sys.latest, (char*)TOS));
 
 lbrack:	// [
     sys.state = 0; goto next;
@@ -421,7 +423,7 @@ entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
 	e->link = sys.latest;
 	e->name = NOS;
 	e->flags = 0;
-	e->cfa = TOS;
+	e->exec = TOS;
 	e->doer = 0;
 
 	sys.latest = (cell)e;
@@ -429,13 +431,13 @@ entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
 	goto next;
     }
 
-link_to:     FUNC1(&((entry_t*)TOS)->cfa);	// link>  ( lfa -- cfa )
-flags_fetch: FUNC1(FROM_CFA(TOS)->flags);	// flags@ ( cfa -- n )
-flags_store:					// flags! ( n cfa -- )
-    FROM_CFA(TOS)->flags = NOS; DROP(2); goto next;
+link_to:     FUNC1(&((entry_t*)TOS)->exec);	// link>  ( lfa -- xt )
+flags_fetch: FUNC1(FROM_XT(TOS)->flags);	// flags@ ( xt -- n )
+flags_store:					// flags! ( n xt -- )
+    FROM_XT(TOS)->flags = NOS; DROP(2); goto next;
 
-to_name: FUNC1(FROM_CFA(TOS)->name);	// >name ( cfa -- 'name )
-to_doer: FUNC1(&FROM_CFA(TOS)->doer);	// >doer ( cfa -- 'doer )
+to_name: FUNC1(FROM_XT(TOS)->name);	// >name ( xt -- 'name )
+to_doer: FUNC1(&FROM_XT(TOS)->doer);	// >doer ( xt -- 'doer )
 
 num_immediate: FUNC0(IMMEDIATE); // #immediate
 
