@@ -39,7 +39,7 @@ def forth_sortname(name):
     if match:
         pair = match.group(2), match.group(1)
     else:
-        pair = name, u''
+        pair = name.lower(), u''
 
     c = pair[0][0]
     if c in string.letters or c in string.digits:
