@@ -22,16 +22,36 @@ Data Definitions
    typical use is in a definition of the form :samp:`: {Foo} Create
    ... does> ... ;`.
 
-.. word:: Variable
+.. word:: Variable      ( <word> -- )
 
    :samp:`Variable {xxx}` creates a word :word:`xxx` with signature
    ``( -- addr )``, where *addr* is the address of a newly allocated
    cell in the dictionary.
 
-.. word:: Constant      ( n -- )
+.. word:: Constant      ( n <word> -- )
 
    :samp:`n Constant {xxx}` creates a word :word:`xxx` with signature
    `( -- n )`.
+
+.. word:: Alias         ( xt <word> -- )
+
+   Define a new word `word` that executes the word with the execution
+   token *xt*. It is typically used in the form :samp:`' {foo} Alias
+   {bar}`, which defines *bar* as a new name for *foo*.
+
+.. word:: Defer         ( <word> -- )
+
+   Like :word:`Alias`, except that the new word has not yet a defined
+   action. It must be later be set with :word:`is`. Before this has
+   been done, the execution of the newly defined word causes an error.
+   The word is typically used in the definition of mutually recursive
+   words.
+
+.. word:: is            ( xt <word> -- )
+
+   Change the activity of a deferred word. *word* must be defined with
+   :word:`Alias` or :word:`Defer`. The typical use is then :samp:`'
+   {foo} is {bar}`, which makes *foo* the new activity of *bar*.
 
 
 Dictionary Structure

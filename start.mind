@@ -32,25 +32,25 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 : Variable ( -- )     Create  1 cells allot ; \ (L)
 : Constant ( n -- )   Create ,  does> @ ;     \ (L)
 
-: Defer    ( xt -- )   ^dodefer Create-as  'latest >doer ! ;
+: Alias    ( xt -- )   ^dodefer Create-as  'latest >doer ! ; \ (L)
 
 
 \ Literals
 
-(') drop Defer ?exists ( xt -- ) \ abort if word does not exist
+(') drop Alias ?exists ( xt -- ) \ abort if word does not exist
 
 : '	  ( "word" -- xt )   (')  dup ?exists ;
 
 : literal,  ( n -- )            \ create { ' lit | n } in code.
   lit lit ,  , ;
 
-' literal, Defer literal ( n -- ) immediate
+' literal, Alias literal ( n -- ) immediate
 
 : ['] ( "word" --; Compile: -- xt )
   ' literal, ; immediate        \ Compile the XT of the following word
 : [compile] ( "word" -- )       \ Compile the following word
   ' , ;        immediate
-: is    ( xt "word" -- )       \ Set behaviour of `Defer` word
+: is    ( xt "word" -- )       \ Set behaviour of `Alias` word
   ' >doer ! ;
 
 
@@ -125,6 +125,9 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 
 : (?pairs)  ( n1 n2 -- )    <> abort" Mismatching control structure" ;
 ' (?pairs) is ?pairs
+
+: no-defer   true abort" undefined Defer" ; \ (L)
+: Defer      ['] no-defer Alias ; \ (L)
 
 
 \ Conversion: string to number
