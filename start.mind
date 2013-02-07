@@ -1,5 +1,5 @@
 \ mind -- a Forth interpreter					. o ( mind )
-\ Copyright 2011-2012 Markus Redeker <cep@ibp.de>
+\ Copyright 2011-2013 Markus Redeker <cep@ibp.de>
 \
 \ Published under the GNU General Public License version 2 or any
 \ later version, at your choice. There is NO WARRANY, not at all. See
@@ -23,7 +23,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 	#immediate  latest @ link>  flags! \ make immediate
 
 
-: 'latest ( -- cfa )    latest @ link> ;
+: 'latest ( -- xt )    latest @ link> ;
 : immediate   'latest dup flags@  #immediate or  swap flags! ;
 
 : Create   ^dovar Create-as ;   \ (L)
@@ -32,14 +32,14 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 : Variable ( -- )     Create  1 cells allot ; \ (L)
 : Constant ( n -- )   Create ,  does> @ ;     \ (L)
 
-: Defer    ( cfa -- )   ^dodefer Create-as  'latest >doer ! ;
+: Defer    ( xt -- )   ^dodefer Create-as  'latest >doer ! ;
 
 
 \ Literals
 
-(') drop Defer ?exists ( cfa -- ) \ abort if word does not exist
+(') drop Defer ?exists ( xt -- ) \ abort if word does not exist
 
-: '	  ( "word" -- cfa )   (')  dup ?exists ;
+: '	  ( "word" -- xt )   (')  dup ?exists ;
 
 : literal,  ( n -- )            \ create { ' lit | n } in code.
   lit lit ,  , ;
@@ -47,10 +47,10 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 ' literal, Defer literal ( n -- ) immediate
 
 : ['] ( "word" --; Compile: -- xt )
-  ' literal, ; immediate        \ Compile the CFA of the following word
+  ' literal, ; immediate        \ Compile the XT of the following word
 : [compile] ( "word" -- )       \ Compile the following word
   ' , ;        immediate
-: is    ( cfa "word" -- )       \ Set behaviour of `Defer` word
+: is    ( xt "word" -- )       \ Set behaviour of `Defer` word
   ' >doer ! ;
 
 
@@ -94,7 +94,7 @@ here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
 : (.")  ( -- )       'inlined puts ; \ Print inlined string (L)
 : (")   ( -- addr )  'inlined ;      \ Address of inlined string (L)
 
-: Stringlit ( cfa -- )   Create ,  immediate  does>  @ ,  >mark  ," >resolve ;
+: Stringlit ( xt -- )   Create ,  immediate  does>  @ ,  >mark  ," >resolve ;
 
 ' (.") Stringlit ."             \ (L)
 ' (")  Stringlit  "             \ (L)
@@ -271,7 +271,7 @@ start-finished off
   ?stack  sp@ >r  s0 @  BEGIN  dup r@ u>= WHILE  dup @ h.  cell- REPEAT
   drop rdrop ;
 
-: .name   ( cfa -- )   >name puts ;
+: .name   ( xt -- )   >name puts ;
 : words   latest  BEGIN @  ?dup WHILE  dup link> .name space  REPEAT ;
 
 
