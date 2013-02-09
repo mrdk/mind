@@ -412,7 +412,7 @@ comma_quote: // ,"
     CODE(C(here), C(lit), (cell)"\"", C(parse_to),
     	 C(here), C(strlen), C(oneplus), C(allot));
 
-entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
+entry_comma: // entry, ( a c -- )  Compile an entry with the name A, code C
     {
 	entry_t *e;
 
@@ -430,6 +430,13 @@ entry_comma: // ( a c -- )	Compile an entry with the name A, code field C
 	DROP(2);
 	goto next;
     }
+
+create_comma: // Create, ( 'interpreter <word> -- )
+    CODE(C(parse), C(dup), C(strlen), C(oneplus), C(allot),
+         C(swap), C(entry_comma));
+
+colon_comma: // :, ( <word> -- )
+    CODE(C(docol_addr), C(create_comma));
 
 link_to:     FUNC1(&((entry_t*)TOS)->exec);	// link>  ( lfa -- xt )
 flags_fetch: FUNC1(FROM_XT(TOS)->flags);	// flags@ ( xt -- n )

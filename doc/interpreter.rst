@@ -21,6 +21,18 @@ Compiler Words
    If the values of *flag1* and *flag2* are different, an error is
    raised.
 
+.. word:: \:,           ( <word> -- ) "colon-comma"
+
+   Create a header for the name *word* with the interpreter routine of
+   :word:`^docol`. This word performs the basic functionality of
+   word:`:`. A colon definition ::
+
+       : foo    ... ;
+
+   can then also be written as ::
+
+       :, foo   ] ...  ;; [
+
 .. word:: immediate
 
    Set the *immediate*-flag for the most recently defined word.

@@ -16,6 +16,12 @@ Data Definitions
    :word:`allot`. A typical use of :word:`Create` is therefore in
    phrases like :samp:`Create {foo} ... allot`.
 
+.. word:: Create,       ( 'interpreter <word> -- ) "create-comma"
+
+   Create an header for the name *word* with the interpreter routine
+   *'interpret*. This word performs the basic functionality of
+   :word:`Create`.
+
 .. word:: does>         "does"
 
    Used together with :word:`Create` or a word that calls it. The

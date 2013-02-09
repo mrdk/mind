@@ -10,29 +10,23 @@
 
 \ Defining words
 
-here ," Create-as"  ^docol entry,	( 'interpreter "name" -- )
-	] parse  dup strlen 1+ allot  swap entry,  ;; [
+:, 'latest ( -- xt )  ] latest @ link>  ;; [
+:, immediate          ] 'latest dup flags@  #immediate or  swap flags! ;; [
 
-^dodefer Create-as ?pairs               ( n1 n2 -- )
-(') 2drop  (') ?pairs >doer !
+:, Alias ( xt -- )    ] ^dodefer Create,  'latest >doer ! ;; [ \ (L)
 
-^docol Create-as :			( "name" -- ) \ (L)
-	] ^docol Create-as  1 state !   lit :  ;; [ drop
-: ;	   lit : ?pairs   lit ;; ,   0 state !   ;; [ \ (L)
-    drop                               \ drop flag created by `:`
-	#immediate  latest @ link>  flags! \ make immediate
+(') 2drop Alias ?pairs ( n1 n2 -- )
+
+:, : ( <word> -- )    ] :,  1 state !   lit :  ;; [   \ (L)
+:, ;                                                  \ (L)
+   ] lit : ?pairs  lit ;; ,   0 state !  ;; [  immediate
 
 
-: 'latest ( -- xt )    latest @ link> ;
-: immediate   'latest dup flags@  #immediate or  swap flags! ;
-
-: Create   ^dovar Create-as ;   \ (L)
+: Create   ^dovar Create, ;   \ (L)
 : does>    ^dodoes 'latest !   r> 'latest >doer ! ; \ (L)
 
 : Variable ( -- )     Create  1 cells allot ; \ (L)
 : Constant ( n -- )   Create ,  does> @ ;     \ (L)
-
-: Alias    ( xt -- )   ^dodefer Create-as  'latest >doer ! ; \ (L)
 
 
 \ Literals
