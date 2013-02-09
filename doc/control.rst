@@ -4,28 +4,27 @@ Control Flow
 Control Structures
 ^^^^^^^^^^^^^^^^^^
 
-.. word:: ;; |K|
+.. word:: ;;  |K|, "semi-semi"
 
-      End the execution of the current word.
+   Jump out of the current word.
 
-      .. source:: retroforth
+   .. source:: [Retro]_
 
-.. word:: if;		( n -- ) |K|
+.. word:: if;		( n -- ) |K|, "if-semi"
 
-      Leave the execution of the current word if the TOS is nonzero.
+   Jump out of the current word only if the TOS is nonzero.
 
-      .. source:: retroforth
+   .. source:: [Retro]_
 
-.. word:: 0; 		( 0 -- | n -- n ) |K|
+.. word:: 0; 		( 0 -- | n -- n ) |K|, "zero-semi"
 
-      If the TOS is zero, drop it and end the execution of the current
-      word.
+   If the TOS is zero, drop it and jump out of the current word.
 
-      .. source:: retroforth
+   .. source:: [Retro]_
 
-.. word:: execute	( addr -- ) |K|
+.. word:: execute	( xt -- ) |K|
 
-   Execute the word at addr.
+   Execute the word with the given execution token.
 
    .. source:: [Forth83]_
 
@@ -36,7 +35,7 @@ Control Structures
 
    .. source:: [Forth83]_
 
-.. word:: 0branch	( n -- ) |K|
+.. word:: 0branch	( n -- ) |K|, "zero-branch"
 
       Conditional jump. If *n* is zero, jump to the address in the
       next cell. If *n* is nonzero, continue with the execution of the
@@ -53,7 +52,7 @@ Error Handling
 
    .. source:: [Forth83]_
 
-.. word:: 'abort	( -- addr ) |K|
+.. word:: 'abort	( -- addr ) |K|, "tick-abort"
 
    Variable that contains a word that does is called after an error
    has occurred; it is expected to reset the parameter stack and the
@@ -76,7 +75,7 @@ Starting and Ending
 Command Line Parameters
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-:program:`mind` has the following command line parameters:
+The program :program:`mind` has the following command line parameters:
 
     .. option:: -e <cmd>
 
