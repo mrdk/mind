@@ -30,6 +30,10 @@ Abbreviations in Stack Diagrams
    *a*, *b*, *c*
 	arbitrary values.
 
+   *<word>*
+        a word that is read from the input stream. Words are sequences
+        of nonblank characters.
+
 
 Flags
 -----

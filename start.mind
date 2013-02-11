@@ -11,7 +11,8 @@
 \ Defining words
 
 :, 'latest ( -- xt )  ] latest @ link>  ;; [
-:, immediate          ] 'latest dup flags@  #immediate or  swap flags! ;; [
+:, immediate                    \ (L)
+   ] 'latest dup flags@  #immediate or  swap flags! ;; [
 
 :, Alias ( xt -- )    ] ^dodefer Create,  'latest >doer ! ;; [ \ (L)
 
@@ -33,18 +34,18 @@
 
 (') drop Alias ?exists ( xt -- ) \ abort if word does not exist
 
-: '	  ( "word" -- xt )   (')  dup ?exists ;
+: '	  ( <word> -- xt )   (')  dup ?exists ;
 
 : literal,  ( n -- )            \ create { ' lit | n } in code.
   lit lit ,  , ;
 
 ' literal, Alias literal ( n -- ) immediate
 
-: ['] ( "word" --; Compile: -- xt )
+: ['] ( <word> --; Compile: -- xt )
   ' literal, ; immediate        \ Compile the XT of the following word
-: [compile] ( "word" -- )       \ Compile the following word
+: [compile] ( <word> -- )       \ Compile the following word
   ' , ;        immediate
-: is    ( xt "word" -- )       \ Set behaviour of `Alias` word
+: is    ( xt <word> -- )       \ Set behaviour of `Alias` word
   ' >doer ! ;
 
 
