@@ -50,13 +50,11 @@ Return Stack
 
    Move the top of the return stack to the TOS.
 
-.. word:: >rr		( a -- ; R: b -- a b ) |K|, "to-r-r"
+.. word:: >rr		( a -- ; R: b -- a b ) |K|, |rv|, "to-r-r"
 
    Move the TOS to the second position of the return stack.
 
-   .. source:: [Reva]_
-
-.. word:: rr>		( -- a; R: a b -- b ) |K|, "r-r-from"
+.. word:: rr>		( -- a; R: a b -- b ) |K|, |rv|, "r-r-from"
 
    Move the second entry of the return stack to the TOS. The words
    :word:`rr>` and :word:`>rr` are helpful when one turns return stack
@@ -72,8 +70,6 @@ Return Stack
 
    because there is one more value on the return stack when :word:`r+`
    is called.
-
-   .. source:: [Reva]_
 
 .. word:: r@		( -- a ) |K|, |83|, "r-fetch"
 

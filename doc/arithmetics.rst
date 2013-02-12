@@ -7,8 +7,8 @@ two's complement notation. Positive signed numbers are binary
 equivalent to unsigned numbers of the same value. Memory addresses,
 when on the stack, are traditionally interpreted as unsigned integers.
 
-Arithmetic
-^^^^^^^^^^
+Arithmetics
+^^^^^^^^^^^
 
 .. word:: +		( n1 n2 -- n3 ) |K|, |83|, "plus"
 
@@ -174,10 +174,8 @@ Logic and Comparisons
 
    Test whether *n1* >= *n2* as unsigned integers.
 
-.. word:: within	( n n0 n1 -- flag ) |K|
+.. word:: within	( n n0 n1 -- flag ) |K|, |vf|, |rt|
 
    True if *n0* <= *n* <= *n1*. The sequence of integers is here
    viewed as cyclic; the word works therefore with unsigned integers
    as well as with signed ones.
-
-   .. source:: [Retro]_, [volksForth]_

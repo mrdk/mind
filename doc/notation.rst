@@ -43,7 +43,6 @@ Flags
 .. _immediate:
 
 *I* -- immediate
-
     The word is always executed, even during compilation. It has the
     "immediate" flag set in its header.
 
@@ -52,7 +51,6 @@ Flags
 .. _kernel:
 
 *K* -- kernel
-
     The word is defined in the kernel of :program:`mind`.
 
 .. Abbreviation: |83|, defined in conf.py
@@ -60,5 +58,27 @@ Flags
 .. _from-forth83:
 
 *83* -- Forth-83
-
      The word is defined in the [Forth83]_ standard.
+
+.. Abbreviation: |vf|, defined in conf.py
+
+.. _from-volksforth:
+
+*vf* -- volksForth
+     The word is defined in [volksForth]_ and not already part of
+     [Forth83]_.
+
+.. Abbreviation: |rt|, defined in conf.py
+
+.. _from-retro:
+
+*rt* -- retro
+     The word is part of [Retro]_.
+
+.. Abbreviation: |rv|, defined in conf.py
+
+.. _from-reva:
+
+*rv* -- Reva
+     The word is part of [Reva]_.
+

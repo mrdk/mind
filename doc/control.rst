@@ -4,23 +4,17 @@ Control Flow
 Control Structures
 ^^^^^^^^^^^^^^^^^^
 
-.. word:: ;;  |K|, "semi-semi"
+.. word:: ;;            |K|, |rt|, "semi-semi"
 
    Jump out of the current word.
 
-   .. source:: [Retro]_
-
-.. word:: if;		( n -- ) |K|, "if-semi"
+.. word:: if;		( n -- ) |K|, |rt|, "if-semi"
 
    Jump out of the current word only if the TOS is nonzero.
 
-   .. source:: [Retro]_
-
-.. word:: 0; 		( 0 -- | n -- n ) |K|, "zero-semi"
+.. word:: 0; 		( 0 -- | n -- n ) |K|, |rt|, "zero-semi"
 
    If the TOS is zero, drop it and jump out of the current word.
-
-   .. source:: [Retro]_
 
 .. word:: execute	( xt -- ) |K|, |83|
 

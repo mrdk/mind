@@ -71,6 +71,9 @@ rst_prolog = """
 .. |I| replace:: :ref:`I <immediate>`
 .. |K| replace:: :ref:`K <kernel>`
 .. |83| replace:: :ref:`83 <from-forth83>`
+.. |vf| replace:: :ref:`vf <from-volksforth>`
+.. |rt| replace:: :ref:`rt <from-retro>`
+.. |rv| replace:: :ref:`rv <from-reva>`
 """
 
 primary_domain = "forth"
