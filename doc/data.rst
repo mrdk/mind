@@ -4,7 +4,7 @@ Data structures
 Data Definitions
 ^^^^^^^^^^^^^^^^
 
-.. word:: Create        ( <word> -- )
+.. word:: Create        ( <word> -- ) |83|
 
    Create a new dictionary header. A statement :samp:`Create {foo}`
    creates a new header for a word :word:`foo`. When :word:`foo` is
@@ -22,19 +22,19 @@ Data Definitions
    *'interpret*. This word performs the basic functionality of
    :word:`Create`.
 
-.. word:: does>         "does"
+.. word:: does>         |83|, "does"
 
    Used together with :word:`Create` or a word that calls it. The
    typical use is in a definition of the form :samp:`: {Foo} Create
    ... does> ... ;`.
 
-.. word:: Variable      ( <word> -- )
+.. word:: Variable      ( <word> -- ) |83|
 
    :samp:`Variable {xxx}` creates a word :word:`xxx` with signature
    ``( -- addr )``, where *addr* is the address of a newly allocated
    cell in the dictionary.
 
-.. word:: Constant      ( n <word> -- )
+.. word:: Constant      ( n <word> -- ) |83|
 
    :samp:`n Constant {xxx}` creates a word :word:`xxx` with signature
    `( -- n )`.
@@ -73,17 +73,13 @@ The internal structure of the dictionary.
 
 .. word:: ^dodoes |K|
 
-.. word:: link>         |K|, "from-link"
-
-   .. source:: [Forth83]_
+.. word:: link>         |K|, |83|, "from-link"
 
 .. word:: flags@ |K|
 
 .. word:: flags! |K|
 
-.. word:: >name         |K|, "to-name"
-
-   .. source:: [Forth83]_
+.. word:: >name         |K|, |83|, "to-name"
 
 .. word:: >doer |K|
 

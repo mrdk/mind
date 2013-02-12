@@ -10,35 +10,26 @@ when on the stack, are traditionally interpreted as unsigned integers.
 Arithmetic
 ^^^^^^^^^^
 
-.. word:: +		( n1 n2 -- n3 ) |K|, "plus"
+.. word:: +		( n1 n2 -- n3 ) |K|, |83|, "plus"
 
    Compute the sum of *n1* and *n2*. This is the same in signed and in
    unsigned arithmetic.
 
-   .. source:: [Forth83]_
-
-.. word:: -		( n1 n2 -- n3 ) |K|, "minus"
+.. word:: -		( n1 n2 -- n3 ) |K|, |83|, "minus"
 
    Compute the difference *n1* - *n2*. This is the same in signed and
    in unsigned arithmetic.
 
-   .. source:: [Forth83]_
-
-.. word:: *		( n1 n2 -- n3 ) |K|, "times"
+.. word:: *		( n1 n2 -- n3 ) |K|, |83|, "times"
 
    Compute the product of *n1* and *n2*. This is the same in signed
    and unsigned arithmetic.
 
-   .. source:: [Forth83]_
+.. word:: /		( n1 n2 -- n3 ) |K|, |83|, "divide"
 
-.. word:: /		( n1 n2 -- n3 ) |K|, "divide"
-
-   Compute the quotient *n1* / *n2* as signed integer.
-
-   Currently this is C arithmetics, with rounding towards 0. (It may
-   be changed later.)
-
-   .. source:: [Forth83]_
+   Compute the quotient *n1* / *n2* as signed integer. Currently this
+   is C arithmetics, with rounding towards 0. (It may be changed
+   later.)
 
 .. word:: u/		( n1 n2 -- n3 ) |K|
 
@@ -48,33 +39,25 @@ Arithmetic
 
    Compute *n1* modulo *n2* in signed arithmetic.
 
-.. word:: /mod		( n1 n2 -- quot rem ) |K|, "divide-mod"
+.. word:: /mod		( n1 n2 -- quot rem ) |K|, |83|, "divide-mod"
 
    *quot* is *n1* / *n2* and *rem* is *n1* modulo *n2*. The
    computation is done in signed arithmetic.
 
-   .. source:: [Forth83]_
-
-.. word:: abs		( n -- u ) |K|, "absolute"
+.. word:: abs		( n -- u ) |K|, |83|, "absolute"
 
    Compute the absolute value of the TOS. The result can be
    interpreted as a signed and as an unsigned number.
 
-   .. source:: [Forth83]_
-
-.. word:: negate        ( n1 -- n2 ) |K|
+.. word:: negate        ( n1 -- n2 ) |K|, |83|
 
    Computer the negative if the TOS.
 
-   .. source:: [Forth83]_
-
-.. word::  max          ( n1 n2 -- n3 )
-           min          ( n1 n2 -- n3 )
+.. word::  max          ( n1 n2 -- n3 ) |83|
+           min          ( n1 n2 -- n3 ) |83|
 
    Compute the maximum and minimum of *n1* and *n2* in signed
    arithmetic.
-
-   .. source:: [Forth83]_
 
 .. word:: -1		( -- -1 ) |K|
           0		( -- 0 )  |K|
@@ -84,38 +67,30 @@ Arithmetic
    These numbers are defined as Forth words to shorten the compiled
    code and to make bootstrapping of the language easier.
 
-.. word:: 1+		( n -- n' ) |K|, "one-plus"
+.. word:: 1+		( n -- n' ) |K|, |83|, "one-plus"
 
    Add 1 to the TOS.
 
-   .. source:: [Forth83]_
-
-.. word:: 1-		( n -- n' ) |K|, "one-minus"
+.. word:: 1-		( n -- n' ) |K|, |83|, "one-minus"
 
    Subtract 1 from the TOS.
 
-   .. source:: [Forth83]_
-
-.. word:: 2*		( n -- n' ) |K|, "two-times"
+.. word:: 2*		( n -- n' ) |K|, |83|, "two-times"
 
    Multiplication with 2, as signed or unsigned integer. This is also
    a bitwise shift to the left.
 
-   .. source:: [Forth83]_
-
-.. word:: 2/		( n -- n' ) |K|, "two-divide"
+.. word:: 2/		( n -- n' ) |K|, |83|, "two-divide"
 
    Division by 2, as signed integer. This is also a bitwise shift to
    the right.
-
-   .. source:: [Forth83]_
 
 
 Logic and Comparisons
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. word:: true		( -- flag ) |K|
-          false		( -- flag ) |K|
+.. word:: true		( -- flag ) |K|, |83|
+          false		( -- flag ) |K|, |83|
 
    Boolean flags for true and false. The value for :word:`true` is
    `-1`, the value for :word:`false` is `0`, so that either all bytes
@@ -130,84 +105,62 @@ Logic and Comparisons
 
        200 and
 
-   .. source:: [Forth83]_
-
-.. word:: or		( n1 n2 -- n3 ) |K|
+.. word:: or		( n1 n2 -- n3 ) |K|, |83|
 
    Bitwise "or" of *n1* and *n2*.
 
-   .. source:: [Forth83]_
-
-.. word:: and		( n1 n2 -- n3 ) |K|
+.. word:: and		( n1 n2 -- n3 ) |K|, |83|
 
    Bitwise "and" of *n1* and *n2*.
 
-   .. source:: [Forth83]_
-
-.. word:: xor		( n1 n2 -- n3 ) |K|, "x-or"
+.. word:: xor		( n1 n2 -- n3 ) |K|, |83|, "x-or"
 
    Bitwise exclusive "or" of *n1* and *n2*.
-
-   .. source:: [Forth83]_
 
 .. word:: not           ( n1 -- n2 ) |K|
 
    Bitwise negation of the TOS.
 
-.. word:: =		( n1 n2 -- flag ) |K|, "equals"
+.. word:: =		( n1 n2 -- flag ) |K|, |83|, "equals"
 
    Test whether *n1* and *n2* are equal.
-
-   .. source:: [Forth83]_
 
 .. word:: <>		( n1 n2 -- flag ) |K|, "not-equals"
 
    Test whether *n1* and *n2* are different.
 
-.. word:: 0=		( n -- flag ) |K|, "zero-equals"
+.. word:: 0=		( n -- flag ) |K|, |83|, "zero-equals"
 
    Test whether the TOS is equal to 0. (This also inverts boolean
    flags.)
 
-   .. source:: [Forth83]_
-
-.. word:: 0<		( n -- flag ) |K|, "zero-less"
+.. word:: 0<		( n -- flag ) |K|, |83|, "zero-less"
 
    Test whether TOS < 0
 
-   .. source:: [Forth83]_
-
-.. word:: 0>		( n -- flag ) |K|, "zero-greater"
+.. word:: 0>		( n -- flag ) |K|, |83|, "zero-greater"
 
    Test whether TOS > 0
 
-   .. source:: [Forth83]_
-
-.. word:: <		( n1 n2 -- flag ) |K|, "less-than"
+.. word:: <		( n1 n2 -- flag ) |K|, |83|, "less-than"
 
    Test whether *n1* < *n2*.
-
-   .. source:: [Forth83]_
 
 .. word:: <=		( n1 n2 -- flag ) |K|, "less-than-or-equal"
 
    Test whether *n1* <= *n2*.
 
-.. word:: >		( n1 n2 -- flag ) |K|, "greater-than"
+.. word:: >		( n1 n2 -- flag ) |K|, |83|, "greater-than"
 
    Test whether *n1* > *n2*.
-
-   .. source:: [Forth83]_
 
 .. word:: >=		( n1 n2 -- flag ) |K|, "greater-than-or-equal"
 
    Test whether *n1* >= *n2*.
 
-.. word:: u<		( n1 n2 -- flag ) |K|, "u-less-than"
+.. word:: u<		( n1 n2 -- flag ) |K|, |83|, "u-less-than"
 
    Test whether *n1* < *n2* as unsigned integers.
-
-   .. source:: [Forth83]_
 
 .. word:: u<=		( n1 n2 -- flag ) |K|, "u-less-than-or-equal"
 
@@ -221,7 +174,7 @@ Logic and Comparisons
 
    Test whether *n1* >= *n2* as unsigned integers.
 
-.. word:: within		( n n0 n1 -- flag ) |K|
+.. word:: within	( n n0 n1 -- flag ) |K|
 
    True if *n0* <= *n* <= *n1*. The sequence of integers is here
    viewed as cyclic; the word works therefore with unsigned integers

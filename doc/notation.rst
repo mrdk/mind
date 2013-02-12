@@ -55,3 +55,10 @@ Flags
 
     The word is defined in the kernel of :program:`mind`.
 
+.. Abbreviation: |83|, defined in conf.py
+
+.. _from-forth83:
+
+*83* -- Forth-83
+
+     The word is defined in the [Forth83]_ standard.

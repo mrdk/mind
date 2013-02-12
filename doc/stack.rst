@@ -4,42 +4,35 @@ Stack Operations
 Parameter Stack
 ^^^^^^^^^^^^^^^
 
-.. word:: dup		( a -- a a ) |K|, "dupe"
-          over		( a b -- a b a ) |K|
+.. word:: dup		( a -- a a ) |K|, |83|, "dupe"
+          over		( a b -- a b a ) |K|, |83|
           under		( a b -- b a b ) |K|
-          drop		( a -- ) |K|
-          2drop		( a b -- ) |K|, "two-drop"
+          drop		( a -- ) |K|, |83|
+          2drop		( a b -- ) |K|, |83|, "two-drop"
           nip		( a b -- b ) |K|
-          swap		( a b -- b a ) |K|
-          rot		( a b c -- b c a ) |K|, "rote"
+          swap		( a b -- b a ) |K|, |83|
+          rot		( a b c -- b c a ) |K|, |83|, "rote"
           -rot		( a b c -- c a b ) |K|, "minus-rote"
 
    Basic stack operations.
-
-   .. source:: [Forth83]_ (:word:`dup`, :word:`over`, :word:`drop`,
-               :word:`2drop`, :word:`swap`, :word:`rot`)
 
 .. word:: ?dup		( 0 -- 0 | n -- n n ) |K|, "question-dupe"
 
       Duplicate the TOS only if it is nonzero
 
-.. word:: sp@		( -- addr ) |K|, "s-p-fetch"
+.. word:: sp@		( -- addr ) |K|, |83|, "s-p-fetch"
 
    Get the value of the stack pointer. ``sp@ @`` is equivalent to
    :word:`dup`.
-
-   .. source:: [Forth83]_
 
 .. word:: sp!		( addr -- ) |K|, "s-p-store"
 
       Make *addr* the new value of the stack pointer.
 
-.. word:: s0		( -- addr ) |K|, "s-zero"
+.. word:: s0		( -- addr ) |K|, |83|, "s-zero"
 
    Variable for the position of the stack pointer when the stack is
    empty
-
-   .. source:: [Forth83]_
 
 
 Return Stack
@@ -49,17 +42,13 @@ Return Stack
 
       Remove the top value of the return stack.
 
-.. word:: >r		( a -- ; R: -- a ) |K|, "to-r"
+.. word:: >r		( a -- ; R: -- a ) |K|, |83|, "to-r"
 
    Move the TOS to the top of the return stack.
 
-   .. source:: [Forth83]_
-
-.. word:: r>		( -- a; R: a -- ) |K|, "r-from"
+.. word:: r>		( -- a; R: a -- ) |K|, |83|, "r-from"
 
    Move the top of the return stack to the TOS.
-
-   .. source:: [Forth83]_
 
 .. word:: >rr		( a -- ; R: b -- a b ) |K|, "to-r-r"
 
@@ -86,11 +75,9 @@ Return Stack
 
    .. source:: [Reva]_
 
-.. word:: r@		( -- a ) |K|, "r-fetch"
+.. word:: r@		( -- a ) |K|, |83|, "r-fetch"
 
    Copy the top of the return stack to the TOS.
-
-   .. source:: [Forth83]_
 
 .. word:: rp@		( -- addr ) |K|, "r-p-fetch"
 

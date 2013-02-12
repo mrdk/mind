@@ -4,15 +4,13 @@ Interpreter
 Compiler Words
 ^^^^^^^^^^^^^^
 
-.. word:: [ 		|I|, |K|, "left-bracket"
+.. word:: [ 		|I|, |K|, |83|, "left-bracket"
 
    Switch the interpreter to interpreting mode. All words are now
    executed.
 
-   .. source:: [Forth83]_
-
-.. word:: \:            ( <word> -- flag1 ) "colon"
-          ;             ( flag2 -- ) |I|, "semicolon"
+.. word:: \:            ( <word> -- flag1 ) |83|, "colon"
+          ;             ( flag2 -- ) |83|, |I|, "semicolon"
 
    Words for the "colon definition" of further Forth words. A typical
    colon definition has the form :samp:`: {name} ... ;`, and it
@@ -53,12 +51,10 @@ Interpreter Words
 
 These words are about reading and interpreting program text.
 
-.. word:: ]             |K|, "right-bracket"
+.. word:: ]             |K|, |83|, "right-bracket"
 
    Switch the interpreter to compiling mode. All words are now
    compiled, except for those that are immediate.
-
-   .. source:: [Forth83]_
 
 .. word:: skip-whitespace  |K|
 
@@ -66,13 +62,11 @@ These words are about reading and interpreting program text.
       position is no longer an element of :word:`whitespace`. If this
       is already the case, then do nothing.
 
-.. word:: state		( -- addr ) |K|
+.. word:: state		( -- addr ) |83|, |K|
 
    State of the compiler. If the value is zero, all words are
    interpreted; if it is nonzero, words are compiled and only those
    with an immediate flag are executed.
-
-   .. source:: [Forth83]_
 
 .. word:: (interpret)	( addr -- ) |K|
 
@@ -82,9 +76,8 @@ These words are about reading and interpreting program text.
 .. word:: interpret |K|
 
    Read one word from the input and execute or compile it, depending
-   on the the value of :word:`state`.
-
-   .. source:: [Forth83]_, but different behaviour.
+   on the the value of :word:`state`. (The word occurs in [Forth83]_,
+   but with different behaviour.)
 
 .. word:: notfound |K|
 
@@ -103,7 +96,6 @@ These words are about reading and interpreting program text.
 
       The Forth word stored in :word:`word?` has the signature `( --
       )`; it expects the searched string at :word:`here`.
-
 
 .. word:: parse-to	( addr str -- ) |K|
 
@@ -138,12 +130,10 @@ These words are about reading and interpreting program text.
 
       Start a comment that reaches to the end of the line.
 
-.. word:: ( 		|I|, |K| "paren"
+.. word:: ( 		|I|, |K|, |83|, "paren"
 
    Start a comment that reaches to the next ``)`` symbol or to the end
    of the page. Note that brackets are not nested.
-
-   .. source:: [Forth83]_
 
 
 Dictionary
@@ -151,29 +141,23 @@ Dictionary
 
 These are words to build data structures in the dictionary.
 
-.. word:: align |K|
+.. word:: align         |K|
 
       Increment (if necessary) the content of :word:`dp` so that it
       points to a valid address for a cell.
 
-.. word:: allot		( n -- ) |K|
+.. word:: allot		( n -- ) |K|, |83|
 
    Allocate *n* bytes at the end of the dictionary. (Afterwards it
    may be no longer aligned.
 
-   .. source:: [Forth83]_
-
-.. word:: ,		( n -- ) |K|, "comma"
+.. word:: ,		( n -- ) |K|, |83|, "comma"
 
    Align the dictionary and put the cell n at its end.
 
-   .. source:: [Forth83]_
-
-.. word:: c,		( b -- ) |K|, "c-comma"
+.. word:: c,		( b -- ) |K|, |83|, "c-comma"
 
    Put the byte b at the end of the dictionary.
-
-   .. source:: [Forth83]_
 
 .. word:: ,"
 
@@ -194,8 +178,6 @@ These are words to build data structures in the dictionary.
 
       Dictionary Pointer. It contains the endpoint of the dictionary.
 
-.. word:: here		( -- addr ) |K|
+.. word:: here		( -- addr ) |K|, |83|
 
    Put the current value of the dictionary pointer onto the stack.
-
-   .. source:: [Forth83]_

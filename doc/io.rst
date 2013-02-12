@@ -1,18 +1,14 @@
 Input/Output
 ------------
 
-.. word:: emit		( n -- ) |K|
+.. word:: emit		( n -- ) |K|, |83|
 
    Send the character with number *n* to the output.
 
-   .. source:: [Forth83]_
-
-.. word:: type		( addr n -- ) |K|
+.. word:: type		( addr n -- ) |K|, |83|
 
    Send the sequence of characters of length *n* starting at *addr* to
    the output.
-
-   .. source:: [Forth83]_
 
 .. word:: puts		( addr -- ) |K|
 
@@ -51,18 +47,14 @@ Input/Output
 
    Print a string.
 
-.. word:: .( |K|, "dot-paren"
+.. word:: .(            |K|, |83|, "dot-paren"
 
    Print the characters that follow this word in the input file to the
    output, until the next ``)``. The closing bracket is not printed.
 
-   .. source:: [Forth83]_
-
-.. word:: cr |K|, "c-r"
+.. word:: cr |K|, |83|, "c-r"
 
    Begin a new output line.
-
-   .. source:: [Forth83]_
 
 .. word:: uh.		( addr -- ) |K|
 

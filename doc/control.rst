@@ -22,18 +22,14 @@ Control Structures
 
    .. source:: [Retro]_
 
-.. word:: execute	( xt -- ) |K|
+.. word:: execute	( xt -- ) |K|, |83|
 
    Execute the word with the given execution token.
 
-   .. source:: [Forth83]_
-
-.. word:: branch |K|
+.. word:: branch        |K|, |83|
 
    Unconditional jump. The cell following this word contains the
    address of the jump target.
-
-   .. source:: [Forth83]_
 
 .. word:: 0branch	( n -- ) |K|, "zero-branch"
 
@@ -45,12 +41,10 @@ Control Structures
 Error Handling
 ^^^^^^^^^^^^^^
 
-.. word:: abort |K|
+.. word:: abort         |K|, |83|
 
    Stop the interpretation of the currently read text stream and
    return to the interactive mode by executing :word:`'abort`.
-
-   .. source:: [Forth83]_
 
 .. word:: 'abort	( -- addr ) |K|, "tick-abort"
 

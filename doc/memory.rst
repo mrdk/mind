@@ -4,35 +4,25 @@ Memory Operations
 Memory Access
 ^^^^^^^^^^^^^
 
-.. word:: @		( addr -- n ) |K|, "fetch"
+.. word:: @		( addr -- n ) |K|, |83|, "fetch"
 
    Fetch the cell at *addr*.
 
-   .. source:: [Forth83]_
-
-.. word:: !		( n addr -- ) |K|, "store"
+.. word:: !		( n addr -- ) |K|, |83|, "store"
 
    Store one cell at *addr*.
 
-   .. source:: [Forth83]_
-
-.. word:: +!		( n addr -- ) |K|, "plus-store"
+.. word:: +!		( n addr -- ) |K|, |83|, "plus-store"
 
    Add *n* to the cell at *addr*.
 
-   .. source:: [Forth83]_
-
-.. word:: c@		( addr -- n ) |K|, "c-fetch"
+.. word:: c@		( addr -- n ) |K|, |83|, "c-fetch"
 
    Fetch the byte at *addr*.
 
-   .. source:: [Forth83]_
-
-.. word:: c!		( n addr -- ) |K|, "c-store"
+.. word:: c!		( n addr -- ) |K|, |83|, "c-store"
 
    Store one byte at *addr*.
-
-   .. source:: [Forth83]_
 
 .. word:: on            ( addr -- )
           off           ( addr -- )
@@ -85,11 +75,9 @@ Strings
    If *char* is contained in *str*, then return the position of its
    first occurrence. Otherwise return 0.
 
-.. word:: bl		( -- char ) |K|, "b-l"
+.. word:: bl		( -- char ) |K|, |83|, "b-l"
 
    Code for the "blank" character.
-
-   .. source:: [Forth83]_
 
 .. word:: #eol		( -- char ) |K|, "number-e-o-l"
 
