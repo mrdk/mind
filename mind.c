@@ -242,7 +242,7 @@ docol:				/* Runtime of ":" */
     RPUSH(ip); ip = FROM_XT(w)->body; goto next;
 
 dodefer:			/* Runtime of Defer */
-    RPUSH(ip); w = (label_t*)FROM_XT(w)->doer; goto **w;
+    w = (label_t*)FROM_XT(w)->doer; goto **w;
 
 dovar:				/* Runtime of Variable */
     PUSH(FROM_XT(w)->body); goto next;
