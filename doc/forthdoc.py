@@ -19,11 +19,10 @@ from sphinx.util.nodes import make_refnode
 from sphinx.util.compat import Directive
 
 
-html_extra = ['<table width="30%" style="display:inline-table">' +
-              '<tr><td>',
-              '</td></tr></table>',
-              '<span style="float:right">',
-              '</span>']
+html_extra = ['<span>',
+              '<span style="position:absolute; left:50%">',
+              '</span><span style="position:absolute; right:20px">',
+              '</span></span>']
 tex_extra = [r'\hbox to 0.3\textwidth{',
              r'\hss}',
              r'\hfill',
@@ -34,11 +33,11 @@ def extras(i):
             nodes.raw('', html_extra[i], format='html')]
 
 def forth_sortname(name):
-    match = re.match('([^a-zA-Z0-9]+)([a-zA-Z0-9].*)$', name)
+    match = re.match('([^a-zA-Z0-9]+)([a-zA-Z0-9].*)$', name.lower())
     if match:
-        pair = match.group(2).lower(), match.group(1)
+        pair = match.group(2), match.group(1)
     else:
-        pair = name.lower(), u''
+        pair = name, u''
 
     c = pair[0][0]
     if c in string.letters or c in string.digits:
