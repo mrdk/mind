@@ -33,7 +33,9 @@ def extras(i):
             nodes.raw('', html_extra[i], format='html')]
 
 def forth_sortname(name):
-    match = re.match('([^a-zA-Z0-9]+)([a-zA-Z0-9].*)$', name.lower())
+    name = name.lower()
+    
+    match = re.match('([^a-zA-Z0-9]+)([a-zA-Z0-9].*)$', name)
     if match:
         pair = match.group(2), match.group(1)
     else:
