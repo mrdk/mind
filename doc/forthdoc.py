@@ -20,7 +20,7 @@ from sphinx.util.compat import Directive
 
 
 html_extra = ['<span>',
-              '<span style="position:absolute; left:50%">',
+              '<span style="position:absolute; left:50%; margin-top:3px">',
               '</span><span style="position:absolute; right:20px">',
               '</span></span>']
 tex_extra = [r'\hbox to 0.3\textwidth{',
