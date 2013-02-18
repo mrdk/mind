@@ -1,5 +1,5 @@
 // mind -- a Forth interpreter
-// Copyright 2011-2012 Markus Redeker <cep@ibp.de>
+// Copyright 2011-2013 Markus Redeker <cep@ibp.de>
 //
 // Published under the GNU General Public License version 2 or any
 // later version, at your choice. There is NO WARRANY, not at all. See
@@ -168,7 +168,7 @@ E(cstore, "c!", 0)
 E(append, "append", 0)
 E(malloc, "malloc", 0)
 E(free, "free", 0)
-E(cells, "cells", 0)
+E(per_cell, "/cell", 0)
 E(cellplus, "cell+", 0)
 E(cellminus, "cell-", 0)
 

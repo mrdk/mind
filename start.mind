@@ -18,6 +18,7 @@
 
 :, Alias ( xt -- )    ] ^dodefer Create,  'latest >doer ! ;; [
 
+\ Create an alias for ?pairs so that it can be defined later.
 (') 2drop Alias ?pairs ( n1 n2 -- )
 
 :, : ( <word> -- )    ] :,  1 state !   lit :  ;; [
@@ -31,7 +32,7 @@
 : Create    ^dovar Create, ;
 : does>     ^dodoes 'latest !   r> 'latest >doer ! ;
 
-: Variable ( -- )     Create  1 cells allot ;
+: Variable ( -- )     Create  /cell allot ;
 : Constant ( n -- )   Create ,  does> @ ;
 
 
@@ -146,7 +147,7 @@
 ' (abort") Stringlit abort"
 
 : depth ( -- n )                \ Number of entries on the stack
-  s0 @   sp@ - [ 1 cells ] literal  / ;
+  s0 @   sp@ - /cell  / ;
 : ?stack   depth 0< abort" Stack empty" ;
 
 : (?pairs)  ( n1 n2 -- )    <> abort" Mismatching control structure" ;
@@ -199,6 +200,16 @@ Variable #acc                   \ Number accumulator
 : octal      8 base ! ;
 : decimal   10 base ! ;
 : hex       16 base ! ;
+
+\ ==== Now the bootstrapping of the language is complete ======================
+
+\ == Data structures ==
+\ on off cells
+
+: on  ( addr -- )   true swap ! ;
+: off ( addr -- )   false swap ! ;
+
+: cells ( n -- n' )   /cell * ;
 
 
 \ == Conversion: numbers to string (Modified f.i.g. model.) ==
@@ -280,10 +291,6 @@ Stringstream line-stream
          ." ok" cr  REPEAT ;
 
 \ == Command interpreter ==
-\ on off
-
-: on  ( addr -- )   true swap ! ;
-: off ( addr -- )   false swap ! ;
 
 Variable start-finished		\ Has start-command been executed?
 start-finished off

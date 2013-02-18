@@ -630,9 +630,9 @@ malloc: FUNC1(malloc(TOS)); // ( n -- addr )
 free:                       // ( addr -- )
     free((void*)TOS); DROP(1); goto next;
 
-cells:     FUNC1(TOS * sizeof(cell));
-cellplus:  FUNC1(TOS + sizeof(cell)); // cell+
-cellminus: FUNC1(TOS - sizeof(cell)); // cell-
+per_cell:  FUNC0(sizeof(cell));       // /cell ( -- n )
+cellplus:  FUNC1(TOS + sizeof(cell)); // cell+ ( n -- n' )
+cellminus: FUNC1(TOS - sizeof(cell)); // cell- ( n -- n' )
 
 strchr: FUNC2(strchr((char*)NOS, TOS)); // ( string char -- addr )
 strlen: FUNC1(strlen((char*)TOS)); // ( a -- # )

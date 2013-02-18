@@ -40,7 +40,11 @@ Memory Access
       Free the memory space at *addr*, which must have been allocated
       by :word:`malloc`.
 
-.. word:: cells		( n1 -- n2 ) |K|
+.. word:: /cell         ( -- n ) |K|, "per-cell"
+
+   Return the number of bytes per cell.
+
+.. word:: cells		( n1 -- n2 )
 
       Compute the number of bytes used by *n1* cells.
 
