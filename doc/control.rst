@@ -66,9 +66,9 @@ Implementation of Control Structures
       next cell. If *n* is nonzero, continue with the execution of the
       word after the next cell.
 
-.. word:: if,           ( n -- | Compile: -- addr ) |I|, |83|
-          else,         ( Compile: addr1 -- addr2 ) |I|, |83|
-          then,         ( Compile: addr -- ) |I|, |83|
+.. word:: if,           ( n -- | Compile: -- addr )
+          else,         ( Compile: addr1 -- addr2 )
+          then,         ( Compile: addr -- )
 
    Building blocks for conditional execution. With them the structure
    ::
@@ -81,9 +81,9 @@ Implementation of Control Structures
 
    No check for correct nesting is done.
 
-.. word:: begin,        ( Compile: -- addr ) |I|, |83|
-          while,        ( n -- | Compile: addr1 -- addr2 addr1 ) |I|, |83|
-          repeat,       ( Compile: addr -- ) |I|, |83|
+.. word:: begin,        ( Compile: -- addr )
+          while,        ( n -- | Compile: addr1 -- addr2 addr1 )
+          repeat,       ( Compile: addr -- )
 
    Building blocks for loops. With them the structure ::
 
