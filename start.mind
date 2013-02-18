@@ -5,32 +5,38 @@
 \ later version, at your choice. There is NO WARRANY, not at all. See
 \ the file "copying" for details.
 
-\ The words that are marked with a (L) belong to the core language;
-\ they are not just implementation details.
+\ At the beginning of each section (a section is marked by "==") there
+\ is a list of the words that are defined in the section and belong to
+\ the mind language proper.
 
-\ Defining words
+\ == Bootstrapping of colon definitions ==
+\ immediate Alias : ;
 
 :, 'latest ( -- xt )  ] latest @ link>  ;; [
-:, immediate                    \ (L)
+:, immediate                   
    ] 'latest dup flags@  #immediate or  swap flags! ;; [
 
-:, Alias ( xt -- )    ] ^dodefer Create,  'latest >doer ! ;; [ \ (L)
+:, Alias ( xt -- )    ] ^dodefer Create,  'latest >doer ! ;; [
 
 (') 2drop Alias ?pairs ( n1 n2 -- )
 
-:, : ( <word> -- )    ] :,  1 state !   lit :  ;; [   \ (L)
-:, ;                                                  \ (L)
+:, : ( <word> -- )    ] :,  1 state !   lit :  ;; [
+:, ;                                                 
    ] lit : ?pairs  lit ;; ,   0 state !  ;; [  immediate
 
 
-: Create   ^dovar Create, ;   \ (L)
-: does>    ^dodoes 'latest !   r> 'latest >doer ! ; \ (L)
+\ == Constant-like words ==
+\ Create does> Variable Constant
 
-: Variable ( -- )     Create  1 cells allot ; \ (L)
-: Constant ( n -- )   Create ,  does> @ ;     \ (L)
+: Create    ^dovar Create, ;
+: does>     ^dodoes 'latest !   r> 'latest >doer ! ;
+
+: Variable ( -- )     Create  1 cells allot ;
+: Constant ( n -- )   Create ,  does> @ ;
 
 
-\ Literals
+\ == Literals ==
+\ is
 
 (') drop Alias ?exists ( xt -- ) \ abort if word does not exist
 
@@ -49,7 +55,7 @@
   ' >doer ! ;
 
 
-\ Control structures
+\ == Control structures: building blocks ==
 
 : >mark    ( -- a )	align  here 0 , ;
 : >resolve ( a -- )	align  here swap ! ;
@@ -57,59 +63,69 @@
 : <mark    ( -- a )	align here ;
 : <resolve ( a -- )	, ;
 
-: if,   ( -- addr )         ['] 0branch ,  >mark ;     \ (L)
-: else, ( addr1 -- addr2 )  ['] branch ,   >mark  swap >resolve ; \ (L)
-: then, ( addr -- )         >resolve ;                            \ (L)
+
+\ == Control structures: conditionals ==
+\ if, else, then, IF ELSE THEN
+
+: if,   ( -- addr )         ['] 0branch ,  >mark ;
+: else, ( addr1 -- addr2 )  ['] branch ,   >mark  swap >resolve ;
+: then, ( addr -- )         >resolve ;
+
+: IF   ( -- addr flag )
+  if,  ['] if, ;  immediate
+: ELSE ( addr1 flag1 -- addr2 flag2 )
+  ['] if, ?pairs  else,  ['] else, ;  immediate 
 
 : ?then ( flag -- )             \ Are we inside an IF-ELSE-THEN structure?
   dup ['] if, <> [ if, ] ['] else, ?pairs [ else, ] drop [ then, ] ;
+: THEN ( addr flag -- )
+  ?then then, ;  immediate
 
-: IF   ( -- addr flag )       
-  if,  ['] if, ;  immediate     \ (L)
-: ELSE ( addr1 flag1 -- addr2 flag2 )
-  ['] if, ?pairs  else,  ['] else, ;  immediate \ (L)
-: THEN ( addr flag -- )        
-  ?then then, ;  immediate      \ (L)
 
-: begin,  ( -- a )        <mark ; \ (L)
-: while,  ( a -- a' a )   if, swap ; \ (L)
-: repeat, ( a -- )        ['] branch ,  <resolve ; \ (L)
+\ == Control structures: loops ==
+\ begin, while, repeat, BEGIN WHILE REPEAT
 
-: BEGIN ( -- 0 a )             
-  0  begin,  ['] begin, ;  immediate \ (L)
+: begin,  ( -- a )        <mark ;
+: while,  ( a -- a' a )   if, swap ;
+: repeat, ( a -- )        ['] branch ,  <resolve ;
+
+: BEGIN ( -- 0 a )
+  0  begin,  ['] begin, ;  immediate
 : WHILE ( a -- a' a )
-  ['] begin, ?pairs  while,  ['] begin, ;  immediate \ (L)
+  ['] begin, ?pairs  while,  ['] begin, ;  immediate
 : REPEAT ( 0 a'1 ... a'n a -- )
   ['] begin, ?pairs  repeat,
-  [ begin, ]  0;  then, [ repeat, ] ;  immediate \ (L)
+  [ begin, ]  0;  then, [ repeat, ] ;  immediate
 
 
-\ Number Comparison
+\ == Number Comparison ==
+\ min max
 
 : within+  ( n n0 n1 -- flag )	1+ within ; \ true if n0 <= n <= n1
 
 : ?nip ( n1 n2 flag -- n3 ) IF nip ELSE drop THEN ;
-: max ( n1 n2 -- n3 )   2dup <  ?nip ; \ Maximum of n1 and n2 (L)
-: min ( n1 n2 -- n3 )   2dup >  ?nip ; \ Minimum of n1 and n2 (L)
+: max ( n1 n2 -- n3 )   2dup <  ?nip ; \ Maximum of n1 and n2
+: min ( n1 n2 -- n3 )   2dup >  ?nip ; \ Minimum of n1 and n2
 
 
-\ Inlined strings
+\ == Inlined strings ==
+\ (.") (") ." "
 
 \ data structure: { ' 'inlined | ' end | data ... | }
 \ return address of data following in code, relative to the word
 \ calling `'inlined`
 : 'inlined ( -- addr )   rr> dup @ >rr  cell+ ;
 
-: (.")  ( -- )       'inlined puts ; \ Print inlined string (L)
-: (")   ( -- addr )  'inlined ;      \ Address of inlined string (L)
+: (.")  ( -- )       'inlined puts ; \ Print inlined string
+: (")   ( -- addr )  'inlined ;      \ Address of inlined string
 
 : Stringlit ( xt -- )   Create ,  immediate  does>  @ ,  >mark  ," >resolve ;
 
-' (.") Stringlit ."             \ (L)
-' (")  Stringlit  "             \ (L)
+' (.") Stringlit ."
+' (")  Stringlit  "
 
 
-\ Characters
+\ == Characters ==
 
 : char   ( "char" -- c )        \  Ascii (or other) code for "char"
   parse c@ ;
@@ -121,7 +137,8 @@
   0 max  BEGIN  ?dup WHILE 1- space REPEAT ;
 
 
-\ Debug tools
+\ == Debug tools ==
+\ no-defer Defer
 
 : .abort    ( str -- )	       ." Abort: "  here puts  space  puts  cr ;
 : do-abort  ( flag str -- )    swap IF  .abort abort  ELSE drop THEN ;
@@ -135,11 +152,11 @@
 : (?pairs)  ( n1 n2 -- )    <> abort" Mismatching control structure" ;
 ' (?pairs) is ?pairs
 
-: no-defer   true abort" undefined Defer" ; \ (L)
-: Defer      ['] no-defer Alias ; \ (L)
+: no-defer   true abort" undefined Defer" ;
+: Defer      ['] no-defer Alias ;
 
 
-\ Conversion: string to number
+\ == Conversion: string to number ==
 
 Variable base                   \ Base for number conversion.
 
@@ -167,7 +184,7 @@ Variable #acc                   \ Number accumulator
   get-sign swap  >unumber  * ;
 
 
-\ Add number conversion to the outer interpreter
+\ == Add number conversion to the outer interpreter ==
 
 : convert-number             \ Convert number at `here`, compile it if necessary
   here >number  state @ IF literal, THEN ;
@@ -184,7 +201,7 @@ Variable #acc                   \ Number accumulator
 : hex       16 base ! ;
 
 
-\ Conversion: numbers to string (Modified f.i.g. model.)
+\ == Conversion: numbers to string (Modified f.i.g. model.) ==
 
 128 Constant /numbuf
 Create numbuf  /numbuf 1+ allot
@@ -207,7 +224,7 @@ Variable 'num                  \ points to the beginning of the generated string
 : .     ( n -- )    (.)  puts space ;
 
 
-\ Line input
+\ == Line input ==
 
 : ?split   ( addr c -- )     \ if character at `addr` is `c`, split string there
   over c@ = IF  0 swap c!  ELSE drop THEN ;
@@ -262,8 +279,11 @@ Stringstream line-stream
          linebuf line-stream interpret-stream
          ." ok" cr  REPEAT ;
 
-: on  ( addr -- )   true swap ! ; \ (L)
-: off ( addr -- )   false swap ! ; \ (L)
+\ == Command interpreter ==
+\ on off
+
+: on  ( addr -- )   true swap ! ;
+: off ( addr -- )   false swap ! ;
 
 Variable start-finished		\ Has start-command been executed?
 start-finished off
@@ -277,7 +297,7 @@ start-finished off
 ' command-interpret 'abort !
 
 
-\ Debug and Display
+\ == Debug and Display ==
 
 : .s                            \ print content of stack
   ?stack  sp@ >r  s0 @  BEGIN  dup r@ u>= WHILE  dup @ h.  cell- REPEAT
