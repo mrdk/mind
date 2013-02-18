@@ -56,18 +56,32 @@
 
 : <mark    ( -- a )	align here ;
 : <resolve ( a -- )	, ;
-: >resolve-all ( a1 ... an n -- )    0;  swap >resolve  1- >resolve-all ;
 
+: if,   ( -- addr )         ['] 0branch ,  >mark ;     \ (L)
+: else, ( addr1 -- addr2 )  ['] branch ,   >mark  swap >resolve ; \ (L)
+: then, ( addr -- )         >resolve ;                            \ (L)
 
-: IF   ( -- a )      ['] 0branch ,  >mark ;  immediate
-: ELSE ( a1 -- a2 )  ['] branch ,   >mark  swap >resolve ;  immediate
-: THEN ( a -- )      >resolve ;  immediate
+: ?then ( flag -- )             \ Are we inside an IF-ELSE-THEN structure?
+  dup ['] if, <> [ if, ] ['] else, ?pairs [ else, ] drop [ then, ] ;
 
-: BEGIN ( -- 0 a )	0 <mark ;  immediate
-: WHILE ( n a -- a' n+1 a )
-    >r  ['] 0branch ,  >mark  swap 1+  r> ;  immediate
-: REPEAT ( a1 ... an n a -- )
-    ['] branch ,  <resolve  >resolve-all ;  immediate
+: IF   ( -- addr flag )       
+  if,  ['] if, ;  immediate     \ (L)
+: ELSE ( addr1 flag1 -- addr2 flag2 )
+  ['] if, ?pairs  else,  ['] else, ;  immediate \ (L)
+: THEN ( addr flag -- )        
+  ?then then, ;  immediate      \ (L)
+
+: begin,  ( -- a )        <mark ; \ (L)
+: while,  ( a -- a' a )   if, swap ; \ (L)
+: repeat, ( a -- )        ['] branch ,  <resolve ; \ (L)
+
+: BEGIN ( -- 0 a )             
+  0  begin,  ['] begin, ;  immediate \ (L)
+: WHILE ( a -- a' a )
+  ['] begin, ?pairs  while,  ['] begin, ;  immediate \ (L)
+: REPEAT ( 0 a'1 ... a'n a -- )
+  ['] begin, ?pairs  repeat,
+  [ begin, ]  0;  then, [ repeat, ] ;  immediate \ (L)
 
 
 \ Number Comparison
@@ -257,7 +271,7 @@ start-finished off
 : command-interpret
   start-command @  start-finished @ or IF  start-finished off
       start-command @ line-stream interpret-stream  THEN
-  interactive-mode @ IF 
+  interactive-mode @ IF
       line-interpret ELSE bye THEN ;
 
 ' command-interpret 'abort !

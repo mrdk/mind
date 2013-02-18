@@ -17,6 +17,11 @@ Abbreviations in Stack Diagrams
    *flag*
 	a boolean flag, either 0 or -1.
 
+   *cf*
+        a "compilation flag". These flags are left on the stack during
+        the compilation of control stuctures (like ``IF ... ELSE ...
+        THEN``) in order to check for correct nesting.
+
    *str*
 	the start address of an zero-terminated string
 

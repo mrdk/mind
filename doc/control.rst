@@ -1,8 +1,39 @@
 Control Flow
-------------
+============
 
 Control Structures
-^^^^^^^^^^^^^^^^^^
+------------------
+
+.. word:: IF            ( n -- | Compile: -- addr cf ) |I|, |83|
+          ELSE          ( Compile: addr1 cf1 -- addr2 cf2 ) |I|, |83|
+          THEN          ( Compile: addr cf -- ) |I|, |83|
+
+   Components of a control structure for conditional execution. They
+   are used either in the form ``IF ... THEN`` or ``IF ... ELSE ...
+   THEN``, otherwise an error is raised at compile time. If at the
+   time when :word:`IF` is reached the TOS is zero, the code after
+   :word:`IF` is execued, otherwise the code after :word:`ELSE`, if it
+   exists. Afterwards the execution continues after :word:`THEN`.
+
+   These words are the user interfaces to the more primitive words
+   :word:`if,`, :word:`else,` and :word:`then,`.
+
+.. word:: BEGIN       ( Compile: -- addr cf ) |I|, |83|
+          WHILE       ( n -- | Compile: addr1 cf1 -- addr2 addr1 cf2 ) |I|, |83|
+          REPEAT      ( Compile: addr1 .. addrn addr cf -- ) |I|, |83|
+
+   Components of a control structure for loops. They are used in the
+   form ::
+
+       BEGIN ... WHILE ... WHILE ... REPEAT
+   
+   with an arbitrary number of :word:`WHILE`\s. The code between
+   :word:`BEGIN` and :word:`REPEAT` is repeated until at some
+   :word:`WHILE` the TOS is a nonzero number. It is possible to omit
+   :word:`WHILE` completely; the result is an infinite loop.
+
+   These words are the user interfaces to the more primitive words
+   :word:`begin,`, :word:`while,` and :word:`repeat,`.
 
 .. word:: ;;            |K|, |rt|, "semi-semi"
 
@@ -20,6 +51,10 @@ Control Structures
 
    Execute the word with the given execution token.
 
+
+Implementation of Control Structures
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. word:: branch        |K|, |83|
 
    Unconditional jump. The cell following this word contains the
@@ -31,9 +66,39 @@ Control Structures
       next cell. If *n* is nonzero, continue with the execution of the
       word after the next cell.
 
+.. word:: if,           ( n -- | Compile: -- addr ) |I|, |83|
+          else,         ( Compile: addr1 -- addr2 ) |I|, |83|
+          then,         ( Compile: addr -- ) |I|, |83|
+
+   Building blocks for conditional execution. With them the structure
+   ::
+
+      IF ... ELSE ... THEN
+
+   can be expressed as :: 
+
+      [ if, ] ... [ else, ] ... [ then, ]
+
+   No check for correct nesting is done.
+
+.. word:: begin,        ( Compile: -- addr ) |I|, |83|
+          while,        ( n -- | Compile: addr1 -- addr2 addr1 ) |I|, |83|
+          repeat,       ( Compile: addr -- ) |I|, |83|
+
+   Building blocks for loops. With them the structure ::
+
+       BEGIN ... WHILE ... WHILE ... REPEAT
+
+   can be expressed as ::
+
+       [ begin, ]  ... [ while, ] ... [ while, ] ... [ repeat, then, then, ]
+
+   There must be as many :word:`then,` as there are :word:`while,`. No
+   check for correct nesting is done.
+
 
 Error Handling
-^^^^^^^^^^^^^^
+--------------
 
 .. word:: abort         |K|, |83|
 
@@ -48,7 +113,7 @@ Error Handling
 
 
 Starting and Ending
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 .. word:: bye |K|
 
@@ -61,7 +126,7 @@ Starting and Ending
 
 
 Command Line Parameters
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------
 
 The program :program:`mind` has the following command line parameters:
 
