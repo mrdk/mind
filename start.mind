@@ -13,8 +13,7 @@
 \ immediate Alias : ;
 
 :, 'latest ( -- xt )  ] latest @ link>  ;; [
-:, immediate
-   ] 'latest dup flags@  #immediate or  swap flags! ;; [
+:, immediate          ] 'latest dup flags@  #immediate or  swap flags! ;; [
 
 :, Alias ( xt -- )    ] ^dodefer Create,  'latest >doer ! ;; [
 
@@ -22,8 +21,8 @@
 (') 2drop Alias ?pairs ( n1 n2 -- )
 
 :, : ( <word> cf -- )    ] :,  1 state !   lit :  ;; [
-:, ; ( cf -- )
-   ] lit : ?pairs  lit ;; ,   0 state !  ;; [  immediate
+:, ; ( cf -- )           ] lit : ?pairs
+                           lit ;; ,   0 state !  ;; [  immediate
 
 
 \ == Constant-like words ==
@@ -38,19 +37,17 @@
 
 \ == Literals ==
 
-(') drop Alias ?exists ( xt -- ) \ abort if word does not exist
+\ create { ' lit | n } in code.
+: literal, ( n -- )   lit lit ,  , ;
 
-: '	  ( <word> -- xt )   (')  dup ?exists ;
+(') literal, Alias literal ( n -- )  immediate
+(') drop     Alias ?exists ( xt -- ) \ abort if word does not exist
 
-: literal,  ( n -- )            \ create { ' lit | n } in code.
-  lit lit ,  , ;
-
-' literal, Alias literal ( n -- ) immediate
-
-: ['] ( -- xt; Compile: <word> -- ) \ Compile the XT of the following word
-  ' literal, ;  immediate
-: [compile] ( Compile: <word> -- )  \ Compile the following word
-  ' , ;  immediate
+: '  ( <word> -- xt )                  (')  dup ?exists ;
+\ Compile the XT of the following word
+: [']  ( -- xt; Compile: <word> -- )   ' literal, ;  immediate
+\ Compile the following word
+: [compile]   ( Compile: <word> -- )   ' , ;  immediate
 
 
 \ == Control structures: building blocks ==
@@ -69,14 +66,14 @@
 : else, ( addr1 -- addr2 )  ['] branch ,   >mark  swap >resolve ;
 : then, ( addr -- )         >resolve ;
 
-: IF   ( -- addr flag )
+: IF   ( -- addr cf )
   if,  ['] if, ;  immediate
-: ELSE ( addr1 flag1 -- addr2 flag2 )
+: ELSE ( addr1 cf1 -- addr2 cf2 )
   ['] if, ?pairs  else,  ['] else, ;  immediate
 
-: ?then ( flag -- )             \ Are we inside an IF-ELSE-THEN structure?
+: ?then ( cf -- )               \ Are we inside an IF-ELSE-THEN structure?
   dup ['] if, <> [ if, ] ['] else, ?pairs [ else, ] drop [ then, ] ;
-: THEN ( addr flag -- )
+: THEN ( addr cf -- )
   ?then then, ;  immediate
 
 
@@ -96,7 +93,7 @@
   [ begin, ]  0;  then, [ repeat, ] ;  immediate
 
 
-\ == Number Comparison ==
+\ == Number comparison ==
 \ min max
 
 : within+  ( n n0 n1 -- flag )	1+ within ; \ true if n0 <= n <= n1
@@ -127,7 +124,7 @@
 
 : char   ( "char" -- c )        \  Ascii (or other) code for "char"
   parse c@ ;
-: [char] ( "char" --; Compile: -- c ) \ Compile code for "char"
+: [char] ( -- c; Compile: "char" -- ) \ Compile code for "char"
   char literal, ;  immediate
 
 : space    bl emit ;            \ Print a single space
@@ -179,21 +176,16 @@ Variable #acc                   \ Number accumulator
   get-sign swap  >unumber  * ;
 
 
-\ == Add number conversion to the outer interpreter ==
+\ Add number conversion to the outer interpreter
 
 : convert-number             \ Convert number at `here`, compile it if necessary
   here >number  state @ IF literal, THEN ;
 
 ' convert-number word? !        \ Activate number conversion
 
-
 2 base !
 1010 base !   \ going decimal
 
-: binary     2 base ! ;
-: octal      8 base ! ;
-: decimal   10 base ! ;
-: hex       16 base ! ;
 
 \ ==== Now the bootstrapping of the language is complete ======================
 
@@ -204,6 +196,15 @@ Variable #acc                   \ Number accumulator
 : off ( addr -- )   false swap ! ;
 
 : cells ( n -- n' )   /cell * ;
+
+
+\ == Control flow ==
+
+: perform ( `xt -- )   @ execute ;
+
+: later   rr> >r ;
+: push ( addr -- )       \ Save content of addr during execution of current word
+  dup >rr @ >rr  later  r> r> ! ;
 
 
 \ == Conversion: numbers to string (Modified f.i.g. model.) ==
@@ -223,10 +224,20 @@ Variable 'num                  \ points to the beginning of the generated string
 : #s ( u -- )	    BEGIN  ?dup WHILE  # REPEAT ;
 : #> ( -- addr )    'num @ ;
 
+
+\ == Number conversion ==
+
 : (u.)  ( u -- addr )    <# # #s #> ;
 : u.    ( u -- )    (u.) puts space ;
 : (.)   ( n -- addr )    dup abs  <# # #s hold-sign #> ;
 : .     ( n -- )    (.)  puts space ;
+
+: binary     2 base ! ;
+: octal      8 base ! ;
+: decimal   10 base ! ;
+: hex       16 base ! ;
+
+: h.    ( n -- )   base push  hex . ;
 
 
 \ == Line input ==
@@ -241,17 +252,6 @@ Variable 'num                  \ points to the beginning of the generated string
 
 256 Constant /linebuf
 Create linebuf  /linebuf 1+ allot
-
-
-0 cell+ Constant /cell
-
-: perform ( `xt -- )   @ execute ;
-
-: later   rr> >r ;
-: push ( addr -- )       \ Save content of addr during execution of current word
-  dup >rr @ >rr  later  r> r> ! ;
-
-: h. ( n -- )   base push  hex . ;
 
 
 : Textstream	Create /textstream allot ;
