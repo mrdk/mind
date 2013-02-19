@@ -9,15 +9,14 @@ Compiler Words
    Switch the interpreter to interpreting mode. All words are now
    executed.
 
-.. word:: \:            ( <word> -- flag1 ) |83|, "colon"
-          ;             ( flag2 -- ) |83|, |I|, "semicolon"
+.. word:: \:            ( <word> -- cf1 ) |83|, "colon"
+          ;             ( cf2 -- ) |83|, |I|, "semicolon"
 
    Words for the "colon definition" of further Forth words. A typical
    colon definition has the form :samp:`: {name} ... ;`, and it
    defines a new Forth word with the name *name*.
 
-   If the values of *flag1* and *flag2* are different, an error is
-   raised.
+   If the values of *cf1* and *cf2* are different, an error is raised.
 
 .. word:: \:,           ( <word> -- ) "colon-comma"
 

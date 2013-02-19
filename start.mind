@@ -13,7 +13,7 @@
 \ immediate Alias : ;
 
 :, 'latest ( -- xt )  ] latest @ link>  ;; [
-:, immediate                   
+:, immediate
    ] 'latest dup flags@  #immediate or  swap flags! ;; [
 
 :, Alias ( xt -- )    ] ^dodefer Create,  'latest >doer ! ;; [
@@ -21,23 +21,22 @@
 \ Create an alias for ?pairs so that it can be defined later.
 (') 2drop Alias ?pairs ( n1 n2 -- )
 
-:, : ( <word> -- )    ] :,  1 state !   lit :  ;; [
-:, ;                                                 
+:, : ( <word> cf -- )    ] :,  1 state !   lit :  ;; [
+:, ; ( cf -- )
    ] lit : ?pairs  lit ;; ,   0 state !  ;; [  immediate
 
 
 \ == Constant-like words ==
 \ Create does> Variable Constant
 
-: Create    ^dovar Create, ;
-: does>     ^dodoes 'latest !   r> 'latest >doer ! ;
+: Create ( <word> -- )   ^dovar Create, ;
+: does>                  ^dodoes 'latest !   r> 'latest >doer ! ;
 
-: Variable ( -- )     Create  /cell allot ;
-: Constant ( n -- )   Create ,  does> @ ;
+: Variable ( <word> -- )     Create  /cell allot ;
+: Constant ( <word> n -- )   Create ,  does> @ ;
 
 
 \ == Literals ==
-\ is
 
 (') drop Alias ?exists ( xt -- ) \ abort if word does not exist
 
@@ -48,12 +47,10 @@
 
 ' literal, Alias literal ( n -- ) immediate
 
-: ['] ( <word> --; Compile: -- xt )
-  ' literal, ; immediate        \ Compile the XT of the following word
-: [compile] ( <word> -- )       \ Compile the following word
-  ' , ;        immediate
-: is    ( xt <word> -- )       \ Set behaviour of `Alias` word
-  ' >doer ! ;
+: ['] ( -- xt; Compile: <word> -- ) \ Compile the XT of the following word
+  ' literal, ;  immediate
+: [compile] ( Compile: <word> -- )  \ Compile the following word
+  ' , ;  immediate
 
 
 \ == Control structures: building blocks ==
@@ -75,7 +72,7 @@
 : IF   ( -- addr flag )
   if,  ['] if, ;  immediate
 : ELSE ( addr1 flag1 -- addr2 flag2 )
-  ['] if, ?pairs  else,  ['] else, ;  immediate 
+  ['] if, ?pairs  else,  ['] else, ;  immediate
 
 : ?then ( flag -- )             \ Are we inside an IF-ELSE-THEN structure?
   dup ['] if, <> [ if, ] ['] else, ?pairs [ else, ] drop [ then, ] ;
@@ -139,22 +136,19 @@
 
 
 \ == Debug tools ==
-\ no-defer Defer
+\ no-defer Defer is
 
 : .abort    ( str -- )	       ." Abort: "  here puts  space  puts  cr ;
 : do-abort  ( flag str -- )    swap IF  .abort abort  ELSE drop THEN ;
 : (abort")  ( flag -- )        'inlined do-abort ;
 ' (abort") Stringlit abort"
 
-: depth ( -- n )                \ Number of entries on the stack
-  s0 @   sp@ - /cell  / ;
-: ?stack   depth 0< abort" Stack empty" ;
+: no-defer   true abort" undefined Defer" ;
+: Defer ( <word> -- )      ['] no-defer Alias ;
+: is    ( xt <word> -- )   ' >doer ! ;
 
 : (?pairs)  ( n1 n2 -- )    <> abort" Mismatching control structure" ;
 ' (?pairs) is ?pairs
-
-: no-defer   true abort" undefined Defer" ;
-: Defer      ['] no-defer Alias ;
 
 
 \ == Conversion: string to number ==
@@ -306,8 +300,12 @@ start-finished off
 
 \ == Debug and Display ==
 
+\ Number of entries on the stack
+: depth ( -- n )    s0 @   sp@ -  /cell / 1- ;
+: ?stack            depth 0< abort" Stack empty" ;
+
 : .s                            \ print content of stack
-  ?stack  sp@ >r  s0 @  BEGIN  dup r@ u>= WHILE  dup @ h.  cell- REPEAT
+  ?stack  sp@ >r  s0 @  BEGIN cell-  dup r@ u>= WHILE  dup @ h. REPEAT
   drop rdrop ;
 
 : .name   ( xt -- )   >name puts ;
