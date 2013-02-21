@@ -271,7 +271,6 @@ Constant /stringstream
   ['] strstream-forward  over >forward !
   ['] strstream-current@ over >current@ !
   ['] strstream-eos      over >eos !
-  0 over >#eos !
   drop ;
 
 : interpret-stream ( 'string 'stream -- )

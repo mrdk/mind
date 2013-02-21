@@ -111,13 +111,6 @@ structures for reading program text.
    address of its :word:`eos` routine. The routine has the signature (
    *stream* -- *bool* ).
 
-.. word:: >#eos		( 'textstream -- addr ) |K|
-
-      	The TOS contains the address of a textstream structure:
-      	compute the address of its :word:`eos` field. The field is one
-      	cell wide and contains the "end of stream" constant of this
-      	textstream.
-
 .. word:: >line#	( 'textstream -- addr ) |K|
 
       	The TOS contains the address of a textstream structure:
@@ -189,10 +182,6 @@ A file stream contains all the fields of a text stream, plus
 .. word:: eos		( -- flag ) |K|
 
       Test whether the end of the current stream is reached.
-
-.. word:: #eos		( -- inchar ) |K|
-
-      The "end of stream" constant for the current stream.
 
 .. word:: line#		( -- addr ) |K|
 

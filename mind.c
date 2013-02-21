@@ -91,7 +91,6 @@ typedef struct {
     cell forward;		// Forth word ( stream -- )
     cell current_fetch;		// Forth word ( stream -- char )
     cell eos;			// Forth word ( stream -- flag )
-    cell num_eos;		// integer: "end of stream constant"
     cell lineno;		// integer: line number
 } textstream_t;
 
@@ -106,7 +105,6 @@ static void open_textfile(textfile_t *inf, char* name, entry_t dict[])
     inf->stream.forward = C(file_forward);
     inf->stream.current_fetch = C(file_current_fetch);
     inf->stream.eos = C(file_eof);
-    inf->stream.num_eos = EOF;
     inf->stream.lineno = 1;
     inf->input = (cell)fopen(name, "r");
     inf->current = fgetc((FILE*)inf->input);
@@ -359,7 +357,6 @@ interactive_mode: FUNC0(&args.interactive);
 to_forward:     OFFSET(textstream_t, forward);	       // >forward
 to_current_fetch: OFFSET(textstream_t, current_fetch); // >current@
 to_eos:      OFFSET(textstream_t, eos);	     // >eos
-to_num_eos:  OFFSET(textstream_t, num_eos);  // >#eos
 to_lineno:   OFFSET(textstream_t, lineno);   // >line#
 per_textstream: FUNC0(sizeof(textstream_t)); // /textstream
 
@@ -380,8 +377,6 @@ current_fetch:			// current@ ( -- char )
 eos: // ( -- char )
     EXTEND(1); TOS = sys.instream;
     w = (label_t*)((textstream_t*)sys.instream)->eos; goto **w;
-
-num_eos: FUNC0(((textstream_t*)sys.instream)->num_eos);
 
 file_forward:       // ( stream -- )
     file_forward((textfile_t*)TOS); DROP(1); goto next;
