@@ -4,10 +4,16 @@ interface.
 
 DOCUMENTATION
 
-The documentation is currently written in the Emacs org-mode format,
-until we find something better. It is best viewed in an Emacs editor
-but should also be readable directly. You find the documentation in
-the *.org files.
+The documentation can be found in the doc/ subdirectory, in the *.rst
+files. It is written in the ReStructuredText format, for the Sphinx
+documentation system, but should be readable even without it. For the
+generation of HTML or PDF files Sphinx v1.0.8 is needed. In the
+current Debian release, "squeze", this version must be installed from
+the backports repository. (For details see
+http://backports.debian.org).
+
+If Sphinx is intstalled, type "make html" or "make latexpdf" from the
+main directory or from doc/ to get the documentation.
 
 COPYING
 
