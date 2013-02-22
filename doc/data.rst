@@ -140,8 +140,8 @@ A file stream contains all the fields of a text stream, plus
 
    The TOS contains the address of a filestream structure: compute the
    address of its :word:`>file` field. The field is one cell wide and
-   contains the underlying C file pointer :c:type:`FILE*` for this
-   stream.
+   contains the underlying C file pointer of type :c:type:`FILE*` for
+   this stream.
 
 .. word:: >current	( 'filestream -- addr ) |K|
 

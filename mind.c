@@ -354,7 +354,7 @@ interactive_mode: FUNC0(&args.interactive);
 // ---------------------------------------------------------------------------
 // Text streams
 
-to_forward:     OFFSET(textstream_t, forward);	       // >forward
+to_forward:  OFFSET(textstream_t, forward);            // >forward
 to_current_fetch: OFFSET(textstream_t, current_fetch); // >current@
 to_eos:      OFFSET(textstream_t, eos);	     // >eos
 to_lineno:   OFFSET(textstream_t, lineno);   // >line#
