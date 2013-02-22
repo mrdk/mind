@@ -469,7 +469,7 @@ latest:   FUNC0(&sys.latest);
 dp:       FUNC0(&sys.dp);
 here:     FUNC0(sys.dp);
 state:    FUNC0(&sys.state);
-wordq:    FUNC0(&sys.wordq);
+wordq:    FUNC0(&sys.wordq);    // word? ( -- addr )
 
 // ---------------------------------------------------------------------------
 // Return stack
@@ -489,7 +489,7 @@ rrto: // >rr ( n -- )
 rrfrom: // rr> ( -- n )
     EXTEND(1); TOS = rp[1]; rp[1] = rp[0]; rp++;  goto next;
 
-rfetch: FUNC0(*rp);
+rfetch: FUNC0(*rp); // r@ ( -- n)
 
 rpfetch: FUNC0(rp); // rp@ ( -- addr )
 
@@ -514,7 +514,7 @@ qdup: // ?dup ( 0 -- 0 | n -- n n  if n > 0)
 dup: // ( n -- n n )
     EXTEND(1); TOS = NOS; goto next;
 
-twodup: // a b -- a b a b
+twodup: // 2dup ( a b -- a b a b )
     EXTEND(2); NOS = sp[3]; TOS = sp[2]; goto next;
 
 over: // ( a b -- a b a )
@@ -542,10 +542,10 @@ spstore: // sp! ( addr -- )
 false: FUNC0(FALSE);
 true:  FUNC0(TRUE);
 
-zero: FUNC0(0);
-one:  FUNC0(1);
-minus_one: FUNC0(-1);
-two:  FUNC0(2);
+zero: FUNC0(0);                 //  0 ( -- n )
+one:  FUNC0(1);                 //  1 ( -- n )
+minus_one: FUNC0(-1);           // -1 ( -- n )
+two:  FUNC0(2);                 //  2 ( -- n )
 
 oneplus:  FUNC1(TOS + 1); // 1+  ( n -- n+1 )
 oneminus: FUNC1(TOS - 1); // 1-  ( n -- n-1 )
@@ -573,7 +573,7 @@ divmod: // /mod ( n1 n2 -- div mod )
 	goto next;
     }
 
-udivmod: // /mod ( u1 u2 -- div mod )
+udivmod: // u/mod ( u1 u2 -- div mod )
     {
 	ucell u1 = NOS, u2 = TOS;
 	NOS = u1 / u2;
