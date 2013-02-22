@@ -4,41 +4,35 @@ Notation
 Abbreviations in Stack Diagrams
 -------------------------------
 
-   *addr*
-        an address in memory.
+*addr*
+    an address in memory.
 
-   *char*
-        a text character: a number that fits into one byte.
+*char*
+    a text character: a number that fits into one byte.
 
-   *inchar*
-        an "input character": either a *char* or the constant
-        :word:`#eof`.
+*flag*
+    a boolean flag, either 0 or -1.
 
-   *flag*
-	a boolean flag, either 0 or -1.
+*cf*
+    a "compilation flag". These flags are left on the stack during the
+    compilation of control stuctures (like ``IF ... ELSE ... THEN``)
+    in order to check for correct nesting.
 
-   *cf*
-        a "compilation flag". These flags are left on the stack during
-        the compilation of control stuctures (like ``IF ... ELSE ...
-        THEN``) in order to check for correct nesting.
+*str*
+    the start address of an zero-terminated string
 
-   *str*
-	the start address of an zero-terminated string
+*xt*
+    "Execution Token": The address of a word that can be executed.
 
-   *xt*
-	"Execution Token": The address of a word that can be
-	executed.
+*n*
+    a number, or sometimes an arbitrary value
 
-   *n*
-	a number, or sometimes an arbitrary value
+*a*, *b*, *c*
+    arbitrary values.
 
-   *a*, *b*, *c*
-	arbitrary values.
-
-   *<word>*
-        a word that is read from the input stream. Words are sequences
-        of nonblank characters.
-
+*<word>*
+    a word that is read from the input stream. Words are sequences
+    of nonblank characters. 
 
 Flags
 -----
