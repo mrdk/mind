@@ -14,7 +14,7 @@ test: mind
 TAGS:
 	etags *.c *.h start.mind
 
-clean: docclean srclean
+clean: docclean srcclean
 
 srcclean:
 	rm -f mind mind.o
