@@ -15,9 +15,12 @@ from sphinx import addnodes
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Index, Domain, ObjType
 from sphinx.roles import XRefRole
+from sphinx.util import ws_re
 from sphinx.util.nodes import make_refnode
 from sphinx.util.compat import Directive
 
+
+rootcontext = u'~'
 
 html_extra = ['<span>',
               '<span style="position:absolute; left:50%; margin-top:3px">',
@@ -32,9 +35,9 @@ def extras(i):
     return [nodes.raw('', tex_extra[i], format='latex'),
             nodes.raw('', html_extra[i], format='html')]
 
-def forth_sortname(name):
+def forth_sortname(context, name):
     name = name.lower()
-    
+
     match = re.match('([^a-zA-Z0-9]+)([a-zA-Z0-9].*)$', name)
     if match:
         pair = match.group(2), match.group(1)
@@ -43,28 +46,52 @@ def forth_sortname(name):
 
     c = pair[0][0]
     if c in string.letters or c in string.digits:
-        return (1,) + pair
+        return (1,) + pair + (context,)
     else:
-        return (0,) + pair
+        return (0,) + pair + (context,)
 
 def forth_heading(c):
+    """Return the index header for a word beginning with *c*."""
     if c in string.letters or c in string.digits:
         return c.upper()
     else:
         return u'Symbols'
 
+def longname(context, name):
+    """Transform a word *name* with a given *context* into it normalised form.
+
+    The normalised form of a context
+    The root context, '~', specifies absolute context paths.
+    'ctx~', 'foo~ bar~'   -> 'ctx~ foo~ bar~'
+    'ctx~', '~ foo~ bar~' -> 'foo~ bar~'
+    'ctx~', '~'           -> '~'
+    '~', 'foo~ bar~'      -> 'foo~ bar~'
+    """
+    context = context.split()
+    name = name.split()
+
+    if name[0] == rootcontext:
+        return ' '.join(name[1:])
+    elif context[0] == rootcontext:
+        return ' '.join(context[1:] + name)
+    else:
+        return ' '.join(context + name)
+
 class ForthWord(object):
 
-    def __init__(self, name, docname, stack):
+    def __init__(self, context, name, docname, stack):
+        self.context = context
         self.name = name
         self.docname = docname
         self.stack = stack
 
+        self.longname = longname(context, name)
+
         # A somewhat brutal method to enforce a valid HTML anchor for
         # every Forth word is to encode it in base 64.
-        self.fullname = 'word-' + base64.b64encode(name)
+        self.fullname = 'word-' + base64.b64encode(self.longname)
 
-        self.sortname = forth_sortname(name)
+        self.sortname = forth_sortname(context, name)
         self.heading = forth_heading(self.sortname[1][0])
 
     def __repr__(self):
@@ -107,10 +134,24 @@ class WordDirective(ObjectDescription):
         return name
 
     def add_target_and_index(self, name_cls, sig, signode):
-        word = ForthWord(name_cls, self.env.docname, self.stack)
+        context = self.env.domaindata['forth']['currentcontext']
+        word = ForthWord(context, name_cls, self.env.docname, self.stack)
 
         signode['ids'].append(word.fullname)
-        self.env.domaindata['forth']['words'][name_cls] = word
+        self.env.domaindata['forth']['words'][word.longname] = word
+
+class CurrentcontextDirective(Directive):
+
+    required_arguments = 1
+    optional_arguments = 0
+    final_argument_whitespace = True
+    option_spec = {}
+    has_content = False
+
+    def run(self):
+        env = self.state.document.settings.env
+        env.domaindata['forth']['currentcontext'] = self.arguments[0]
+        return []
 
 class SourceDirective(Directive):
 
@@ -129,7 +170,10 @@ class SourceDirective(Directive):
         return [subnode] + messages
 
 class ForthXRefRole(XRefRole):
-    pass
+
+    def process_link(self, env, refnode, has_explicit_title, title, target):
+        context = env.domaindata['forth']['currentcontext']
+        return title.split()[-1], ws_re.sub(' ', longname(context, target))
 
 class ForthIndex(Index):
 
@@ -145,8 +189,9 @@ class ForthIndex(Index):
         for head, g in itertools.groupby(words, lambda w: w.heading):
             entries = []
             for w in g:
+                context = '' if w.context == rootcontext else w.context
                 entries += [(w.name, 0, w.docname, w.fullname,
-                             '', '', w.stack)]
+                             context, '', w.stack)]
             content += [(head, entries)]
         return (content, True)
 
@@ -159,14 +204,16 @@ class ForthDomain(Domain):
         }
     directives = {                      #: directive name -> directive class
         'word': WordDirective,
-        'source': SourceDirective
+        'source': SourceDirective,
+        'currentcontext': CurrentcontextDirective
         }
     roles = {                           # role name -> role callable
         'word' : ForthXRefRole()
         }
     indices = [ForthIndex]              # a list of Index subclasses
     initial_data = {                    # data value for a fresh environment
-        'words': {}                     # name -> ForthWord(name)
+        'words': {},                    # name -> ForthWord(name)
+        'currentcontext': rootcontext   # Name of the active context
         }
 
     def resolve_xref(self, env, fromdocname, builder,
@@ -178,7 +225,7 @@ class ForthDomain(Domain):
         except KeyError:
             return
 
- 
+
 def setup(app):
     # *app* is a Sphinx object in sphinx/application.py
     app.add_domain(ForthDomain)
