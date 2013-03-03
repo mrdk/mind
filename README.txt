@@ -8,18 +8,18 @@ The documentation can be found in the doc/ subdirectory, in the *.rst
 files. It is written in the ReStructuredText format, for the Sphinx
 documentation system, but should be readable even without it. For the
 generation of HTML or PDF files Sphinx v1.0.8 is needed. In the
-current Debian release, "squeze", this version must be installed from
+current Debian release, "squeeze", this version must be installed from
 the backports repository. (For details see
 http://backports.debian.org).
 
-If Sphinx is intstalled, type "make html" or "make latexpdf" from the
+If Sphinx is installed, type "make html" or "make latexpdf" from the
 main directory or from doc/ to get the documentation.
 
 COPYING
 
 The program is licensed under the GNU General Public License version 2
-or any later version, at your choice. There is NO WARRANY, not at all.
-See the file "copying" for details.
+or any later version, at your choice. There is NO WARRANTY, not at
+all. See the file "copying" for details.
 
 The documentation files are licensed under the Creative Commons
 Attribution-ShareAlike 3.0 Unported License. To view a copy of this
