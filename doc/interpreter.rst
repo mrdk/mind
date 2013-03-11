@@ -158,7 +158,7 @@ These are words to build data structures in the dictionary.
 
    Put the byte b at the end of the dictionary.
 
-.. word:: ,"
+.. word:: ,"            ( <string"> -- ) |vf|, "comma-quote"
 
    Read until the next ``"`` char and put the resulting string at the
    end of the dictionary. The space character immediately after the
@@ -169,11 +169,11 @@ These are words to build data structures in the dictionary.
    Put a new entry at the end of the end of the dictionary. *str* is
    its name and *addr* is stored in its XT field.
 
-.. word:: latest	( -- addr ) |K|
+.. word:: last          ( -- addr ) |K|, |83|
 
-      Variable for the address of the latest dictionary entry.
+   Variable for the address of the newest dictionary entry.
 
-.. word:: dp		( -- addr ) |K|
+.. word:: dp		( -- addr ) |K|, |vf|, "d-p"
 
       Dictionary Pointer. It contains the endpoint of the dictionary.
 

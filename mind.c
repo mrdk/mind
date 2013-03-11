@@ -5,13 +5,13 @@
 // later version, at your choice. There is NO WARRANY, not at all. See
 // the file "copying" for details.
 
+#include "types.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-#include "types.h"
 
 #define MEMCELLS 0x10000	/* Memory size in cells */
 
@@ -465,7 +465,7 @@ lit:				/* -- n */
 
 s0:       FUNC0(&sys.s0);
 r0:       FUNC0(&sys.r0);
-latest:   FUNC0(&sys.latest);
+last:     FUNC0(&sys.latest);
 dp:       FUNC0(&sys.dp);
 here:     FUNC0(sys.dp);
 state:    FUNC0(&sys.state);

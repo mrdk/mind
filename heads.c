@@ -86,7 +86,7 @@ E(lit, "lit", 0)
 // System variables
 E(s0, "s0",0)
 E(r0, "r0",0)
-E(latest, "latest",0)
+E(last, "last",0)
 E(dp, "dp",0)
 E(here, "here", 0)
 E(state, "state", 0)

@@ -12,10 +12,10 @@
 \ == Bootstrapping of colon definitions ==
 \ immediate Alias : ;
 
-:, 'latest ( -- xt )  ] latest @ link>  ;; [
-:, immediate          ] 'latest dup flags@  #immediate or  swap flags! ;; [
+:, 'last ( -- xt )    ] last @ link>  ;; [
+:, immediate          ] 'last dup flags@  #immediate or  swap flags! ;; [
 
-:, Alias ( xt -- )    ] ^dodefer Create,  'latest >doer ! ;; [
+:, Alias ( xt -- )    ] ^dodefer Create,  'last >doer ! ;; [
 
 \ Create an alias for ?pairs so that it can be defined later.
 (') 2drop Alias ?pairs ( n1 n2 -- )
@@ -29,7 +29,7 @@
 \ Create does> Variable Constant
 
 : Create ( <word> -- )   ^dovar Create, ;
-: does>                  ^dodoes 'latest !   r> 'latest >doer ! ;
+: does>                  ^dodoes 'last !   r> 'last >doer ! ;
 
 : Variable ( <word> -- )     Create  /cell allot ;
 : Constant ( <word> n -- )   Create ,  does> @ ;
@@ -316,7 +316,7 @@ start-finished off
   drop rdrop ;
 
 : .name   ( xt -- )   >name puts ;
-: words   latest  BEGIN @  ?dup WHILE  dup link> .name space  REPEAT ;
+: words   last  BEGIN @  ?dup WHILE  dup link> .name space  REPEAT ;
 
 
 \ Local Variables:
