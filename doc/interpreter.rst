@@ -67,10 +67,10 @@ These words are about reading and interpreting program text.
    interpreted; if it is nonzero, words are compiled and only those
    with an immediate flag are executed.
 
-.. word:: (interpret)	( addr -- ) |K|
+.. word:: exec/compile	( xt -- ) |K|, "exec-compile"
 
-      Search the string at *addr* in the dictionary and interpret or
-      compile it, depending on the value of :word:`state`.
+   Interpret or compile the word given by *xt*, depending on the value
+   of :word:`state`.
 
 .. word:: interpret |K|
 

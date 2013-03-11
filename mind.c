@@ -57,21 +57,14 @@ typedef struct {
 #define FROM_XT(xt)                                             \
     ((entry_t*)((char*)(xt) - offsetof(entry_t, exec)))
 
-/* Find string *name* in dictionary, starting at *e*. */
-static entry_t *find_word(entry_t *e, char *name)
-{
-    for (; e; e = (entry_t*)e->link) {
-	if (!strcmp((char*)e->name, name))
-	    return e;
-    }
-    return NULL;
-}
-
 /* Find XT for *name* in dictionary, starting at *e*. */
 static cell* find_xt(entry_t *e, char *name)
 {
-    e = find_word(e, name);
-    return e? &e->exec : NULL;
+    for (; e; e = (entry_t*)e->link) {
+	if (!strcmp((char*)e->name, name))
+	    return &e->exec;
+    }
+    return NULL;
 }
 
 /* ----------------------------------------------------------------------- */
@@ -277,12 +270,14 @@ execute: // ( a -- )
 // ---------------------------------------------------------------------------
 // Outer interpreter
 
-paren_interpret: // (interpret)  ( ... addr -- ... )
+exec_compile: // exec/compile ( xt -- )
     {
-	entry_t *e = find_word((entry_t*)sys.last, (char*)TOS);
-
+        cell xt = TOS;
 	DROP(1);
-	if (e) {
+
+	if (xt) {
+            entry_t *e = FROM_XT(xt);
+
 	    if (sys.state && !(e->flags & IMMEDIATE)) {
 		COMMA(&e->exec, cell);
 		goto next;
@@ -296,7 +291,7 @@ paren_interpret: // (interpret)  ( ... addr -- ... )
     }
 
 interpret:  // : interpret   parse (interpret) ;
-    CODE(C(parse), C(paren_interpret));
+    CODE(C(parse), C(parenfind), C(exec_compile));
 
 notfound: // Tell that the word at sys.dp could not be interpreted
     {

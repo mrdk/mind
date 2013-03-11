@@ -26,8 +26,8 @@ E(dovar_addr, "^dovar", 0)
 E(dodoes_addr, "^dodoes", 0)
 
 // Outer interpreter
-E(paren_interpret, "(interpret)", 0)
 E(interpret, "interpret", 0)
+E(exec_compile, "exec_compile", 0)
 E(notfound, "notfound", 0)
 E(parentick, "(')", 0)
 E(parenfind, "(find)", 0)
