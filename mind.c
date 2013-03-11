@@ -126,7 +126,7 @@ struct {
     cell r0;		     // (cell*) Start of the return stack
     cell dp;		     // (cell*) Dictionary pointer
     cell s0;		     // (cell*) Start of the parameter stack
-    cell latest;	     // (entry_t*) The latest definition
+    cell last;	             // (entry_t*) The last definition
     cell state;		     // Compiler state
     cell wordq;		     // Called if word not found (Name: Retro)
     cell tick_abort;	     // Called by `abort` to get an interactive prompt
@@ -140,7 +140,7 @@ static void init_sys(entry_t dict[])
     sys.r0 = (cell)(sys.mem + 100);
     sys.dp = sys.r0 + sizeof(cell);
     sys.s0 = (cell)(sys.mem + MEMCELLS - 0x10); // Top of memory + safety space
-    sys.latest = (cell)&dict[num_words - 1];
+    sys.last = (cell)&dict[num_words - 1];
     sys.state = 0;
     sys.wordq = C(notfound);
     sys.tick_abort = C(bye);
@@ -279,7 +279,7 @@ execute: // ( a -- )
 
 paren_interpret: // (interpret)  ( ... addr -- ... )
     {
-	entry_t *e = find_word((entry_t*)sys.latest, (char*)TOS);
+	entry_t *e = find_word((entry_t*)sys.last, (char*)TOS);
 
 	DROP(1);
 	if (e) {
@@ -310,7 +310,7 @@ parentick: // (') ( "word" -- xt | 0 )
     CODE(C(parse), C(parenfind));
 
 parenfind: // (find) ( addr -- xt | 0 )
-    FUNC1(find_xt((entry_t*)sys.latest, (char*)TOS));
+    FUNC1(find_xt((entry_t*)sys.last, (char*)TOS));
 
 lbrack:	// [
     sys.state = 0; goto next;
@@ -415,13 +415,13 @@ entry_comma: // entry, ( a c -- )  Compile an entry with the name A, code C
 	e = (entry_t*)sys.dp;
 	sys.dp += sizeof(entry_t);
 
-	e->link = sys.latest;
+	e->link = sys.last;
 	e->name = NOS;
 	e->flags = 0;
 	e->exec = TOS;
 	e->doer = 0;
 
-	sys.latest = (cell)e;
+	sys.last = (cell)e;
 	DROP(2);
 	goto next;
     }
@@ -465,7 +465,7 @@ lit:				/* -- n */
 
 s0:       FUNC0(&sys.s0);
 r0:       FUNC0(&sys.r0);
-last:     FUNC0(&sys.latest);
+last:     FUNC0(&sys.last);
 dp:       FUNC0(&sys.dp);
 here:     FUNC0(sys.dp);
 state:    FUNC0(&sys.state);
