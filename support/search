@@ -1,0 +1,7 @@
+#! /bin/bash
+#
+# usage: search <word>
+#
+# Searches <word> in the source and in the docmentation
+
+grep --colour "$*" *.c *.h doc/*.rst
