@@ -67,6 +67,12 @@ static cell* find_xt(entry_t *e, char *name)
     return NULL;
 }
 
+typedef struct {
+    cell link;                  // (context_t*) Previous context in chain
+    cell last;                  // (entry_t*)   The last definition
+    cell find_word;             // Forth word ( str ctx -- xt | 0 )
+} context_t;
+
 /* ----------------------------------------------------------------------- */
 /* Define hand-compiled Forth code */
 #define CODE(...)					\
@@ -119,10 +125,10 @@ struct {
     cell r0;		     // (cell*) Start of the return stack
     cell dp;		     // (cell*) Dictionary pointer
     cell s0;		     // (cell*) Start of the parameter stack
-    cell last;	             // (entry_t*) The last definition
     cell state;		     // Compiler state
-    cell wordq;		     // Called if word not found (Name: Retro)
+    cell wordq;		     // Called if word not found
     cell tick_abort;	     // Called by `abort` to get an interactive prompt
+    context_t root;          // root context
     textfile_t inf;	     // Input file
     cell instream;	     // (textstream_t*) Current input stream
     cell mem[MEMCELLS];	     // The memory
@@ -133,10 +139,12 @@ static void init_sys(entry_t dict[])
     sys.r0 = (cell)(sys.mem + 100);
     sys.dp = sys.r0 + sizeof(cell);
     sys.s0 = (cell)(sys.mem + MEMCELLS - 0x10); // Top of memory + safety space
-    sys.last = (cell)&dict[num_words - 1];
     sys.state = 0;
     sys.wordq = C(notfound);
     sys.tick_abort = C(bye);
+    sys.root.link = 0;
+    sys.root.last = (cell)&dict[num_words - 1];
+    sys.root.find_word = C(find_word);
     open_textfile(&sys.inf, "start.mind", dict);
     sys.instream = (cell)&sys.inf.stream;
 }
@@ -248,16 +256,16 @@ dovar_addr:   FUNC0(&&dovar);
 dodoes_addr:  FUNC0(&&dodoes);
 
 
-semi:	// ;;		    end of colon definition		[Name: Retro]
+semi:	// ;;		    end of colon definition
     ip = (cell*)RPOP; goto next;
 
-if_semi: // if; ( n -- )  exit if TOS <> 0			[Name: Retro]
+if_semi: // if; ( n -- )  exit if TOS <> 0
     if (*sp++) {
 	ip = (cell*)RPOP;
     }
     goto next;
 
-zero_semi:  // 0;  ( 0 -- | n -- n ) exit if TOS = 0		[Name: Retro]
+zero_semi:  // 0;  ( 0 -- | n -- n ) exit if TOS = 0
     if (!TOS) {
 	DROP(1);
 	ip = (cell*)RPOP;
@@ -291,7 +299,7 @@ exec_compile: // exec/compile ( xt -- )
     }
 
 interpret:  // : interpret   parse (interpret) ;
-    CODE(C(parse), C(parenfind), C(exec_compile));
+    CODE(C(parse), C(find), C(exec_compile));
 
 notfound: // Tell that the word at sys.dp could not be interpreted
     {
@@ -302,10 +310,13 @@ notfound: // Tell that the word at sys.dp could not be interpreted
     }
 
 parentick: // (') ( "word" -- xt | 0 )
-    CODE(C(parse), C(parenfind));
+    CODE(C(parse), C(find));
 
-parenfind: // (find) ( addr -- xt | 0 )
-    FUNC1(find_xt((entry_t*)sys.last, (char*)TOS));
+find: // find ( str -- xt | 0 )
+    CODE(C(lit), (cell)&sys.root, C(find_word));
+
+find_word: // find-word ( str ctx -- xt | 0 )
+    FUNC2(find_xt((entry_t*)((context_t*)TOS)->last, (char*)NOS));
 
 lbrack:	// [
     sys.state = 0; goto next;
@@ -410,13 +421,13 @@ entry_comma: // entry, ( a c -- )  Compile an entry with the name A, code C
 	e = (entry_t*)sys.dp;
 	sys.dp += sizeof(entry_t);
 
-	e->link = sys.last;
+	e->link = sys.root.last;
 	e->name = NOS;
 	e->flags = 0;
 	e->exec = TOS;
 	e->doer = 0;
 
-	sys.last = (cell)e;
+	sys.root.last = (cell)e;
 	DROP(2);
 	goto next;
     }
@@ -460,7 +471,7 @@ lit:				/* -- n */
 
 s0:       FUNC0(&sys.s0);
 r0:       FUNC0(&sys.r0);
-last:     FUNC0(&sys.last);
+last:     FUNC0(&sys.root.last);
 dp:       FUNC0(&sys.dp);
 here:     FUNC0(sys.dp);
 state:    FUNC0(&sys.state);

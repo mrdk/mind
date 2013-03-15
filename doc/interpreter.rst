@@ -55,12 +55,6 @@ These words are about reading and interpreting program text.
    Switch the interpreter to compiling mode. All words are now
    compiled, except for those that are immediate.
 
-.. word:: skip-whitespace  |K|
-
-      Read from the current stream until the character at the current
-      position is no longer an element of :word:`whitespace`. If this
-      is already the case, then do nothing.
-
 .. word:: state		( -- addr ) |83|, |K|
 
    State of the compiler. If the value is zero, all words are
@@ -87,7 +81,7 @@ These words are about reading and interpreting program text.
 
       This word is the value of :word:`word?` at startup.
 
-.. word:: word?		( -- addr ) |K|
+.. word:: word?		( -- addr ) |K|, |rt|
 
       Contains a word that is executed when a string that cannot be
       found in the dictionary by :word:`(interpret)`. At system
@@ -95,6 +89,12 @@ These words are about reading and interpreting program text.
 
       The Forth word stored in :word:`word?` has the signature `( --
       )`; it expects the searched string at :word:`here`.
+
+.. word:: skip-whitespace  |K|
+
+   Read from the current stream until the character at the current
+   position is no longer an element of :word:`whitespace`. If this is
+   already the case, do nothing.
 
 .. word:: parse-to	( addr str -- ) |K|
 
@@ -115,24 +115,34 @@ These words are about reading and interpreting program text.
       Currently the parsed word is located directly at the end of the
       dictionary.
 
-.. word:: (') 		( -- xt ) |K|
+.. word:: (') 		( <word> -- xt | 0 ) |K|, |vf|, "paren-tick"
 
-      Read a word from the input and return its XT. If it is not
-      found, return 0.
+   Read a word from the input and return its XT. If it is not found,
+   return 0.
 
-.. word:: (find)	( addr -- xt ) |K|
+.. word:: ' 		( <word> -- xt ) |83|, "tick"
 
-      Search the string at addr in the dictionary and return its XT.
-      If it is not found, return 0.
+   Read a word from the input and return its XT. If it is not found,
+   an error is raised.
 
-.. word:: \\ 		|I|, |K|
+.. word:: find          ( str -- xt | 0 ) |K|, |rv|
 
-      Start a comment that reaches to the end of the line.
+   Search the string *str* in the dictionary and return its XT. If it
+   is not found, return 0.
+
+.. word:: find-word     ( str ctx -- xt | 0 ) |K|, |rv|
+
+   Search the string *str* in the context *ctx* and return its XT. If
+   it is not found, return 0.
+
+.. word:: \\ 		|I|, |K|, |vf|, "skip-line"
+
+   Start of a comment that reaches to the end of the line.
 
 .. word:: ( 		|I|, |K|, |83|, "paren"
 
-   Start a comment that reaches to the next ``)`` symbol or to the end
-   of the page. Note that brackets are not nested.
+   Start a comment that reaches to the next ")" symbol or to the end
+   of the file. Note that brackets are not nested.
 
 
 Dictionary
