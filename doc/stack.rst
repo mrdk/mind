@@ -25,7 +25,7 @@ Parameter Stack
    Get the value of the stack pointer. ``sp@ @`` is equivalent to
    :word:`dup`.
 
-.. word:: sp!		( addr -- ) |K|, "s-p-store"
+.. word:: sp!		( addr -- ) |K|, |vf| "s-p-store"
 
       Make *addr* the new value of the stack pointer.
 
@@ -33,6 +33,11 @@ Parameter Stack
 
    Variable for the position of the stack pointer when the stack is
    empty
+
+.. word:: clearstack    ( ... -- ) |vf|
+
+   Empty the stack by resetting the stack pointer to the value of
+   :word:`s0`.
 
 
 Return Stack

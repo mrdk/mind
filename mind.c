@@ -301,7 +301,7 @@ exec_compile: // exec/compile ( xt -- )
 	goto **w;
     }
 
-interpret:  // : interpret   parse (interpret) ;
+interpret:  // : interpret   parse find exec/compile ;
     CODE(C(parse), C(find), C(exec_compile));
 
 notfound: // Tell that the word at sys.dp could not be interpreted
@@ -472,8 +472,6 @@ lit:				/* -- n */
 // ---------------------------------------------------------------------------
 // System variables
 
-s0:       FUNC0(&sys.s0);
-r0:       FUNC0(&sys.r0);
 last:     FUNC0(&sys.root.last);
 dp:       FUNC0(&sys.dp);
 here:     FUNC0(sys.dp);
@@ -500,9 +498,9 @@ rrfrom: // rr> ( -- n )
 
 rfetch: FUNC0(*rp); // r@ ( -- n)
 
-rpfetch: FUNC0(rp); // rp@ ( -- addr )
-
-rpstore: // rp! ( addr -- )
+r0:      FUNC0(&sys.r0);  //  r0 ( -- addr)
+rpfetch: FUNC0(rp);       // rp@ ( -- addr )
+rpstore:                  // rp! ( addr -- )
     rp = (cell*)TOS; DROP(1); goto next;
 
 // ---------------------------------------------------------------------------
@@ -539,11 +537,11 @@ rot: // ( a b c -- b c a )
 minus_rot: // ( a b c -- c a b )
     { cell tmp = TOS; TOS = NOS; NOS = sp[2]; sp[2] = tmp; goto next; }
 
-
-spfetch: FUNC0(&NOS); // sp@ ( -- addr )
-
-spstore: // sp! ( addr -- )
-    sp = (cell*)TOS; DROP(1); goto next;
+s0:      FUNC0(&sys.s0); // s0  ( -- addr)
+spfetch:                 // sp@ ( -- addr )
+    { cell *tmp = sp; FUNC0(tmp); }
+spstore:                 // sp! ( addr -- )
+    sp = (cell*)TOS; goto next;
 
 // ---------------------------------------------------------------------------
 // Arithmetics

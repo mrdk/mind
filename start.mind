@@ -293,11 +293,15 @@ Stringstream line-stream
 
 
 \ == Command interpreter ==
+\ clearstack
 
 Variable start-finished		\ Has start-command been executed?
 start-finished off
 
+: clearstack s0 @ sp! ;
+
 : command-interpret
+  clearstack  r0 @ rp!
   start-command @  start-finished @ or IF  start-finished off
       start-command @ line-stream interpret-stream  THEN
   interactive-mode @ IF
@@ -309,7 +313,7 @@ start-finished off
 \ == Debug and Display ==
 
 \ Number of entries on the stack
-: depth ( -- n )    s0 @   sp@ -  /cell / 1- ;
+: depth ( -- n )    sp@  s0 @  swap -  /cell / ;
 : ?stack            depth 0< abort" Stack empty" ;
 
 : .s                            \ print content of stack
