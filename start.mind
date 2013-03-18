@@ -303,7 +303,7 @@ start-finished off
   interactive-mode @ IF
       line-interpret ELSE bye THEN ;
 
-' command-interpret 'abort !
+' command-interpret is abort
 
 
 \ == Debug and Display ==

@@ -10,8 +10,7 @@
 
 // Starting and ending
 E(boot, "boot", 0)
-E(abort, "abort", 0)
-E(tick_abort, "'abort", 0)
+D(abort, "abort", bye, 0)
 E(bye, "bye", 0)
 
 // Inner interpreter

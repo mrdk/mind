@@ -102,14 +102,11 @@ Error Handling
 
 .. word:: abort         |K|, |83|
 
-   Stop the interpretation of the currently read text stream and
-   return to the interactive mode by executing :word:`'abort`.
-
-.. word:: 'abort	( -- addr ) |K|, "tick-abort"
-
-   Variable that contains a word that does is called after an error
-   has occurred; it is expected to reset the parameter stack and the
-   return stack and then to start an interactive prompt.
+   :word:`Defer` word that is called after an error has occured; it is
+   it is expected to reset the parameter stack and the return stack
+   and then to start an interactive prompt. Its default value in the
+   kernel is :word:`bye`; in :file:`start.mind` it is then reset to
+   :word:`command-interpret`.
 
 
 Starting and Ending

@@ -26,8 +26,10 @@
 // Enumerate the dictionary entries. The word `foo` gets the number
 // `i_foo`, and its dictionary entry is found at dict[i_foo].
 enum wordnum_t {
-#define E(label, name, flags)  i_##label,
+#define E(label, ...)  i_##label,
+#define D E
 #include "heads.c"
+#undef D
 #undef E
     num_words };
 
@@ -45,12 +47,19 @@ typedef struct {
     cell body[];
 } entry_t;
 
-#define NEW_ENTRY(label, wname, wflags)				\
+#define NEW_WORD(label, wname, wflags)				\
 {   .link  = i_##label ? (cell)&dict[i_##label - 1] : 0,	\
     .flags = wflags,						\
     .name  = (cell)wname,					\
     .exec = (cell)&&label,					\
     .doer  = 0 },
+
+#define NEW_DEFER(label, wname, wdoer, wflags)                  \
+{   .link  = i_##label ? (cell)&dict[i_##label - 1] : 0,	\
+    .flags = wflags,						\
+    .name  = (cell)wname,					\
+    .exec = (cell)&&dodefer,					\
+    .doer  = C(wdoer) },
 
 // Compute the address of an entry_t field when given an execution
 // token instead of the beginning of the struct.
@@ -127,7 +136,6 @@ struct {
     cell s0;		     // (cell*) Start of the parameter stack
     cell state;		     // Compiler state
     cell wordq;		     // Called if word not found
-    cell tick_abort;	     // Called by `abort` to get an interactive prompt
     context_t root;          // root context
     textfile_t inf;	     // Input file
     cell instream;	     // (textstream_t*) Current input stream
@@ -141,7 +149,6 @@ static void init_sys(entry_t dict[])
     sys.s0 = (cell)(sys.mem + MEMCELLS - 0x10); // Top of memory + safety space
     sys.state = 0;
     sys.wordq = C(notfound);
-    sys.tick_abort = C(bye);
     sys.root.link = 0;
     sys.root.last = (cell)&dict[num_words - 1];
     sys.root.find_word = C(find_word);
@@ -205,8 +212,10 @@ void mind()
     cell *sp;			/* Stack Pointer */
 
     static entry_t dict[] = { /* Dictionary */
-#define E NEW_ENTRY
+#define E NEW_WORD
+#define D NEW_DEFER
 #include "heads.c"
+#undef D
 #undef E
     };
 
@@ -217,16 +226,10 @@ boot:
     sp = (cell*)sys.s0;
     rp = (cell*)sys.r0;
     {
-	static cell interpreter[] = {
-	    C(do_stream), C(tick_abort), C(fetch), C(execute) };
+	static cell interpreter[] = { C(do_stream), C(abort) };
 	ip = interpreter;
 	goto next;
     }
-
-abort:
-    w = (label_t*)sys.tick_abort; goto **w;
-
-tick_abort: FUNC0(&sys.tick_abort);
 
 bye:
     return;
@@ -306,7 +309,7 @@ notfound: // Tell that the word at sys.dp could not be interpreted
 	printf("l%"PRIdCELL": not found: %s\n",
 	       ((textstream_t*)sys.instream)->lineno, (char*)sys.dp);
 	fclose((FILE*)sys.inf.input);
-	goto abort;
+        w = (label_t)C(abort); goto **w;
     }
 
 parentick: // (') ( "word" -- xt | 0 )
