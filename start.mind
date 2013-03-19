@@ -107,10 +107,11 @@
 
 
 \ == Characters ==
+\ char [char] space spaces
 
-: char   ( "char" -- c )        \  Ascii (or other) code for "char"
+: char   ( <char> -- c )        \  Ascii (or other) code for <char>
   parse c@ ;
-: [char] ( -- c | Compile: "char" -- ) \ Compile code for "char"
+: [char] ( -- c | Compile: <char> -- ) \ Compile code for <char>
   char literal, ;  immediate
 
 : space    bl emit ;            \ Print a single space

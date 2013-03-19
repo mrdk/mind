@@ -5,6 +5,18 @@ Input/Output
 
    Send the character with number *n* to the output.
 
+.. word:: space         |83|
+
+   Send a blank character to the output
+
+.. word:: spaces        ( n -- ) |83|
+
+   Send *n* spaces to the output. If *n* is negative, do nothing.
+
+.. word:: cr            |K|, |83|, "c-r"
+
+   Begin a new output line.
+
 .. word:: type		( addr n -- ) |K|, |83|
 
    Send the sequence of characters of length *n* starting at *addr* to
@@ -49,10 +61,6 @@ Input/Output
 
    Print the characters that follow this word in the input file to the
    output, until the next ``)``. The closing bracket is not printed.
-
-.. word:: cr |K|, |83|, "c-r"
-
-   Begin a new output line.
 
 .. word:: uh.		( addr -- ) |K|
 
