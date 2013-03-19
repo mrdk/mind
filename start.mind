@@ -157,6 +157,7 @@
 
 
 \ == Conversion: string to number ==
+\ base
 
 Variable base                   \ Base for number conversion.
 
@@ -237,11 +238,12 @@ Variable 'num                  \ points to the beginning of the generated string
 
 
 \ == Number conversion ==
+\ (u.) u. (.) . binary octal decimal hex h.
 
-: (u.)  ( u -- addr )    <# # #s #> ;
-: u.    ( u -- )    (u.) puts space ;
-: (.)   ( n -- addr )    dup abs  <# # #s hold-sign #> ;
-: .     ( n -- )    (.)  puts space ;
+: (u.)  ( u -- str )    <# # #s #> ;
+: u.    ( u -- )        (u.) puts space ;
+: (.)   ( n -- str )    dup abs  <# # #s hold-sign #> ;
+: .     ( n -- )        (.)  puts space ;
 
 : binary     2 base ! ;
 : octal      8 base ! ;
