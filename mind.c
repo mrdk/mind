@@ -312,9 +312,6 @@ notfound: // Tell that the word at sys.dp could not be interpreted
         w = (label_t)C(abort); goto **w;
     }
 
-parentick: // (') ( "word" -- xt | 0 )
-    CODE(C(parse), C(find));
-
 find: // find ( str -- xt | 0 )
     CODE(C(lit), (cell)&sys.root, C(find_word));
 

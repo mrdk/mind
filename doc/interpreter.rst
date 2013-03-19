@@ -115,7 +115,7 @@ These words are about reading and interpreting program text.
       Currently the parsed word is located directly at the end of the
       dictionary.
 
-.. word:: (') 		( <word> -- xt | 0 ) |K|, |vf|, "paren-tick"
+.. word:: (') 		( <word> -- xt | 0 ) |vf|, "paren-tick"
 
    Read a word from the input and return its XT. If it is not found,
    return 0.

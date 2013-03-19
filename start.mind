@@ -10,12 +10,14 @@
 \ the mind language proper.
 
 \ == Bootstrapping of colon definitions ==
-\ immediate Alias : ;
+\ immediate Alias : ; (')
 
 :, 'last ( -- xt )    ] last @ link>  ;; [
 :, immediate          ] 'last dup flags@  #immediate or  swap flags! ;; [
 
 :, Alias ( xt -- )    ] ^dodefer Create,  'last >doer ! ;; [
+
+:, (')  ( <word> -- xt | 0 )    ] parse find ;; [
 
 \ Create an alias for ?pairs so that it can be defined later.
 (') 2drop Alias ?pairs ( n1 n2 -- )
