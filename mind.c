@@ -409,10 +409,6 @@ comma: // , ( n -- )
 ccomma: // c, ( n -- )
     COMMA(TOS, char); DROP(1); goto next;
 
-comma_quote: // ,"
-    CODE(C(here), C(lit), (cell)"\"", C(parse_to),
-    	 C(here), C(strlen), C(oneplus), C(allot));
-
 entry_comma: // entry, ( a c -- )  Compile an entry with the name A, code C
     {
 	entry_t *e;

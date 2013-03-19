@@ -106,8 +106,20 @@
 : min ( n1 n2 -- n3 )   2dup >  ?nip ; \ Minimum of n1 and n2
 
 
+\ == Characters ==
+
+: char   ( "char" -- c )        \  Ascii (or other) code for "char"
+  parse c@ ;
+: [char] ( -- c | Compile: "char" -- ) \ Compile code for "char"
+  char literal, ;  immediate
+
+: space    bl emit ;            \ Print a single space
+: spaces  ( n -- )              \ Print n spaces
+  0 max  BEGIN  ?dup WHILE 1- space REPEAT ;
+
+
 \ == Inlined strings ==
-\ (.") (") ." "
+\ (.") (") ," ." "
 
 \ data structure: { ' 'inlined | ' end | data ... | }
 \ return address of data following in code, relative to the word
@@ -117,22 +129,14 @@
 : (.")  ( -- )       'inlined puts ; \ Print inlined string
 : (")   ( -- addr )  'inlined ;      \ Address of inlined string
 
+: ,"  ( <text"> -- )
+  here  (") [ >mark  char " c, 0 c,  >resolve ]  parse-to
+  here strlen 1+ allot ;
+
 : Stringlit ( xt -- )   Create ,  immediate  does>  @ ,  >mark  ," >resolve ;
 
 ' (.") Stringlit ."
 ' (")  Stringlit  "
-
-
-\ == Characters ==
-
-: char   ( "char" -- c )        \  Ascii (or other) code for "char"
-  parse c@ ;
-: [char] ( -- c; Compile: "char" -- ) \ Compile code for "char"
-  char literal, ;  immediate
-
-: space    bl emit ;            \ Print a single space
-: spaces  ( n -- )              \ Print n spaces
-  0 max  BEGIN  ?dup WHILE 1- space REPEAT ;
 
 
 \ == Debug tools ==
