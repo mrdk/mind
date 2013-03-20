@@ -270,12 +270,12 @@ Create linebuf  /linebuf strallot
 
 \ == Text Streams and String Streams ==
 
-: Textstream ( <word> -- )   Create /textstream allot ;
+: Stream ( <word> -- )   Create /stream allot ;
 
 : Field  ( offset size <word> -- offset' )   Create over ,  +
   does>  ( 'base -- 'field )                 @ + ;
 
-/textstream
+/stream
   /cell Field >'current-char         \ points to the current character
 Constant /stringstream
 

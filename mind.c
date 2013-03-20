@@ -99,13 +99,13 @@ typedef struct {
     cell forward;		// Forth word ( stream -- )
     cell current_fetch;		// Forth word ( stream -- char )
     cell eos;			// Forth word ( stream -- flag )
-    cell lineno;		// integer: line number
-} textstream_t;
+} stream_t;
 
 typedef struct {
-    textstream_t stream;
+    stream_t stream;
     cell input;			// (FILE*) Input file
     cell current;		// Character at input position (or EOF)
+    cell lineno;		// integer: line number
 } textfile_t;
 
 static void open_textfile(textfile_t *inf, char* name, entry_t dict[])
@@ -113,9 +113,9 @@ static void open_textfile(textfile_t *inf, char* name, entry_t dict[])
     inf->stream.forward = C(file_forward);
     inf->stream.current_fetch = C(file_current_fetch);
     inf->stream.eos = C(file_eof);
-    inf->stream.lineno = 1;
     inf->input = (cell)fopen(name, "r");
     inf->current = fgetc((FILE*)inf->input);
+    inf->lineno = 1;
 }
 
 static void file_forward(textfile_t *inf)
@@ -123,7 +123,7 @@ static void file_forward(textfile_t *inf)
     inf->current = fgetc((FILE*)inf->input);
 
     if (inf->current == '\n')
-	inf->stream.lineno++;
+	inf->lineno++;
 }
 
 // ---------------------------------------------------------------------------
@@ -138,7 +138,7 @@ struct {
     cell wordq;		     // Called if word not found
     context_t root;          // root context
     textfile_t inf;	     // Input file
-    cell instream;	     // (textstream_t*) Current input stream
+    cell instream;	     // (stream_t*) Current input stream
     cell mem[MEMCELLS];	     // The memory
 } sys;
 
@@ -307,7 +307,7 @@ interpret:  // : interpret   parse find exec/compile ;
 notfound: // Tell that the word at sys.dp could not be interpreted
     {
 	printf("l%"PRIdCELL": not found: %s\n",
-	       ((textstream_t*)sys.instream)->lineno, (char*)sys.dp);
+	       ((textfile_t*)sys.instream)->lineno, (char*)sys.dp);
 	fclose((FILE*)sys.inf.input);
         w = (label_t)C(abort); goto **w;
     }
@@ -360,29 +360,29 @@ interactive_mode: FUNC0(&args.interactive);
 // ---------------------------------------------------------------------------
 // Text streams
 
-to_forward:  OFFSET(textstream_t, forward);            // >forward
-to_current_fetch: OFFSET(textstream_t, current_fetch); // >current@
-to_eos:      OFFSET(textstream_t, eos);	     // >eos
-to_lineno:   OFFSET(textstream_t, lineno);   // >line#
-per_textstream: FUNC0(sizeof(textstream_t)); // /textstream
+to_forward:  OFFSET(stream_t, forward);            // >forward
+to_current_fetch: OFFSET(stream_t, current_fetch); // >current@
+to_eos:      OFFSET(stream_t, eos);	     // >eos
+per_stream: FUNC0(sizeof(stream_t)); // /stream
 
 tick_instream: FUNC0(&sys.instream); // 'instream
 
 to_infile:  OFFSET(textfile_t, input);	 // >infile
 to_current: OFFSET(textfile_t, current); // >current
+to_lineno:  OFFSET(textfile_t, lineno);  // >line#
 per_textfile: FUNC0(sizeof(textfile_t)); // /textfile
 
-lineno: FUNC0(&((textstream_t*)sys.instream)->lineno);
+lineno: FUNC0(&((textfile_t*)sys.instream)->lineno);
 
 forward:			// ( -- )
     EXTEND(1); TOS = sys.instream;
-    w = (label_t*)((textstream_t*)sys.instream)->forward; goto **w;
+    w = (label_t*)((stream_t*)sys.instream)->forward; goto **w;
 current_fetch:			// current@ ( -- char )
     EXTEND(1); TOS = sys.instream;
-    w = (label_t*)((textstream_t*)sys.instream)->current_fetch; goto **w;
+    w = (label_t*)((stream_t*)sys.instream)->current_fetch; goto **w;
 eos: // ( -- char )
     EXTEND(1); TOS = sys.instream;
-    w = (label_t*)((textstream_t*)sys.instream)->eos; goto **w;
+    w = (label_t*)((stream_t*)sys.instream)->eos; goto **w;
 
 file_forward:       // ( stream -- )
     file_forward((textfile_t*)TOS); DROP(1); goto next;
