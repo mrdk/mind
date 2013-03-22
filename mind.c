@@ -336,6 +336,8 @@ parse_to: // : parse-to ( addr string -- )
 
 skip_whitespace: // : skip-whitespace ( -- )
 	         //   BEGIN  whitespace current@ strchr 0= if;  forward AGAIN ;
+// : whitespace-eos  ( -- ? )
+//   whitespace current@ strchr 0=  eos or ;
     CODE(C(whitespace), C(current_fetch), C(strchr), C(zero_equal),
 	 C(if_semi), C(forward), C(branch), (cell)(start));
 
@@ -344,10 +346,12 @@ parse: // : parse ( -- addr )
     CODE(C(skip_whitespace), C(here), C(whitespace), C(parse_to), C(here));
 
 backslash: // : \   BEGIN current@ forward  #eol = if;  eos UNTIL ; immediate
+// : backslash-eos  ( -- ? )   current@ #eol =  eos or ;
     CODE(C(current_fetch), C(forward), C(num_eol), C(equal), C(if_semi),
 	 C(eos), C(zbranch), (cell)start);
 
 paren: // : (   BEGIN current@ forward  [char] ) = if;  eos UNTIL ; immediate
+// : paren-eos  ( -- ? )  current@ [char] ) =  eos or ;
     CODE(C(current_fetch), C(forward), C(lit), ')', C(equal), C(if_semi),
 	 C(eos), C(zbranch), (cell)start);
 
@@ -360,9 +364,9 @@ interactive_mode: FUNC0(&args.interactive);
 // ---------------------------------------------------------------------------
 // Text streams
 
-to_forward:  OFFSET(stream_t, forward);            // >forward
+to_forward:       OFFSET(stream_t, forward);       // >forward
 to_current_fetch: OFFSET(stream_t, current_fetch); // >current@
-to_eos:      OFFSET(stream_t, eos);	     // >eos
+to_eos:           OFFSET(stream_t, eos);           // >eos
 per_stream: FUNC0(sizeof(stream_t)); // /stream
 
 tick_instream: FUNC0(&sys.instream); // 'instream
@@ -374,22 +378,19 @@ per_textfile: FUNC0(sizeof(textfile_t)); // /textfile
 
 lineno: FUNC0(&((textfile_t*)sys.instream)->lineno);
 
-forward:			// ( -- )
-    EXTEND(1); TOS = sys.instream;
+forward:	    // ( -- )
     w = (label_t*)((stream_t*)sys.instream)->forward; goto **w;
-current_fetch:			// current@ ( -- char )
-    EXTEND(1); TOS = sys.instream;
+current_fetch:      // current@ ( -- char )
     w = (label_t*)((stream_t*)sys.instream)->current_fetch; goto **w;
-eos: // ( -- char )
-    EXTEND(1); TOS = sys.instream;
+eos:                // ( -- char )
     w = (label_t*)((stream_t*)sys.instream)->eos; goto **w;
 
-file_forward:       // ( stream -- )
-    file_forward((textfile_t*)TOS); DROP(1); goto next;
-file_current_fetch: // ( stream -- char )
-    FUNC1(((textfile_t*)TOS)->current);
-file_eof:           // ( stream -- flag )
-    FUNC1(BOOL(((textfile_t*)TOS)->current == EOF));
+file_forward:       // ( -- )
+    file_forward((textfile_t*)sys.instream); goto next;
+file_current_fetch: // ( -- char )
+    FUNC0(((textfile_t*)sys.instream)->current);
+file_eof:           // ( -- flag )
+    FUNC0(BOOL(((textfile_t*)sys.instream)->current == EOF));
 
 do_stream: // : do-stream   BEGIN interpret  eos UNTIL ;
     CODE(C(interpret), C(eos), C(zbranch), (cell)(start));

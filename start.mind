@@ -279,9 +279,9 @@ Create linebuf  /linebuf strallot
   /cell Field >'current-char         \ points to the current character
 Constant /stringstream
 
-: strstream-forward   ( 'stream -- )        >'current-char  1 swap +! ;
-: strstream-current@  ( 'stream -- char )   >'current-char @ c@ ;
-: strstream-eos       ( 'stream -- flag )   strstream-current@ 0= ;
+: strstream-forward   ( -- )        'instream @ >'current-char  1 swap +! ;
+: strstream-current@  ( -- char )   'instream @ >'current-char @ c@ ;
+: strstream-eos       ( -- flag )   strstream-current@ 0= ;
 
 : Stringstream ( <word> -- )
   Create here  /stringstream allot
