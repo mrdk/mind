@@ -1,9 +1,24 @@
 Input/Output
 ------------
 
+Strings
+^^^^^^^
+
 .. word:: emit		( n -- ) |K|, |83|
 
    Send the character with number *n* to the output.
+
+.. word:: space         |83|
+
+   Send a blank character to the output
+
+.. word:: spaces        ( n -- ) |83|
+
+   Send *n* spaces to the output. If *n* is negative, do nothing.
+
+.. word:: cr            |K|, |83|, "c-r"
+
+   Begin a new output line.
 
 .. word:: type		( addr n -- ) |K|, |83|
 
@@ -50,10 +65,42 @@ Input/Output
    Print the characters that follow this word in the input file to the
    output, until the next ``)``. The closing bracket is not printed.
 
-.. word:: cr |K|, |83|, "c-r"
 
-   Begin a new output line.
+Numbers
+^^^^^^^
 
-.. word:: uh.		( addr -- ) |K|
+.. word:: base          ( -- addr ) |83|
 
-      Print the TOS as unsigned hexadecimal number, followed by a space.
+   Variable that contains the base for number conversion. The minimal
+   value of :word:`base` is 2, the maximal value is 36. Most words
+   that convert a number from its internal representation as a cell to
+   a string or backwards use this variable.
+
+.. word:: binary        |vf|
+          octal         |83|
+          decimal       |83|
+          hex           |83|
+
+   Sets :word:`base` to 2, 8, 10 or 16, respectively.
+
+.. word:: .             ( n -- ) |83|, "dot"
+          u\.           ( u -- ) |83|, "u-dot"
+
+   Print the TOS as a signed or unsigned number, followed by a space.
+   The conversion uses the value of :word:`base`.
+
+.. word:: (.)           ( n -- str ) "paren-dot"
+          (u.)          ( u -- str ) "paren-u-dot"
+
+   Return the address that contains the TOS as a signed or unsigned
+   number, according to :word:`base`. There is no trailing space here.
+   The string exists until another word is called that converts a cell
+   to a string, then it is overwritten. (Among these words are also
+   :word:`.` and :word:`h.` and others, since they use internally
+   :word:`(.)` and :word:`(u.)`.)
+
+.. word:: h.            ( n -- ) |83|, "h-dot"
+          uh.           ( u -- ) |K|, "u-h-dot"
+
+   Print the TOS as a signed or unsigned hexadecimal number, followed
+   by a space. The value of :word:`base` is unchanged.

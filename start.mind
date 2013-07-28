@@ -10,12 +10,14 @@
 \ the mind language proper.
 
 \ == Bootstrapping of colon definitions ==
-\ immediate Alias : ;
+\ immediate Alias : ; (')
 
 :, 'last ( -- xt )    ] last @ link>  ;; [
 :, immediate          ] 'last dup flags@  #immediate or  swap flags! ;; [
 
 :, Alias ( xt -- )    ] ^dodefer Create,  'last >doer ! ;; [
+
+:, (')  ( <word> -- xt | 0 )    ] parse find ;; [
 
 \ Create an alias for ?pairs so that it can be defined later.
 (') 2drop Alias ?pairs ( n1 n2 -- )
@@ -104,8 +106,21 @@
 : min ( n1 n2 -- n3 )   2dup >  ?nip ; \ Minimum of n1 and n2
 
 
+\ == Characters ==
+\ char [char] space spaces
+
+: char   ( <char> -- c )        \  Ascii (or other) code for <char>
+  parse c@ ;
+: [char] ( -- c | Compile: <char> -- ) \ Compile code for <char>
+  char literal, ;  immediate
+
+: space    bl emit ;            \ Print a single space
+: spaces  ( n -- )              \ Print n spaces
+  0 max  BEGIN  ?dup WHILE 1- space REPEAT ;
+
+
 \ == Inlined strings ==
-\ (.") (") ." "
+\ (.") (") ," ." "
 
 \ data structure: { ' 'inlined | ' end | data ... | }
 \ return address of data following in code, relative to the word
@@ -115,22 +130,14 @@
 : (.")  ( -- )       'inlined puts ; \ Print inlined string
 : (")   ( -- addr )  'inlined ;      \ Address of inlined string
 
+: ,"  ( <text"> -- )
+  here  (") [ >mark  char " c, 0 c,  >resolve ]  parse-to
+  here strlen 1+ allot ;
+
 : Stringlit ( xt -- )   Create ,  immediate  does>  @ ,  >mark  ," >resolve ;
 
 ' (.") Stringlit ."
 ' (")  Stringlit  "
-
-
-\ == Characters ==
-
-: char   ( "char" -- c )        \  Ascii (or other) code for "char"
-  parse c@ ;
-: [char] ( -- c; Compile: "char" -- ) \ Compile code for "char"
-  char literal, ;  immediate
-
-: space    bl emit ;            \ Print a single space
-: spaces  ( n -- )              \ Print n spaces
-  0 max  BEGIN  ?dup WHILE 1- space REPEAT ;
 
 
 \ == Debug tools ==
@@ -150,6 +157,7 @@
 
 
 \ == Conversion: string to number ==
+\ base
 
 Variable base                   \ Base for number conversion.
 
@@ -230,11 +238,12 @@ Variable 'num                  \ points to the beginning of the generated string
 
 
 \ == Number conversion ==
+\ (u.) u. (.) . binary octal decimal hex h.
 
-: (u.)  ( u -- addr )    <# # #s #> ;
-: u.    ( u -- )    (u.) puts space ;
-: (.)   ( n -- addr )    dup abs  <# # #s hold-sign #> ;
-: .     ( n -- )    (.)  puts space ;
+: (u.)  ( u -- str )    <# # #s #> ;
+: u.    ( u -- )        (u.) puts space ;
+: (.)   ( n -- str )    dup abs  <# # #s hold-sign #> ;
+: .     ( n -- )        (.)  puts space ;
 
 : binary     2 base ! ;
 : octal      8 base ! ;
@@ -261,18 +270,18 @@ Create linebuf  /linebuf strallot
 
 \ == Text Streams and String Streams ==
 
-: Textstream ( <word> -- )   Create /textstream allot ;
+: Stream ( <word> -- )   Create /stream allot ;
 
 : Field  ( offset size <word> -- offset' )   Create over ,  +
   does>  ( 'base -- 'field )                 @ + ;
 
-/textstream
+/stream
   /cell Field >'current-char         \ points to the current character
 Constant /stringstream
 
-: strstream-forward   ( 'stream -- )        >'current-char  1 swap +! ;
-: strstream-current@  ( 'stream -- char )   >'current-char @ c@ ;
-: strstream-eos       ( 'stream -- flag )   strstream-current@ 0= ;
+: strstream-forward   ( -- )        'instream @ >'current-char  1 swap +! ;
+: strstream-current@  ( -- char )   'instream @ >'current-char @ c@ ;
+: strstream-eos       ( -- flag )   strstream-current@ 0= ;
 
 : Stringstream ( <word> -- )
   Create here  /stringstream allot

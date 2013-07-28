@@ -99,13 +99,13 @@ typedef struct {
     cell forward;		// Forth word ( stream -- )
     cell current_fetch;		// Forth word ( stream -- char )
     cell eos;			// Forth word ( stream -- flag )
-    cell lineno;		// integer: line number
-} textstream_t;
+} stream_t;
 
 typedef struct {
-    textstream_t stream;
+    stream_t stream;
     cell input;			// (FILE*) Input file
     cell current;		// Character at input position (or EOF)
+    cell lineno;		// integer: line number
 } textfile_t;
 
 static void open_textfile(textfile_t *inf, char* name, entry_t dict[])
@@ -113,7 +113,6 @@ static void open_textfile(textfile_t *inf, char* name, entry_t dict[])
     inf->stream.forward = C(file_forward);
     inf->stream.current_fetch = C(file_current_fetch);
     inf->stream.eos = C(file_eof);
-    inf->stream.lineno = 1;
     if ((inf->input = (cell)fopen(name, "r")))
 	inf->current = fgetc((FILE*)inf->input);
     else
@@ -125,7 +124,7 @@ static void file_forward(textfile_t *inf)
     inf->current = fgetc((FILE*)inf->input);
 
     if (inf->current == '\n')
-	inf->stream.lineno++;
+	inf->lineno++;
 }
 
 // ---------------------------------------------------------------------------
@@ -140,7 +139,7 @@ struct {
     cell wordq;		     // Called if word not found
     context_t root;          // root context
     textfile_t inf;	     // Input file
-    cell instream;	     // (textstream_t*) Current input stream
+    cell instream;	     // (stream_t*) Current input stream
     cell mem[MEMCELLS];	     // The memory
 } sys;
 
@@ -315,13 +314,10 @@ interpret:  // : interpret   parse find exec/compile ;
 notfound: // Tell that the word at sys.dp could not be interpreted
     {
 	printf("l%"PRIdCELL": not found: %s\n",
-	       ((textstream_t*)sys.instream)->lineno, (char*)sys.dp);
+	       ((textfile_t*)sys.instream)->lineno, (char*)sys.dp);
 	fclose((FILE*)sys.inf.input);
         w = (label_t)C(abort); goto **w;
     }
-
-parentick: // (') ( "word" -- xt | 0 )
-    CODE(C(parse), C(find));
 
 find: // find ( str -- xt | 0 )
     CODE(C(lit), (cell)&sys.root, C(find_word));
@@ -347,6 +343,8 @@ parse_to: // : parse-to ( addr string -- )
 
 skip_whitespace: // : skip-whitespace ( -- )
 	         //   BEGIN  whitespace current@ strchr 0= if;  forward AGAIN ;
+// : whitespace-eos  ( -- ? )
+//   whitespace current@ strchr 0=  eos or ;
     CODE(C(whitespace), C(current_fetch), C(strchr), C(zero_equal),
 	 C(if_semi), C(forward), C(branch), (cell)(start));
 
@@ -355,10 +353,12 @@ parse: // : parse ( -- addr )
     CODE(C(skip_whitespace), C(here), C(whitespace), C(parse_to), C(here));
 
 backslash: // : \   BEGIN current@ forward  #eol = if;  eos UNTIL ; immediate
+// : backslash-eos  ( -- ? )   current@ #eol =  eos or ;
     CODE(C(current_fetch), C(forward), C(num_eol), C(equal), C(if_semi),
 	 C(eos), C(zbranch), (cell)start);
 
 paren: // : (   BEGIN current@ forward  [char] ) = if;  eos UNTIL ; immediate
+// : paren-eos  ( -- ? )  current@ [char] ) =  eos or ;
     CODE(C(current_fetch), C(forward), C(lit), ')', C(equal), C(if_semi),
 	 C(eos), C(zbranch), (cell)start);
 
@@ -371,36 +371,33 @@ interactive_mode: FUNC0(&args.interactive);
 // ---------------------------------------------------------------------------
 // Text streams
 
-to_forward:  OFFSET(textstream_t, forward);            // >forward
-to_current_fetch: OFFSET(textstream_t, current_fetch); // >current@
-to_eos:      OFFSET(textstream_t, eos);	     // >eos
-to_lineno:   OFFSET(textstream_t, lineno);   // >line#
-per_textstream: FUNC0(sizeof(textstream_t)); // /textstream
+to_forward:       OFFSET(stream_t, forward);       // >forward
+to_current_fetch: OFFSET(stream_t, current_fetch); // >current@
+to_eos:           OFFSET(stream_t, eos);           // >eos
+per_stream: FUNC0(sizeof(stream_t)); // /stream
 
 tick_instream: FUNC0(&sys.instream); // 'instream
 
 to_infile:  OFFSET(textfile_t, input);	 // >infile
 to_current: OFFSET(textfile_t, current); // >current
+to_lineno:  OFFSET(textfile_t, lineno);  // >line#
 per_textfile: FUNC0(sizeof(textfile_t)); // /textfile
 
-lineno: FUNC0(&((textstream_t*)sys.instream)->lineno);
+lineno: FUNC0(&((textfile_t*)sys.instream)->lineno);
 
-forward:			// ( -- )
-    EXTEND(1); TOS = sys.instream;
-    w = (label_t*)((textstream_t*)sys.instream)->forward; goto **w;
-current_fetch:			// current@ ( -- char )
-    EXTEND(1); TOS = sys.instream;
-    w = (label_t*)((textstream_t*)sys.instream)->current_fetch; goto **w;
-eos: // ( -- char )
-    EXTEND(1); TOS = sys.instream;
-    w = (label_t*)((textstream_t*)sys.instream)->eos; goto **w;
+forward:	    // ( -- )
+    w = (label_t*)((stream_t*)sys.instream)->forward; goto **w;
+current_fetch:      // current@ ( -- char )
+    w = (label_t*)((stream_t*)sys.instream)->current_fetch; goto **w;
+eos:                // ( -- char )
+    w = (label_t*)((stream_t*)sys.instream)->eos; goto **w;
 
-file_forward:       // ( stream -- )
-    file_forward((textfile_t*)TOS); DROP(1); goto next;
-file_current_fetch: // ( stream -- char )
-    FUNC1(((textfile_t*)TOS)->current);
-file_eof:           // ( stream -- flag )
-    FUNC1(BOOL(((textfile_t*)TOS)->current == EOF));
+file_forward:       // ( -- )
+    file_forward((textfile_t*)sys.instream); goto next;
+file_current_fetch: // ( -- char )
+    FUNC0(((textfile_t*)sys.instream)->current);
+file_eof:           // ( -- flag )
+    FUNC0(BOOL(((textfile_t*)sys.instream)->current == EOF));
 
 do_stream: // : do-stream   BEGIN interpret  eos UNTIL ;
     CODE(C(interpret), C(eos), C(zbranch), (cell)(start));
@@ -419,10 +416,6 @@ comma: // , ( n -- )
 
 ccomma: // c, ( n -- )
     COMMA(TOS, char); DROP(1); goto next;
-
-comma_quote: // ,"
-    CODE(C(here), C(lit), (cell)"\"", C(parse_to),
-    	 C(here), C(strlen), C(oneplus), C(allot));
 
 entry_comma: // entry, ( a c -- )  Compile an entry with the name A, code C
     {

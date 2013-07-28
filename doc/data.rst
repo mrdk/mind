@@ -1,8 +1,8 @@
 Data structures
----------------
+===============
 
 Data Definitions
-^^^^^^^^^^^^^^^^
+----------------
 
 .. word:: Create        ( <word> -- ) |83|
 
@@ -61,7 +61,7 @@ Data Definitions
 
 
 Dictionary Structure
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 The internal structure of the dictionary.
 
@@ -86,104 +86,61 @@ The internal structure of the dictionary.
 .. word:: #immediate |K|
 
 
-Text Streams
-^^^^^^^^^^^^
+Streams
+-------
 
-Text streams are an abstraction for the input of program text -- both
-from a file and from strings stored in memory. They are the basic data
-structures for reading program text.
+Streams are an abstraction for the input from a source that produces
+data continuously. There is always one "current stream", with its
+address in :word:`'instream`.
 
-.. word:: >forward	( 'textstream -- addr ) |K|
+.. word:: >forward	( 'stream -- addr ) |K|, "to-forward"
 
-   The TOS contains the address of a textstream structure: compute the
+   The TOS contains the address of a stream structure: compute the
    address of its :word:`forward` routine. The routine has the
-   signature ( *stream* -- ).
+   signature ( -- ).
 
-.. word:: >current@	( 'textstream -- addr ) |K|
+.. word:: >current@	( 'stream -- addr ) |K|, "to-current-fetch"
 
-   The TOS contains the address of a textstream structure: compute the
+   The TOS contains the address of a stream structure: compute the
    address of its :word:`current@` routine. The routine has the
-   signature ( *stream* -- *char* ).
+   signature ( -- *char* ).
 
-.. word:: >eos		( 'textstream -- addr ) |K|
+.. word:: >eos		( 'stream -- addr ) |K|, "to-e-o-s"
 
-   The TOS contains the address of a textstream structure: compute the
+   The TOS contains the address of a stream structure: compute the
    address of its :word:`eos` routine. The routine has the signature (
-   *stream* -- *bool* ).
+   -- *bool* ).
 
-.. word:: >line#	( 'textstream -- addr ) |K|
+.. word:: /stream	( -- n ) |K|, "per-stream"
 
-      	The TOS contains the address of a textstream structure:
-      	compute the address of its :word:`line#` field. The field is
-      	one cell wide and contains the current line number of this
-      	textstream.
+   Number of bytes in a stream data structure.
 
-.. word:: /textstream	( -- n ) |K|
+.. word:: 'instream	( -- addr ) |K|, "tick-instream"
 
-         	Number of bytes in a text stream structure.
+   Variable that contains the address of the current stream.
 
-.. word:: 'instream	( -- addr ) |K|
-
-	Variable that contains the address of the current text stream.
-
-
-File Streams
-^^^^^^^^^^^^
-
-A file stream is an extension of the text stream interface for reading
-from a file (or any other stream in a Unix system).
-
-A file stream contains all the fields of a text stream, plus
-:word:`>intext-file`.
-
-.. word:: >intext-file	( 'filestream -- addr ) |K|
-
-   The TOS contains the address of a filestream structure: compute the
-   address of its :word:`>file` field. The field is one cell wide and
-   contains the underlying C file pointer of type :c:type:`FILE*` for
-   this stream.
-
-.. word:: >current	( 'filestream -- addr ) |K|
-
-   The TOS contains the address of a filestream structure: compute the
-   address of its :word:`>current` field. This field is one cell wide
-   and contains the last character read from the file or the "end of
-   file" constant.
-
-.. word:: /filestream	( -- n ) |K|
-
-      	Number of bytes in a file stream structure.
-
-.. word:: file-forward	( stream -- ) |K|
-
-   Read one character from a file stream and store it in the
-   :word:`>current` field. :word:`line#` is updated if the character
-   is an "end of line" symbol.
-
-.. word:: file-current@	( stream -- char ) |K|
-
-	Put the character at the current position of the file stream
-	onto the stack.
-
-.. word:: file-eof	( stream -- flag ) |K|
-
-      	Test whether the end of the file stream is reached.
-
-.. word:: forward	( stream -- ) |K|
+.. word:: forward	( -- ) |K|
 
       Read one character from the current stream. :word:`line#` is
       updated if the character is an "end of line" symbol.
 
-.. word:: current@	( stream -- char ) |K|
+.. word:: current@	( -- char ) |K|, "current-fetch"
 
       Put the character at the current position of the current stream
       onto the stack.
 
-.. word:: eos		( -- flag ) |K|
+.. word:: eos		( -- flag ) |K|, "e-o-s"
 
       Test whether the end of the current stream is reached.
 
-.. word:: line#		( -- addr ) |K|
+
+File Streams
+------------
+
+A file stream is an extension of the stream interface for reading from
+a file (or any other stream in a Unix system).
+
+.. word:: line#		( -- addr ) |K|, "line-number"
 
       Address of the current line number in the current stream. The
       first line of a file has the number 1.
@@ -191,3 +148,46 @@ A file stream contains all the fields of a text stream, plus
 .. word:: do-stream |K|
 
       Execute the code in the current input stream.
+
+.. word:: >infile	( 'filestream -- addr ) |K|, "to-intfile"
+
+   The TOS contains the address of a filestream structure: compute the
+   address of its :word:`>file` field. The field is one cell wide and
+   contains the underlying C file pointer of type :c:type:`FILE*` for
+   this stream.
+
+.. word:: >current	( 'filestream -- addr ) |K|, "to-current"
+
+   The TOS contains the address of a filestream structure: compute the
+   address of its :word:`>current` field. This field is one cell wide
+   and contains the last character read from the file or the "end of
+   file" constant.
+
+.. word:: >line#	( 'filestream -- addr ) |K|, "to-linenumber"
+
+   The TOS contains the address of a filestream structure: compute the
+   address of its :word:`line#` field. The field is one cell wide and
+   contains the current line number of this stream.
+
+.. word:: /filestream	( -- n ) |K|, "per-filestream"
+
+      	Number of bytes in a file stream structure.
+
+
+Implementation
+^^^^^^^^^^^^^^
+
+.. word:: file-forward	( -- ) |K|
+
+   Read one character from the current file stream and store it in its
+   :word:`>current` field. :word:`line#` is updated if the character
+   is an "end of line" symbol.
+
+.. word:: file-current@	( -- char ) |K|, "file-current-fetch"
+
+   Put the character at the current position of the current file
+   stream onto the stack.
+
+.. word:: file-eof	( -- flag ) |K|, "file-e-o-f"
+
+   Test whether the end of the current file stream is reached.

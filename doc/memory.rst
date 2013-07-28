@@ -57,10 +57,34 @@ Memory Access
       Decrement the TOS by the size of one cell.
 
 
-Strings
-^^^^^^^
+Characters and Strings
+^^^^^^^^^^^^^^^^^^^^^^
 
-.. word:: "             ( <string>" -- ) |I|, "quote"
+.. word:: char          ( <word> -- char )
+
+   Return the number of the character at the beginning of the
+   following word. ``char A`` returns therefore the number 65.
+
+.. word:: [char]        ( -- char | Compile: <word> -- ) |I|, "bracket-compile"
+
+   Compilation word. Puts the number for the character at the
+   beginning of *<word>* as literal into the code. Writing ``[char]
+   A`` in the body of a colon definition has therefore the same effect
+   as writing ``65``.
+
+.. word:: bl		( -- char ) |K|, |83|, "b-l"
+
+   Code for the "blank" character.
+
+.. word:: #eol		( -- char ) |K|, |vf| "number-e-o-l"
+
+      Code for the "end of line" character.
+
+.. word:: #eof		( -- n ) |K|, "number-e-o-f"
+
+   Code for the "end of file" constant (which is *not* a character).
+
+.. word:: "             ( <string"> -- ) |I|, "quote"
           
    String literal.
 
@@ -78,18 +102,6 @@ Strings
 
    If *char* is contained in *str*, then return the position of its
    first occurrence. Otherwise return 0.
-
-.. word:: bl		( -- char ) |K|, |83|, "b-l"
-
-   Code for the "blank" character.
-
-.. word:: #eol		( -- char ) |K|, "number-e-o-l"
-
-      Code for the "end of line" character.
-
-.. word:: #eof		( -- n ) |K|, "number-e-o-f"
-
-      Code for the "end of file" constant (which is *not* a character)
 
 .. word:: whitespace	( -- str ) |K|
 
