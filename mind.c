@@ -114,8 +114,10 @@ static void open_textfile(textfile_t *inf, char* name, entry_t dict[])
     inf->stream.current_fetch = C(file_current_fetch);
     inf->stream.eos = C(file_eof);
     inf->stream.lineno = 1;
-    inf->input = (cell)fopen(name, "r");
-    inf->current = fgetc((FILE*)inf->input);
+    if ((inf->input = (cell)fopen(name, "r")))
+	inf->current = fgetc((FILE*)inf->input);
+    else
+	inf->current = EOF;
 }
 
 static void file_forward(textfile_t *inf)
@@ -154,6 +156,11 @@ static void init_sys(entry_t dict[])
     sys.root.find_word = C(find_word);
     open_textfile(&sys.inf, "start.mind", dict);
     sys.instream = (cell)&sys.inf.stream;
+
+    if (sys.inf.current == EOF) {
+	fprintf(stderr, "Error: file 'start.mind' not found\n");
+	exit(-1);
+    }
 }
 
 static struct {			// Program arguments:
@@ -223,6 +230,7 @@ void mind()
 // Starting and ending
 boot:
     init_sys(dict);
+
     sp = (cell*)sys.s0;
     rp = (cell*)sys.r0;
     {
