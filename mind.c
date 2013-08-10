@@ -240,7 +240,7 @@ void mind()
 boot:
     init_sys(dict);
 
-    open_textfile(&sys.inf, "start.mind"); 
+    open_textfile(&sys.inf, "init.mind"); 
     if (sys.inf.current == EOF) {
 	fprintf(stderr, "Error: File '%s' not found\n", (char*)sys.inf.name);
 	exit(-1);

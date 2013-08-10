@@ -12,7 +12,7 @@ test: mind
 	@./mind -e '.( Finished.) cr'
 
 TAGS:
-	etags *.c *.h start.mind
+	etags *.c *.h init.mind
 
 clean: docclean srcclean
 

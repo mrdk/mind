@@ -105,7 +105,7 @@ Error Handling
    :word:`Defer` word that is called after an error has occured; it is
    it is expected to reset the parameter stack and the return stack
    and then to start an interactive prompt. Its default value in the
-   kernel is :word:`bye`; in :file:`start.mind` it is then reset to
+   kernel is :word:`bye`; in :file:`init.mind` it is then reset to
    :word:`command-interpret`.
 
 
@@ -149,7 +149,7 @@ The program :program:`mind` has the following command line parameters:
 
       If the value of :word:`start-command` is nonzero, then it
       contains a string that is executed after the file
-      :file:`start.mind` is read and before the system switches to
+      :file:`init.mind` is read and before the system switches to
       interactive mode (if it does).
 
 .. word:: interactive-mode	( -- addr ) |K|
