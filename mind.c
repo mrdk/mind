@@ -104,19 +104,34 @@ typedef struct {
 typedef struct {
     stream_t stream;
     cell input;			// (FILE*) Input file
+    cell name;                  // (char*) File name
     cell current;		// Character at input position (or EOF)
     cell lineno;		// integer: line number
 } textfile_t;
 
-static void open_textfile(textfile_t *inf, char* name, entry_t dict[])
+static void init_textfile(textfile_t *inf, entry_t dict[])
 {
     inf->stream.forward = C(file_forward);
     inf->stream.current_fetch = C(file_current_fetch);
     inf->stream.eos = C(file_eof);
+    inf->input = 0;
+    inf->name = 0;
+    inf->current = EOF;
+}
+
+static void open_textfile(textfile_t *inf, char* name)
+{
+    inf->name = (cell)name;
     if ((inf->input = (cell)fopen(name, "r")))
 	inf->current = fgetc((FILE*)inf->input);
-    else
-	inf->current = EOF;
+}
+
+static void close_textfile(textfile_t *inf)
+{
+    fclose((FILE*)inf->input);
+
+    inf->input = 0;
+    inf->current = EOF;
 }
 
 static void file_forward(textfile_t *inf)
@@ -153,13 +168,8 @@ static void init_sys(entry_t dict[])
     sys.root.link = 0;
     sys.root.last = (cell)&dict[num_words - 1];
     sys.root.find_word = C(find_word);
-    open_textfile(&sys.inf, "start.mind", dict);
+    init_textfile(&sys.inf, dict);
     sys.instream = (cell)&sys.inf.stream;
-
-    if (sys.inf.current == EOF) {
-	fprintf(stderr, "Error: file 'start.mind' not found\n");
-	exit(-1);
-    }
 }
 
 static struct {			// Program arguments:
@@ -229,6 +239,12 @@ void mind()
 // Starting and ending
 boot:
     init_sys(dict);
+
+    open_textfile(&sys.inf, "start.mind"); 
+    if (sys.inf.current == EOF) {
+	fprintf(stderr, "Error: File '%s' not found\n", (char*)sys.inf.name);
+	exit(-1);
+    }
 
     sp = (cell*)sys.s0;
     rp = (cell*)sys.r0;
@@ -315,7 +331,7 @@ notfound: // Tell that the word at sys.dp could not be interpreted
     {
 	printf("l%"PRIdCELL": not found: %s\n",
 	       ((textfile_t*)sys.instream)->lineno, (char*)sys.dp);
-	fclose((FILE*)sys.inf.input);
+        close_textfile(&sys.inf);
         w = (label_t)C(abort); goto **w;
     }
 
@@ -378,9 +394,10 @@ per_stream: FUNC0(sizeof(stream_t)); // /stream
 
 tick_instream: FUNC0(&sys.instream); // 'instream
 
-to_infile:  OFFSET(textfile_t, input);	 // >infile
-to_current: OFFSET(textfile_t, current); // >current
-to_lineno:  OFFSET(textfile_t, lineno);  // >line#
+to_infile:     OFFSET(textfile_t, input);   // >infile
+to_infilename: OFFSET(textfile_t, name);    // >infile-name
+to_current:    OFFSET(textfile_t, current); // >current
+to_lineno:     OFFSET(textfile_t, lineno);  // >line#
 per_textfile: FUNC0(sizeof(textfile_t)); // /textfile
 
 lineno: FUNC0(&((textfile_t*)sys.instream)->lineno);

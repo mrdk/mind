@@ -149,12 +149,20 @@ a file (or any other stream in a Unix system).
 
       Execute the code in the current input stream.
 
-.. word:: >infile	( 'filestream -- addr ) |K|, "to-intfile"
+.. word:: >infile	( 'filestream -- addr ) |K|, "to-infile"
 
    The TOS contains the address of a filestream structure: compute the
-   address of its :word:`>file` field. The field is one cell wide and
-   contains the underlying C file pointer of type :c:type:`FILE*` for
-   this stream.
+   address of its :word:`>infile` field. The field is one cell wide
+   and contains the underlying C file pointer of type :c:type:`FILE*`
+   for this stream.
+
+.. word:: >infile-name	( 'filestream -- addr ) |K|, "to-infile-name"
+
+   The TOS contains the address of a filestream structure: compute the
+   address of its :word:`>infile-name` field. The field is one cell
+   wide and contains a pointer to a null-terminated string that
+   contains the name of the file for this stream. The field may also
+   contain a null pointer if the file is not open or has no name.
 
 .. word:: >current	( 'filestream -- addr ) |K|, "to-current"
 
