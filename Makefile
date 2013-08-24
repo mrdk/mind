@@ -6,7 +6,7 @@ clean: docclean srcclean
 CC=gcc
 CFLAGS=-MMD -W -Wall -std=gnu99 -O3 -fno-strict-aliasing -fno-gcse
 
-mind: mind.o
+mind: mind.o io.o
 
 -include *.d
 

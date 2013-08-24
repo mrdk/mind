@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "io.h"
+
 #define MEMCELLS 0x10000	/* Memory size in cells */
 
 // Forth truth values
@@ -95,20 +97,6 @@ typedef struct {
 // ---------------------------------------------------------------------------
 // Reading text files and interactive input
 
-typedef struct {
-    cell forward;		// Forth word ( stream -- )
-    cell current_fetch;		// Forth word ( stream -- char )
-    cell eos;			// Forth word ( stream -- flag )
-} stream_t;
-
-typedef struct {
-    stream_t stream;
-    cell input;			// (FILE*) Input file
-    cell name;                  // (char*) File name
-    cell current;		// Character at input position (or EOF)
-    cell lineno;		// integer: line number
-} textfile_t;
-
 static void init_textfile(textfile_t *inf, entry_t dict[])
 {
     inf->stream.forward = C(file_forward);
@@ -117,29 +105,6 @@ static void init_textfile(textfile_t *inf, entry_t dict[])
     inf->input = 0;
     inf->name = 0;
     inf->current = EOF;
-}
-
-static void open_textfile(textfile_t *inf, char* name)
-{
-    inf->name = (cell)name;
-    if ((inf->input = (cell)fopen(name, "r")))
-	inf->current = fgetc((FILE*)inf->input);
-}
-
-static void close_textfile(textfile_t *inf)
-{
-    fclose((FILE*)inf->input);
-
-    inf->input = 0;
-    inf->current = EOF;
-}
-
-static void file_forward(textfile_t *inf)
-{
-    inf->current = fgetc((FILE*)inf->input);
-
-    if (inf->current == '\n')
-	inf->lineno++;
 }
 
 // ---------------------------------------------------------------------------
