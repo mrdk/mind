@@ -7,10 +7,7 @@ DOCUMENTATION
 The documentation can be found in the doc/ subdirectory, in the *.rst
 files. It is written in the ReStructuredText format, for the Sphinx
 documentation system, but should be readable even without it. For the
-generation of HTML or PDF files Sphinx v1.0.8 is needed. In the
-current Debian release, "squeeze", this version must be installed from
-the backports repository. (For details see
-http://backports.debian.org).
+generation of HTML or PDF files Sphinx v1.0.8 (or later) is needed.
 
 If Sphinx is installed, type "make html" or "make latexpdf" from the
 main directory or from doc/ to get the documentation.
