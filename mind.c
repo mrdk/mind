@@ -95,22 +95,8 @@ typedef struct {
 #define C(label)  ((cell)(&dict[i_##label].exec)) // Call to Forth word
 
 // ---------------------------------------------------------------------------
-// Reading text files and interactive input
-
-static void init_textfile(textfile_t *inf, entry_t dict[])
-{
-    inf->stream.forward = C(file_forward);
-    inf->stream.current_fetch = C(file_current_fetch);
-    inf->stream.eos = C(file_eof);
-    inf->input = 0;
-    inf->name = 0;
-    inf->current = EOF;
-}
-
-// ---------------------------------------------------------------------------
-// Memory
-
 // System variables
+
 struct {
     cell r0;		     // (cell*) Start of the return stack
     cell dp;		     // (cell*) Dictionary pointer
@@ -122,6 +108,16 @@ struct {
     cell instream;	     // (stream_t*) Current input stream
     cell mem[MEMCELLS];	     // The memory
 } sys;
+
+static void init_textfile(textfile_t *inf, entry_t dict[])
+{
+    inf->stream.forward = C(file_forward);
+    inf->stream.current_fetch = C(file_current_fetch);
+    inf->stream.eos = C(file_eof);
+    inf->input = 0;
+    inf->name = 0;
+    inf->current = EOF;
+}
 
 static void init_sys(entry_t dict[])
 {
