@@ -203,7 +203,7 @@ void mind()
 boot:
     init_sys(dict);
 
-    open_textfile(&sys.inf,
+    file_open(&sys.inf,
                   mind_relative((char*)args.progname, "init.mind"));
     if (sys.inf.current == EOF) {
 	fprintf(stderr, "Error: File '%s' not found\n", (char*)sys.inf.name);
@@ -295,7 +295,7 @@ notfound: // Tell that the word at sys.dp could not be interpreted
     {
 	printf("l%"PRIdCELL": not found: %s\n",
 	       ((textfile_t*)sys.instream)->lineno, (char*)sys.dp);
-        close_textfile(&sys.inf);
+        file_close(&sys.inf);
         w = (label_t)C(abort); goto **w;
     }
 

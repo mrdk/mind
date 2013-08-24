@@ -26,8 +26,8 @@ typedef struct {
 
 char *mind_relative(char *mind_file, char *filename);
 
-void open_textfile(textfile_t *inf, char* name);
-void close_textfile(textfile_t *inf);
+void file_open(textfile_t *inf, char* name);
+void file_close(textfile_t *inf);
 void file_forward(textfile_t *inf);
 
 #endif

@@ -21,14 +21,14 @@ char *mind_relative(char* mind_file, char *filename)
     return path;
 }
 
-void open_textfile(textfile_t *inf, char* name)
+void file_open(textfile_t *inf, char* name)
 {
     inf->name = (cell)name;
     if ((inf->input = (cell)fopen(name, "r")))
 	inf->current = fgetc((FILE*)inf->input);
 }
 
-void close_textfile(textfile_t *inf)
+void file_close(textfile_t *inf)
 {
     fclose((FILE*)inf->input);
 
