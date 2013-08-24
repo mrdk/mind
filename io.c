@@ -14,7 +14,11 @@
 char *mind_relative(char* mind_file, char *filename)
 {
     char mind_dir[PATH_MAX];
-    strncpy(mind_dir, mind_file, strcspn(mind_file, "/"));
+    char *slash = strrchr(mind_file, '/');
+    if (slash)
+	strncpy(mind_dir, mind_file, slash - mind_file);
+    else
+	strcpy(mind_dir, mind_file);
 
     char *path = malloc(PATH_MAX);
     sprintf(path, "%s/%s", mind_dir, filename);
