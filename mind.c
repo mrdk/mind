@@ -133,7 +133,9 @@ static void init_sys(entry_t dict[])
     sys.instream = (cell)&sys.inf.stream;
 }
 
-static struct {			// Program arguments:
+// System variables that are derived from the command line arguments.
+static struct {
+    cell progname;              // (char*) argv[0];
     cell command;		// (char*) command parameter
     cell interactive;		// flag: start the interactive mode
 } args;
@@ -201,7 +203,8 @@ void mind()
 boot:
     init_sys(dict);
 
-    open_textfile(&sys.inf, "init.mind"); 
+    open_textfile(&sys.inf,
+                  mind_relative((char*)args.progname, "init.mind"));
     if (sys.inf.current == EOF) {
 	fprintf(stderr, "Error: File '%s' not found\n", (char*)sys.inf.name);
 	exit(-1);
@@ -666,6 +669,8 @@ dotparen: // : .(   here " )" parse-to  here puts ;
 int main(int argc, char *argv[])
 {
     int opt;
+
+    args.progname = (cell)argv[0];
 
     // Default: start in interactive mode
     args.command = 0;
