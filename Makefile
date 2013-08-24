@@ -2,27 +2,33 @@ CC=gcc
 CFLAGS=-W -Wall -std=gnu99 -O3 -fno-strict-aliasing -fno-gcse
 
 all: mind
+clean: docclean srcclean
 
-mind.o: heads.c types.h
+## Executable
 
-mind.s: mind.c heads.c types.h
-	$(CC) -S $(CFLAGS) -fverbose-asm $<
+mind.o: mind.c heads.c types.h
 
 test: mind
 	@./mind -e '.( Finished.) cr'
 
 TAGS:
-	etags *.c *.h init.mind
+	etags *.c *.h
 
-clean: docclean srcclean
+%.s: %.c
+	$(CC) -S $(CFLAGS) -fverbose-asm $<
 
 srcclean:
-	rm -f mind mind.o
+	rm -f mind *.o *.s
 
-docclean:
-	make -C doc/ clean
+.PHONY: srcclean TAGS
+
+
+## Documentation
 
 html latexpdf linkcheck:
 	make -C doc/ $@
 
-.PHONY: mind.s srcclean docclean html latexpdf linkcheck TAGS
+docclean:
+	make -C doc/ clean
+
+.PHONY: docclean html latexpdf linkcheck
