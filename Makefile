@@ -1,12 +1,14 @@
-CC=gcc
-CFLAGS=-W -Wall -std=gnu99 -O3 -fno-strict-aliasing -fno-gcse
-
 all: mind
 clean: docclean srcclean
 
-## Executable
+## Program
 
-mind.o: mind.c heads.c types.h
+CC=gcc
+CFLAGS=-MMD -W -Wall -std=gnu99 -O3 -fno-strict-aliasing -fno-gcse
+
+mind: mind.o
+
+-include *.d
 
 test: mind
 	@./mind -e '.( Finished.) cr'
@@ -18,7 +20,7 @@ TAGS:
 	$(CC) -S $(CFLAGS) -fverbose-asm $<
 
 srcclean:
-	rm -f mind *.o *.s
+	rm -f mind *.o *.d *.s
 
 .PHONY: srcclean TAGS
 
