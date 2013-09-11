@@ -137,8 +137,8 @@ static void init_sys(entry_t dict[])
 // Command line arguments
 
 static struct {
-    cell *raw_argv;                 // content of argv
-    cell raw_argc;                  // argc
+    cell *raw_argv;             // content of argv
+    cell raw_argc;              // argc
     cell progname;              // (char*) argv[0]
     cell command;		// (char*) command parameter
     cell interactive;		// flag: start the interactive mode
@@ -146,10 +146,6 @@ static struct {
 
 static void init_args(int argc, char *argv[])
 {
-    int opt;
-
-    args.progname = (cell)argv[0];
-
     {
         int i;
 
@@ -164,6 +160,7 @@ static void init_args(int argc, char *argv[])
     args.command = 0;
     args.interactive = TRUE;
 
+    int opt;
     while ((opt = getopt(argc, argv, "he:x:")) != -1) {
 	switch (opt) {
 	case 'h':
@@ -251,7 +248,7 @@ boot:
     init_sys(dict);
 
     file_open(&sys.inf,
-                  mind_relative((char*)args.progname, "init.mind"));
+              mind_relative((char*)args.raw_argv[0], "init.mind"));
     if (sys.inf.current == EOF) {
 	fprintf(stderr, "Error: File '%s' not found\n", (char*)sys.inf.name);
 	exit(-1);
