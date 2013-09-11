@@ -30,7 +30,7 @@
 enum wordnum_t {
 #define E(label, ...)  i_##label,
 #define D E
-#include "heads.c"
+#include "headers.c"
 #undef D
 #undef E
     num_words };
@@ -242,7 +242,7 @@ void mind()
     static entry_t dict[] = { /* Dictionary */
 #define E NEW_WORD
 #define D NEW_DEFER
-#include "heads.c"
+#include "headers.c"
 #undef D
 #undef E
     };
