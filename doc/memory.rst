@@ -42,7 +42,7 @@ Memory Access
 
 .. word:: erase         ( addr u -- ) |83|
 
-   Fill the *u* bytes starting at *addr* with zero bytes.
+   Fill the *u* bytes starting at *addr* with zeros.
 
 .. word:: malloc	( n -- addr ) |K|
 
