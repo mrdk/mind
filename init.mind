@@ -199,12 +199,14 @@ Variable #acc                   \ Number accumulator
 \ ==== Now the bootstrapping of the language is complete ======================
 
 \ == Data structures ==
-\ on off cells
+\ on off cells erase
 
 : on  ( addr -- )   true swap ! ;
 : off ( addr -- )   false swap ! ;
 
 : cells ( n -- n' )   /cell * ;
+
+: erase ( addr u -- )   0 fill ;
 
 
 \ == Control flow ==

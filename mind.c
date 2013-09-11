@@ -663,6 +663,12 @@ cstore: // c! ( n a -- )
 append: // ( a char -- a' )
     *(char*)NOS = TOS; NOS++; DROP(1); goto next;
 
+cmove: // ( from to u -- )
+    memcpy((char*)NOS, (char*)sp[2], TOS); DROP(3); goto next;
+
+fill: // ( addr u char -- )
+    memset((char*)sp[2], TOS, NOS); DROP(3); goto next;
+
 malloc: FUNC1(malloc(TOS)); // ( n -- addr )
 free:                       // ( addr -- )
     free((void*)TOS); DROP(1); goto next;

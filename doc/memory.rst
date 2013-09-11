@@ -30,6 +30,20 @@ Memory Access
    Use the cell at *addr* as a binary flag. :word:`on` stores
    :word:`true` at *addr* and :word:`off` stores :word:`false`.
 
+.. word:: cmove         ( from to u -- ) |K|, |83|, "c-move"
+
+   Copy the *u* bytes beginning with the address *from* to the *u*
+   byte long region beginning at the address *to*. The two regions may
+   not overlap.
+
+.. word:: fill          ( addr u char -- ) |K|, |83|
+
+   Fill the *u* bytes starting at *addr* with the byte *char*.
+
+.. word:: erase         ( addr u -- ) |83|
+
+   Fill the *u* bytes starting at *addr* with zero bytes.
+
 .. word:: malloc	( n -- addr ) |K|
 
       Allocate *n* bytes of memory and return its address. Return 0 if
