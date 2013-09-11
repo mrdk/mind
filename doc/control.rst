@@ -168,11 +168,11 @@ The kernel options set the following Forth variables:
 The complete command line parameters of :program:`mind` are accessible
 through the following words:
 
-.. word:: raw-argc         ( -- n ) |K|
+.. word:: raw-argc         ( -- n ) |K|, "raw-arg-c"
 
    Return the number of command line parameters.
 
-.. word:: raw-argv         ( -- addr ) |K|
+.. word:: raw-argv         ( -- addr ) |K|, "raw-arg-v"
 
    Address of an array of cells. The array has :word:`raw-argc` + 1
    elements, and the last element is always 0. The other elements are
@@ -182,11 +182,11 @@ through the following words:
 
 The program options are accessible through the following words:
 
-.. word:: argc             ( -- n ) |K|
+.. word:: argc             ( -- n ) |K|, "arg-v"
 
    Return the number of program options.
 
-.. word:: argv             ( -- addr ) |K|
+.. word:: argv             ( -- addr ) |K|, "arg-c"
 
    Address of an array of cells. The array has :word:`argc` + 1
    elements, and the last element is always 0. The other elements are
