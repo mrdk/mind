@@ -39,6 +39,8 @@ E(backslash, "\\", IMMEDIATE)
 E(paren, "(", IMMEDIATE)
 
 // Command line parameters
+E(raw_argc, "raw-argc", 0)
+E(raw_argv, "raw-argv", 0)
 E(start_command, "start-command", 0)
 E(interactive_mode, "interactive-mode", 0)
 

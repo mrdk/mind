@@ -160,3 +160,16 @@ The program :program:`mind` has the following command line parameters:
 
       If the value of :word:`interactive-mode` is :word:`true`, then
       :program:`mind` switches to an interactive mode after startup.
+
+The complete command line parameters of :program:`mind` are accessible
+through the following words:
+
+.. word:: raw-argc         ( -- n ) |K|
+
+   Return the number of command line parameters.
+
+.. word:: raw-argv         ( -- addr ) |K|
+
+   Address of an array of cells. The array has :word:`raw-argc` + 1
+   elements, and the last element is always 0. The other elements are
+   pointers to the strings that are the command line arguments.
