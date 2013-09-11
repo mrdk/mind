@@ -133,12 +133,47 @@ static void init_sys(entry_t dict[])
     sys.instream = (cell)&sys.inf.stream;
 }
 
-// System variables that are derived from the command line arguments.
+// ---------------------------------------------------------------------------
+// Command line arguments
+
 static struct {
     cell progname;              // (char*) argv[0];
     cell command;		// (char*) command parameter
     cell interactive;		// flag: start the interactive mode
 } args;
+
+static void init_args(int argc, char *argv[])
+{
+    int opt;
+
+    args.progname = (cell)argv[0];
+
+    // Default: start in interactive mode
+    args.command = 0;
+    args.interactive = TRUE;
+
+    while ((opt = getopt(argc, argv, "he:x:")) != -1) {
+	switch (opt) {
+	case 'h':
+	    printf("Usage: %s [-e cmd | -x cmd | -h ]\n", argv[0]);
+	    printf("Options and arguments:\n");
+	    printf("-e cmd: Execute cmd and then stop\n");
+	    printf("-x cmd: Execute cmd, then start command prompt.\n");
+	    printf("-h    : Print this help text\n");
+	    exit(0);
+	case 'e':
+	    args.command = (cell)optarg;
+	    args.interactive = FALSE;
+	    break;
+	case 'x':
+	    args.command = (cell)optarg;
+	    args.interactive = TRUE;
+	    break;
+	default:
+	    exit(-1);
+	}
+    }
+}
 
 /* ---------------------------------------------------------------------- */
 /* Stack manipulation */
@@ -668,35 +703,6 @@ dotparen: // : .(   here " )" parse-to  here puts ;
 
 int main(int argc, char *argv[])
 {
-    int opt;
-
-    args.progname = (cell)argv[0];
-
-    // Default: start in interactive mode
-    args.command = 0;
-    args.interactive = TRUE;
-
-    while ((opt = getopt(argc, argv, "he:x:")) != -1) {
-	switch (opt) {
-	case 'h':
-	    printf("Usage: %s [-e cmd | -x cmd | -h ]\n", argv[0]);
-	    printf("Options and arguments:\n");
-	    printf("-e cmd: Execute cmd and then stop\n");
-	    printf("-x cmd: Execute cmd, then start command prompt.\n");
-	    printf("-h    : Print this help text\n");
-	    return 0;
-	case 'e':
-	    args.command = (cell)optarg;
-	    args.interactive = FALSE;
-	    break;
-	case 'x':
-	    args.command = (cell)optarg;
-	    args.interactive = TRUE;
-	    break;
-	default:
-	    return -1;
-	}
-    }
-
+    init_args(argc, argv);
     mind();
 }
