@@ -26,7 +26,7 @@ Control Structures
    form ::
 
        BEGIN ... WHILE ... WHILE ... REPEAT
-   
+
    with an arbitrary number of :word:`WHILE`\s. The code between
    :word:`BEGIN` and :word:`REPEAT` is repeated until at some
    :word:`WHILE` the TOS is a nonzero number. It is possible to omit
@@ -75,7 +75,7 @@ Implementation of Control Structures
 
       IF ... ELSE ... THEN
 
-   can be expressed as :: 
+   can be expressed as ::
 
       [ if, ] ... [ else, ] ... [ then, ]
 
@@ -125,21 +125,25 @@ Starting and Ending
 Command Line Parameters
 -----------------------
 
-The program :program:`mind` has the following command line parameters:
+The program :program:`mind` has the following command line options:
 
-    .. option:: -e <cmd>
+.. option:: -e <cmd>
 
-       Execute <cmd> and finish.
-        
-    .. option:: -x <cmd>
+   Execute <cmd> and finish.
 
-       Execute <cmd> and start interactive mode.
+.. option:: -x <cmd>
 
-    .. option:: -h
+   Execute <cmd> and start interactive mode.
 
-       Print help text.
+.. option:: -h
 
-    The parameters set the following Forth variables:
+   Print help text.
+
+These options are called the *kernel options*, in contrast to the
+options for the program interpreted by :program:`mind`. The options
+behind the kernel options are called the *program options*.
+
+The kernel options set the following Forth variables:
 
 .. word:: start-command	( -- addr ) |K|
 
@@ -172,4 +176,22 @@ through the following words:
 
    Address of an array of cells. The array has :word:`raw-argc` + 1
    elements, and the last element is always 0. The other elements are
-   pointers to the strings that are the command line arguments.
+   pointers to strings. These strings are the command line arguments
+   of :word:`mind`. They are usually part of system memory and
+   therefore immutable.
+
+The program options are accessible through the following words:
+
+.. word:: argc             ( -- n ) |K|
+
+   Return the number of program options.
+
+.. word:: argv             ( -- addr ) |K|
+
+   Address of an array of cells. The array has :word:`argc` + 1
+   elements, and the last element is always 0. The other elements are
+   pointers to strings. These strings are the program options of
+   :word:`mind`. They are usually part of system memory and therefore
+   immutable.
+
+   The array :word:`argv` is always the end part of :word:`raw-argv`.

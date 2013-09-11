@@ -137,8 +137,10 @@ static void init_sys(entry_t dict[])
 // Command line arguments
 
 static struct {
-    cell *raw_argv;             // content of argv
-    cell raw_argc;              // argc
+    cell *raw_argv;             // (char**) content of argv
+    cell raw_argc;              // (int) argc
+    cell *argv;                 // (char**) content of argv
+    cell argc;                  // (int) argc
     cell progname;              // (char*) argv[0]
     cell command;		// (char*) command parameter
     cell interactive;		// flag: start the interactive mode
@@ -182,6 +184,9 @@ static void init_args(int argc, char *argv[])
 	    exit(-1);
 	}
     }
+
+    args.argc = argc - optind;
+    args.argv = args.raw_argv + optind;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -391,6 +396,8 @@ paren: // : (   BEGIN current@ forward  [char] ) = if;  eos UNTIL ; immediate
 
 raw_argc: FUNC0(args.raw_argc);
 raw_argv: FUNC0(args.raw_argv);
+argc:     FUNC0(args.argc);
+argv:     FUNC0(args.argv);
 start_command:    FUNC0(&args.command);
 interactive_mode: FUNC0(&args.interactive);
 
