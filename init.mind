@@ -322,7 +322,8 @@ Variable ?start-command   ?start-command off
 : do-start
   start-command @ line-stream interpret-stream ;
 : ?do-start
-  start-command @ ?start-command @ or IF  ?start-command off  do-start THEN ;
+  start-command @ ?start-command @ 0= and 
+     IF  ?start-command off  do-start THEN ;
 
 : command-interpret
   r0 @ rp!  clearstack  ?do-start ?do-lines  bye ;
