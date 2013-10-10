@@ -266,9 +266,6 @@ Variable 'num                  \ points to the beginning of the generated string
 : accept  ( addr n -- n' )
   over swap  1+ gets IF  dup chomp strlen ELSE  0 swap c!  drop 0 THEN ;
 
-256 Constant /linebuf
-Create linebuf  /linebuf strallot
-
 
 \ == Text Streams and String Streams ==
 
@@ -281,8 +278,10 @@ Create linebuf  /linebuf strallot
   /cell Field >'current-char         \ points to the current character
 Constant /stringstream
 
-: str-forward   ( -- )        'instream @ >'current-char  1 swap +! ;
-: str-current@  ( -- char )   'instream @ >'current-char @ c@ ;
+: instream    'instream @ ;
+
+: str-forward   ( -- )        instream >'current-char  1 swap +! ;
+: str-current@  ( -- char )   instream >'current-char @ c@ ;
 : str-eos       ( -- flag )   str-current@ 0= ;
 
 : Stringstream ( <word> -- )
@@ -293,30 +292,40 @@ Constant /stringstream
   drop ;
 
 : interpret-stream ( 'string 'stream -- )
-  'instream push  dup 'instream !  >'current-char !  do-stream ;
+  'instream !  instream >'current-char !  do-stream ;
+
+
+\ == Interpreting input lines ==
 
 Stringstream line-stream
 
-: line-interpret
-  BEGIN  linebuf /linebuf accept drop
-         linebuf line-stream interpret-stream
-         ." ok" cr  REPEAT ;
+256 Constant /linebuf
+Create linebuf  /linebuf strallot
+
+: get-line   linebuf /linebuf accept drop ;
+: do-line    linebuf line-stream interpret-stream ;
+
+: do-lines
+  BEGIN  get-line do-line   space ." ok" cr  REPEAT ;
+
+: ?do-lines   interactive-mode @ IF  do-lines THEN ;
 
 
 \ == Command interpreter ==
 \ clearstack
 
-Variable start-finished		\ Has start-command been executed?
-start-finished off
+\ Has start-command been executed?
+Variable ?start-command   ?start-command off
 
-: clearstack s0 @ sp! ;
+: clearstack   s0 @ sp! ;
+
+: do-start
+  start-command @ line-stream interpret-stream ;
+: ?do-start
+  start-command @ ?start-command @ or IF  ?start-command off  do-start THEN ;
 
 : command-interpret
-  clearstack  r0 @ rp!
-  start-command @  start-finished @ or IF  start-finished off
-      start-command @ line-stream interpret-stream  THEN
-  interactive-mode @ IF
-      line-interpret ELSE bye THEN ;
+  r0 @ rp!  clearstack  ?do-start ?do-lines  bye ;
 
 ' command-interpret is abort
 
