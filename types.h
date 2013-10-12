@@ -46,4 +46,8 @@ typedef ldiv_t celldiv_t;
 #error sizeof(void*) > sizeof(long int): not yet supported.
 #endif
 
+// Forth truth values
+#define TRUE 	~(cell)0
+#define FALSE 	0
+
 #endif

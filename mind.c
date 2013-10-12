@@ -13,14 +13,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "args.h"
 #include "io.h"
 
 #define MEMCELLS 0x10000	/* Memory size in cells */
-
-// Forth truth values
-#define TRUE 	~(cell)0
-#define FALSE 	0
-#define BOOL(n)	((n) ? TRUE : FALSE)
 
 /* ---------------------------------------------------------------------- */
 /* Dictionary structure */
@@ -133,73 +129,6 @@ static void init_sys(entry_t dict[])
     sys.instream = (cell)&sys.inf.stream;
 }
 
-// ---------------------------------------------------------------------------
-// Command line arguments
-
-static struct {
-    cell *raw_argv;             // (char**) content of argv
-    cell raw_argc;              // (int) argc
-    cell *argv;                 // (char**) content of argv
-    cell argc;                  // (int) argc
-    cell progname;              // (char*) argv[0]
-    cell command;		// (char*) command parameter
-    cell interactive;		// flag: start the interactive mode
-} args;
-
-static void usage(char *progname)
-{
-    printf("Usage: %s [-e cmd | -x cmd | -h ]\n", progname);
-    printf("Options and arguments:\n");
-    printf("-e cmd: Execute cmd and then stop\n");
-    printf("-x cmd: Execute cmd, then start command prompt.\n");
-    printf("-h    : Print this help text\n");
-}
-
-// Create a copy of ARGV as a forth-style array.
-static void copy_args(int argc, char *argv[])
-{
-    int i;
-
-    args.raw_argc = argc;
-    args.raw_argv = malloc((argc + 1) * sizeof(argv));
-
-    for (i = 0; i <= argc; i++)
-        args.raw_argv[i] = (cell)argv[i];
-}
-
-static void init_args(int argc, char *argv[])
-{
-    copy_args(argc, argv);
-
-    // Default: start in interactive mode
-    args.command = 0;
-    args.interactive = TRUE;
-
-    int opt;
-    while ((opt = getopt(argc, argv, "he:x:")) != -1) {
-	switch (opt) {
-	case 'h':
-            usage(argv[0]);
-	    exit(0);
-	case 'e':
-	    args.command = (cell)optarg;
-	    args.interactive = FALSE;
-	    break;
-	case 'x':
-	    args.command = (cell)optarg;
-	    args.interactive = TRUE;
-	    break;
-	default:
-	    exit(-1);
-	}
-    }
-
-    // The words `argv` and `argc` then contain the remaining
-    // arguments, to be processed by the program.
-    args.argc = argc - optind;
-    args.argv = args.raw_argv + optind;
-}
-
 /* ---------------------------------------------------------------------- */
 /* Stack manipulation */
 
@@ -221,6 +150,9 @@ static void init_args(int argc, char *argv[])
 #define FUNC0(x)  EXTEND(1); TOS = (cell)(x); goto next // ( -- n )
 #define FUNC1(x)  TOS = (cell)(x); goto next            // ( n1 -- n2 )
 #define FUNC2(x)  NOS = (cell)(x); DROP(1); goto next   // ( n1 n2 -- n3 )
+
+// Some functions must return a Forth-style boolean.
+#define BOOL(n)	((n) ? TRUE : FALSE)
 
 // Macro for a word that computes the address of a field from the
 // address of a struct
