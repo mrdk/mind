@@ -183,7 +183,7 @@ a file (or any other stream in a Unix system).
    address of its :word:`line#` field. The field is one cell wide and
    contains the current line number of this stream.
 
-.. word:: /filestream	( -- n ) |K|, "per-filestream"
+.. word:: /textfile     ( -- n ) |K|, "per-filestream"
 
       	Number of bytes in a file stream structure.
 
