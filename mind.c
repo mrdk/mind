@@ -146,18 +146,31 @@ static struct {
     cell interactive;		// flag: start the interactive mode
 } args;
 
+static void usage(char *progname)
+{
+    printf("Usage: %s [-e cmd | -x cmd | -h ]\n", progname);
+    printf("Options and arguments:\n");
+    printf("-e cmd: Execute cmd and then stop\n");
+    printf("-x cmd: Execute cmd, then start command prompt.\n");
+    printf("-h    : Print this help text\n");
+}
+
+// Create a copy of ARGV as a forth-style array.
+static void copy_args(int argc, char *argv[])
+{
+    int i;
+
+    args.raw_argc = argc;
+    args.raw_argv = malloc((argc + 1) * sizeof(argv));
+
+    for (i = 0; i <= argc; i++)
+        args.raw_argv[i] = (cell)argv[i];
+}
+
 static void init_args(int argc, char *argv[])
 {
-    {
-        int i;
+    copy_args(argc, argv);
 
-        args.raw_argc = argc;
-        args.raw_argv = malloc((argc + 1) * sizeof(argv));
-
-        for (i = 0; i <= argc; i++)
-            args.raw_argv[i] = (cell)argv[i];
-    }
-        
     // Default: start in interactive mode
     args.command = 0;
     args.interactive = TRUE;
@@ -166,11 +179,7 @@ static void init_args(int argc, char *argv[])
     while ((opt = getopt(argc, argv, "he:x:")) != -1) {
 	switch (opt) {
 	case 'h':
-	    printf("Usage: %s [-e cmd | -x cmd | -h ]\n", argv[0]);
-	    printf("Options and arguments:\n");
-	    printf("-e cmd: Execute cmd and then stop\n");
-	    printf("-x cmd: Execute cmd, then start command prompt.\n");
-	    printf("-h    : Print this help text\n");
+            usage(argv[0]);
 	    exit(0);
 	case 'e':
 	    args.command = (cell)optarg;
@@ -185,6 +194,8 @@ static void init_args(int argc, char *argv[])
 	}
     }
 
+    // The words `argv` and `argc` then contain the remaining
+    // arguments, to be processed by the program.
     args.argc = argc - optind;
     args.argv = args.raw_argv + optind;
 }
