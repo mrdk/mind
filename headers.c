@@ -47,6 +47,7 @@ E(start_command, "start-command", 0)
 E(interactive_mode, "interactive-mode", 0)
 
 // Text streams
+E(init_mind, "init.mind", 0)
 E(to_forward, ">forward", 0)
 E(to_current_fetch, ">current@", 0)
 E(to_eos, ">eos", 0)

@@ -415,6 +415,8 @@ interactive_mode: FUNC0(&args.interactive);
 // ---------------------------------------------------------------------------
 // Text streams
 
+init_mind: FUNC0(&sys.inf);     // init.mind ( -- addr )
+
 to_forward:       OFFSET(stream_t, forward);       // >forward
 to_current_fetch: OFFSET(stream_t, current_fetch); // >current@
 to_eos:           OFFSET(stream_t, eos);           // >eos

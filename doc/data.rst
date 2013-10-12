@@ -140,6 +140,12 @@ File Streams
 A file stream is an extension of the stream interface for reading from
 a file (or any other stream in a Unix system).
 
+.. word:: init.mind    ( -- addr ) |K|, "init-dot-mind"
+
+   File stream that refers to a file that is read automatically at
+   startup. The name of this file is :file:`init.mind`, and it
+   contains all the essential definitions for a running forht system.
+
 .. word:: line#		( -- addr ) |K|, "line-number"
 
       Address of the current line number in the current stream. The
