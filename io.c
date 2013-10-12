@@ -32,12 +32,14 @@ void file_open(textfile_t *inf, char* name)
 	inf->current = fgetc((FILE*)inf->input);
 }
 
-void file_close(textfile_t *inf)
+int file_close(textfile_t *inf)
 {
-    fclose((FILE*)inf->input);
+    int result = fclose((FILE*)inf->input);
 
     inf->input = 0;
     inf->current = EOF;
+
+    return result;
 }
 
 void file_forward(textfile_t *inf)
