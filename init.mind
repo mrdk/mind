@@ -155,6 +155,8 @@
 : (?pairs)  ( n1 n2 -- )    <> abort" Mismatching control structure" ;
 ' (?pairs) is ?pairs
 
+: .name ( xt -- )   >name puts ; \ Print name of word
+
 
 \ == Conversion: string to number ==
 \ base
@@ -267,12 +269,37 @@ Variable 'num                  \ points to the beginning of the generated string
   over swap  1+ gets IF  dup chomp strlen ELSE  0 swap c!  drop 0 THEN ;
 
 
-\ == Text Streams and String Streams ==
-
-: Stream ( <word> -- )   Create /stream allot ;
+\ == Structures ==
 
 : Field  ( offset size <word> -- offset' )   Create over ,  +
   does>  ( 'base -- 'field )                 @ + ;
+
+
+\ == Text files ==
+
+Variable this-file   init.mind this-file !
+
+: TStream ( <word> -- )
+  Create here  /textfile allot  this-file @ file-init ;
+
+\ init.mind is not a normal word:
+: tstream-body> ( 'tstream -- xt )
+  dup init.mind =  IF drop  ['] init.mind ELSE body> THEN ;
+
+: .tstream-name ( 'tstream -- )   tstream-body> .name ;
+
+: .tstream ( 'tstream -- )
+  dup .tstream-name
+  dup >infile-name @  ?dup IF [char] = emit  puts THEN  [char] : emit
+  dup >line# @ .
+  dup >infile @  IF ." (open) "  THEN
+  dup >caller @  ?dup IF ." <- " .tstream-name THEN
+  drop ;
+
+
+\ == Text Streams and String Streams ==
+
+: Stream ( <word> -- )   Create /stream allot ;
 
 /stream
   /cell Field >'current-char         \ points to the current character
@@ -297,7 +324,7 @@ Constant /stringstream
 
 \ == Interpreting input lines ==
 
-Stringstream line-stream
+Stringstream line-stream        \ The current input line
 
 256 Constant /linebuf
 Create linebuf  /linebuf strallot
@@ -322,7 +349,7 @@ Variable ?start-command   ?start-command off
 : do-start
   start-command @ line-stream interpret-stream ;
 : ?do-start
-  start-command @ ?start-command @ 0= and 
+  start-command @ ?start-command @ 0= and
      IF  ?start-command off  do-start THEN ;
 
 : command-interpret
@@ -341,7 +368,6 @@ Variable ?start-command   ?start-command off
   ?stack  sp@ >r  s0 @  BEGIN cell-  dup r@ u>= WHILE  dup @ h. REPEAT
   drop rdrop ;
 
-: .name   ( xt -- )   >name puts ;
 : words   last  BEGIN @  ?dup WHILE  dup link> .name space  REPEAT ;
 
 

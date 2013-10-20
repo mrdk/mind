@@ -61,7 +61,7 @@ typedef struct {
 
 // Compute the address of an entry_t field when given an execution
 // token instead of the beginning of the struct.
-#define FROM_XT(xt)                                             \
+#define FROM_XT(xt)                                     \
     ((entry_t*)((char*)(xt) - offsetof(entry_t, exec)))
 
 /* Find XT for *name* in dictionary, starting at *e*. */
@@ -105,7 +105,7 @@ struct {
     cell mem[MEMCELLS];	     // The memory
 } sys;
 
-static void init_textfile(textfile_t *inf, entry_t dict[])
+static void file_init(textfile_t *inf, textfile_t *caller, entry_t dict[])
 {
     inf->stream.forward = C(file_forward);
     inf->stream.current_fetch = C(file_current_fetch);
@@ -113,6 +113,8 @@ static void init_textfile(textfile_t *inf, entry_t dict[])
     inf->input = 0;
     inf->name = 0;
     inf->current = EOF;
+    inf->lineno = 0;
+    inf->caller = (cell)caller;
 }
 
 static void init_sys(entry_t dict[])
@@ -125,7 +127,7 @@ static void init_sys(entry_t dict[])
     sys.root.link = 0;
     sys.root.last = (cell)&dict[num_words - 1];
     sys.root.find_word = C(find_word);
-    init_textfile(&sys.inf, dict);
+    file_init(&sys.inf, NULL, dict);
     sys.instream = (cell)&sys.inf.stream;
 }
 
@@ -356,10 +358,14 @@ per_stream: FUNC0(sizeof(stream_t)); // /stream
 
 tick_instream: FUNC0(&sys.instream); // 'instream
 
+file_init:                      // file-init ( new, caller -- );
+    file_init((textfile_t*)NOS, (textfile_t*)TOS, dict); DROP(2);
+
 to_infile:     OFFSET(textfile_t, input);   // >infile
 to_infilename: OFFSET(textfile_t, name);    // >infile-name
 to_current:    OFFSET(textfile_t, current); // >current
 to_lineno:     OFFSET(textfile_t, lineno);  // >line#
+to_caller:     OFFSET(textfile_t, caller);  // >caller
 per_textfile: FUNC0(sizeof(textfile_t)); // /textfile
 
 lineno: FUNC0(&((textfile_t*)sys.instream)->lineno);
@@ -422,13 +428,18 @@ create_comma: // Create, ( 'interpreter <word> -- )
 colon_comma: // :, ( <word> -- )
     CODE(C(docol_addr), C(create_comma));
 
+#define FROM_BODY(addr)                                 \
+    ((entry_t*)((char*)(addr) - offsetof(entry_t, body)))
+
 link_to:     FUNC1(&((entry_t*)TOS)->exec);	// link>  ( lfa -- xt )
+body_to:     FUNC1(&FROM_BODY(TOS)->exec);      // body>  ( body -- xt )
 flags_fetch: FUNC1(FROM_XT(TOS)->flags);	// flags@ ( xt -- n )
 flags_store:					// flags! ( n xt -- )
     FROM_XT(TOS)->flags = NOS; DROP(2); goto next;
 
 to_name: FUNC1(FROM_XT(TOS)->name);	// >name ( xt -- 'name )
 to_doer: FUNC1(&FROM_XT(TOS)->doer);	// >doer ( xt -- 'doer )
+to_body: FUNC1(FROM_XT(TOS)->body);	// >body ( xt -- 'body )
 
 num_immediate: FUNC0(IMMEDIATE); // #immediate
 

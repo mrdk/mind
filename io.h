@@ -22,6 +22,7 @@ typedef struct {
     cell name;                  // (char*) File name
     cell current;		// Character at input position (or EOF)
     cell lineno;		// integer: line number
+    cell caller;                // (textfile_t*) File that called it
 } textfile_t;
 
 char *mind_relative(char *mind_file, char *filename);
