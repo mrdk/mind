@@ -48,4 +48,6 @@ void file_forward(textfile_t *inf)
 
     if (inf->current == '\n')
 	inf->lineno++;
+    else if (inf->current == EOF)
+        file_close(inf);
 }

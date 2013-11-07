@@ -245,6 +245,8 @@ Implementation
    :word:`>current` field. :word:`line#` is updated if the character
    is an "end of line" symbol.
 
+   If the end of the file is reached, it is closed automatically.
+
 .. word:: file-current@	( -- char ) |K|, "file-current-fetch"
 
    Put the character at the current position of the current file
