@@ -155,7 +155,7 @@
 : (?pairs)  ( n1 n2 -- )    <> abort" Mismatching control structure" ;
 ' (?pairs) is ?pairs
 
-: .name ( xt -- )   >name puts ; \ Print name of word
+: .name ( xt -- )   >name @ puts ; \ Print name of word
 
 
 \ == Conversion: string to number ==

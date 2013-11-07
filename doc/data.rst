@@ -73,15 +73,45 @@ The internal structure of the dictionary.
 
 .. word:: ^dodoes |K|
 
-.. word:: link>         |K|, |83|, "from-link"
+.. word:: >link         ( xt -- addr ) |K|, |83|, "to-link"
+
+   Convert the execution token of a word to the address of its link
+   field. This field is one cell wide and contains the address of the
+   link field of the word defined before this -- or 0 of there is no
+   previous word.
+
+.. word:: link>         ( addr -- xt ) |K|, |83|, "from-link"
+
+   Convert the address of the link field of a word to its execution
+   token.
+
+.. word:: >name         ( xt -- addr ) |K|, |83|, "to-name"
+
+   Convert an execution token to the address of the name field of a
+   word. The name field contains the address of the null-terminated
+   string that is the name. This means that the command sequence ::
+
+     ' word >name @
+
+   leaves the address of the string `"word"` on the stack.
+
+.. word:: >doer         ( xt -- addr ) |K|, "to-doer"
+
+   Convert the execution token of a word to the address of its doer
+   field. In words defined with :word:`does`, it contains the address
+   of the code that is eexcuted by them. Otherwise it is usually 0.
+
+.. word:: >body         ( xt -- addr ) |K|, |83|, "to-body"
+
+   Convert the execution token of a word to the address of its body.
+
+.. word:: body>         ( addr -- xt ) |K|, |83|, "from-body"
+
+   Convert the address of the body of a word to its execution token.
 
 .. word:: flags@ |K|
 
 .. word:: flags! |K|
-
-.. word:: >name         |K|, |83|, "to-name"
-
-.. word:: >doer |K|
 
 .. word:: #immediate |K|
 
@@ -177,15 +207,33 @@ a file (or any other stream in a Unix system).
    and contains the last character read from the file or the "end of
    file" constant.
 
-.. word:: >line#	( 'textfile -- addr ) |K|, "to-linenumber"
+.. word:: >line#	( 'textfile -- addr ) |K|, "to-line-number"
 
    The TOS contains the address of a textfile structure: compute the
    address of its :word:`line#` field. The field is one cell wide and
    contains the current line number of this stream.
 
+.. word:: >caller       ( 'textfile -- addr ) |K|, "to-caller"
+
+   Return the address of the caller field of a textfile structure. The
+   field is one cell wide and contains the address of a text file in
+   which the current text file has been defined. If such a file does
+   not exist, the value is 0.
+
 .. word:: /textfile     ( -- n ) |K|, "per-textfile"
 
       	Number of bytes in a file stream structure.
+
+.. word:: file-init     ( new-file caller -- )
+
+   Initialise a new textfile structure. *new-file* is the address of a
+   memory region of :word:`/textfile` bytes. *caller* is either the
+   address of an existing textfile structure or 0. If it is not 0, it
+   contains the address of the file in which the current file was
+   defined.
+
+   The word :word:`file-init` then generates a new textfile structure
+   at *new-file*. Its :word:`>caller` field is set to *caller*.
 
 
 Implementation

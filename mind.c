@@ -437,9 +437,10 @@ flags_fetch: FUNC1(FROM_XT(TOS)->flags);	// flags@ ( xt -- n )
 flags_store:					// flags! ( n xt -- )
     FROM_XT(TOS)->flags = NOS; DROP(2); goto next;
 
-to_name: FUNC1(FROM_XT(TOS)->name);	// >name ( xt -- 'name )
+to_link: FUNC1(&FROM_XT(TOS)->link);	// >link ( xt -- 'link )
+to_name: FUNC1(&FROM_XT(TOS)->name);	// >name ( xt -- 'name )
 to_doer: FUNC1(&FROM_XT(TOS)->doer);	// >doer ( xt -- 'doer )
-to_body: FUNC1(FROM_XT(TOS)->body);	// >body ( xt -- 'body )
+to_body: FUNC1(&FROM_XT(TOS)->body);	// >body ( xt -- 'body )
 
 num_immediate: FUNC0(IMMEDIATE); // #immediate
 
