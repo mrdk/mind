@@ -201,14 +201,18 @@ Variable #acc                   \ Number accumulator
 \ ==== Now the bootstrapping of the language is complete ======================
 
 \ == Data structures ==
-\ on off cells erase
+\ cells on off erase clearstack
+
+: cells ( n -- n' )   /cell * ;
 
 : on  ( addr -- )   true swap ! ;
 : off ( addr -- )   false swap ! ;
 
-: cells ( n -- n' )   /cell * ;
-
 : erase ( addr u -- )   0 fill ;
+
+: clearstack      ( ... -- )   s0 @ sp! ;
+: clear-rstack ( R: ... -- )   r@  r0 @ rp!  >r ;
+     \ clear-rstack saves the caller's address to make it callable
 
 
 \ == Control flow ==
@@ -222,11 +226,8 @@ Variable #acc                   \ Number accumulator
 
 \ == Conversion: numbers to string (Modified f.i.g. model.) ==
 
-\ Allocate for a zero-terminated string of maximal length *n*
-: strallot ( n -- )   1+ allot ;
-
 128 Constant /numbuf
-Create numbuf  /numbuf strallot
+Create numbuf  /numbuf 1+ allot
 Variable 'num                  \ points to the beginning of the generated string
 
 : #>digit ( n - char )
@@ -260,10 +261,10 @@ Variable 'num                  \ points to the beginning of the generated string
 \ == Line input ==
 \ accept
 
-: ?split   ( addr c -- )     \ if character at `addr` is `c`, split string there
+: ?split   ( addr c -- )    \ if character at `addr` is `c`, split string there
   over c@ = IF  0 swap c!  ELSE drop THEN ;
-: chomp  ( str -- )             \ remove trailing end-of-line character.
-  dup strlen + 1-  #eol  ?split ;
+: chomp    ( str -- )           \ remove trailing end-of-line character.
+  dup strlen + 1-  #eol ?split ;
 
 : accept  ( addr n -- n' )
   over swap  1+ gets IF  dup chomp strlen ELSE  0 swap c!  drop 0 THEN ;
@@ -287,8 +288,7 @@ Variable this-file   init.mind this-file !
   dup init.mind =  IF drop  ['] init.mind ELSE body> THEN ;
 
 : .tstream-name ( 'tstream -- )   tstream-body> .name ;
-
-: .tstream ( 'tstream -- )
+: .tstream      ( 'tstream -- )
   dup .tstream-name
   dup >infile-name @  ?dup IF [char] = emit  puts THEN  [char] : emit
   dup >line# @ .
@@ -327,34 +327,23 @@ Constant /stringstream
 Stringstream line-stream        \ The current input line
 
 256 Constant /linebuf
-Create linebuf  /linebuf strallot
+Create linebuf  /linebuf 1+ allot
 
-: get-line   linebuf /linebuf accept drop ;
-: do-line    linebuf line-stream interpret-stream ;
-
-: do-lines
-  BEGIN  get-line do-line   space ." ok" cr  REPEAT ;
-
-: ?do-lines   interactive-mode @ IF  do-lines THEN ;
+: get-line    linebuf /linebuf accept drop ;
+: do-line     linebuf line-stream interpret-stream  space ." ok" cr ;
+: do-lines    BEGIN  interactive-mode @ WHILE  get-line do-line  REPEAT ;
 
 
 \ == Command interpreter ==
-\ clearstack
 
-\ Has start-command been executed?
-Variable ?start-command   ?start-command off
+Variable ?start-command         \ Has start-command been executed?
+?start-command off
 
-: clearstack   s0 @ sp! ;
+: do-start    start-command @ line-stream interpret-stream ;
+: ?do-start   start-command @ ?start-command @ 0= and
+                IF  ?start-command off  do-start THEN ;
 
-: do-start
-  start-command @ line-stream interpret-stream ;
-: ?do-start
-  start-command @ ?start-command @ 0= and
-     IF  ?start-command off  do-start THEN ;
-
-: command-interpret
-  r0 @ rp!  clearstack  ?do-start ?do-lines  bye ;
-
+: command-interpret    clear-rstack clearstack  ?do-start do-lines  bye ;
 ' command-interpret is abort
 
 
@@ -362,6 +351,7 @@ Variable ?start-command   ?start-command off
 
 \ Number of entries on the stack
 : depth ( -- n )    sp@  s0 @  swap -  /cell / ;
+
 : ?stack            depth 0< abort" Stack empty" ;
 
 : .s                            \ print content of stack
