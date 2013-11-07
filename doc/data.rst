@@ -98,7 +98,7 @@ The internal structure of the dictionary.
 .. word:: >doer         ( xt -- addr ) |K|, "to-doer"
 
    Convert the execution token of a word to the address of its doer
-   field. In words defined with :word:`does`, it contains the address
+   field. In words defined with :word:`does>`, it contains the address
    of the code that is eexcuted by them. Otherwise it is usually 0.
 
 .. word:: >body         ( xt -- addr ) |K|, |83|, "to-body"
