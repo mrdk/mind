@@ -155,35 +155,35 @@ a file (or any other stream in a Unix system).
 
       Execute the code in the current input stream.
 
-.. word:: >infile	( 'filestream -- addr ) |K|, "to-infile"
+.. word:: >infile	( 'textfile -- addr ) |K|, "to-infile"
 
-   The TOS contains the address of a filestream structure: compute the
+   The TOS contains the address of a textfile structure: compute the
    address of its :word:`>infile` field. The field is one cell wide
    and contains the underlying C file pointer of type :c:type:`FILE*`
    for this stream.
 
-.. word:: >infile-name	( 'filestream -- addr ) |K|, "to-infile-name"
+.. word:: >infile-name	( 'textfile -- addr ) |K|, "to-infile-name"
 
-   The TOS contains the address of a filestream structure: compute the
+   The TOS contains the address of a textfile structure: compute the
    address of its :word:`>infile-name` field. The field is one cell
    wide and contains a pointer to a null-terminated string that
    contains the name of the file for this stream. The field may also
    contain a null pointer if the file is not open or has no name.
 
-.. word:: >current	( 'filestream -- addr ) |K|, "to-current"
+.. word:: >current	( 'textfile -- addr ) |K|, "to-current"
 
-   The TOS contains the address of a filestream structure: compute the
+   The TOS contains the address of a textfile structure: compute the
    address of its :word:`>current` field. This field is one cell wide
    and contains the last character read from the file or the "end of
    file" constant.
 
-.. word:: >line#	( 'filestream -- addr ) |K|, "to-linenumber"
+.. word:: >line#	( 'textfile -- addr ) |K|, "to-linenumber"
 
-   The TOS contains the address of a filestream structure: compute the
+   The TOS contains the address of a textfile structure: compute the
    address of its :word:`line#` field. The field is one cell wide and
    contains the current line number of this stream.
 
-.. word:: /textfile     ( -- n ) |K|, "per-filestream"
+.. word:: /textfile     ( -- n ) |K|, "per-textfile"
 
       	Number of bytes in a file stream structure.
 
