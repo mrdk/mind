@@ -194,7 +194,6 @@ void mind()
 
 // ---------------------------------------------------------------------------
 // Starting and ending
-boot:
     init_sys(dict);
 
     file_open(&sys.inf,
@@ -207,7 +206,7 @@ boot:
     sp = (cell*)sys.s0;
     rp = (cell*)sys.r0;
     {
-	static cell interpreter[] = { C(do_stream), C(abort) };
+	static cell interpreter[] = { C(do_stream), C(boot) };
 	ip = interpreter;
 	goto next;
     }

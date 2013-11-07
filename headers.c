@@ -9,7 +9,7 @@
 /* E(label, name, flags); */
 
 // Starting and ending
-E(boot, "boot", 0)
+D(boot, "boot", abort, 0)
 D(abort, "abort", bye, 0)
 E(bye, "bye", 0)
 

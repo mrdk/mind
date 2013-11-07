@@ -109,17 +109,22 @@ Error Handling
    :word:`command-interpret`.
 
 
-Starting and Ending
--------------------
+Starting and Finishing
+----------------------
 
-.. word:: bye |K|
+.. word:: bye |K|, |vf|
 
       Leave the Forth system immediately.
 
-.. word:: boot
+.. word:: boot |K|
 
-      Initialise the system completely and start the outer
-      interpreter.
+   Deferred word. It is called after :file:`init.mind` has been read.
+   Its purpose is to processes the command line options, print an
+   initial message, and then to call :word:`abort`.
+
+   In the kernel it is originally initialised with :word:`abort`.
+   After :file:`init.mind` is executed, it is a call to
+   :word:`do-boot`.
 
 
 Command Line Parameters

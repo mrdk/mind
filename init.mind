@@ -331,20 +331,19 @@ Create linebuf  /linebuf 1+ allot
 
 : get-line    linebuf /linebuf accept drop ;
 : do-line     linebuf line-stream interpret-stream  space ." ok" cr ;
-: do-lines    BEGIN  interactive-mode @ WHILE  get-line do-line  REPEAT ;
+: do-lines    interactive-mode @ IF cr
+                  BEGIN get-line do-line  REPEAT THEN ;
 
 
 \ == Command interpreter ==
 
-Variable ?start-command         \ Has start-command been executed?
-?start-command off
+: do-start    start-command @ 0;  line-stream interpret-stream ;
 
-: do-start    start-command @ line-stream interpret-stream ;
-: ?do-start   start-command @ ?start-command @ 0= and
-                IF  ?start-command off  do-start THEN ;
-
-: command-interpret    clear-rstack clearstack  ?do-start do-lines  bye ;
+: command-interpret    clear-rstack clearstack  do-lines  bye ;
 ' command-interpret is abort
+
+: do-boot   ?do-start  abort ;
+' do-boot is boot
 
 
 \ == Debug and Display ==
