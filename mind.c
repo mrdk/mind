@@ -317,8 +317,6 @@ parse_to: // : parse-to ( addr string -- )
 
 skip_whitespace: // : skip-whitespace ( -- )
 	         //   BEGIN  whitespace current@ strchr 0= if;  forward AGAIN ;
-// : whitespace-eos  ( -- ? )
-//   whitespace current@ strchr 0=  eos or ;
     CODE(C(whitespace), C(current_fetch), C(strchr), C(zero_equal),
 	 C(if_semi), C(forward), C(branch), (cell)(start));
 
@@ -327,12 +325,10 @@ parse: // : parse ( -- addr )
     CODE(C(skip_whitespace), C(here), C(whitespace), C(parse_to), C(here));
 
 backslash: // : \   BEGIN current@ forward  #eol = if;  eos UNTIL ; immediate
-// : backslash-eos  ( -- ? )   current@ #eol =  eos or ;
     CODE(C(current_fetch), C(forward), C(num_eol), C(equal), C(if_semi),
 	 C(eos), C(zbranch), (cell)start);
 
 paren: // : (   BEGIN current@ forward  [char] ) = if;  eos UNTIL ; immediate
-// : paren-eos  ( -- ? )  current@ [char] ) =  eos or ;
     CODE(C(current_fetch), C(forward), C(lit), ')', C(equal), C(if_semi),
 	 C(eos), C(zbranch), (cell)start);
 
