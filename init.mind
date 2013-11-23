@@ -342,7 +342,7 @@ Create linebuf  /linebuf 1+ allot
 : command-interpret    clear-rstack clearstack  do-lines  bye ;
 ' command-interpret is abort
 
-: do-boot   ?do-start  abort ;
+: do-boot   do-start  abort ;
 ' do-boot is boot
 
 
