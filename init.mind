@@ -1,4 +1,4 @@
-\ mind -- a Forth interpreter					. o ( mind )
+\ mind -- a Forth interpreter
 \ Copyright 2011-2013 Markus Redeker <cep@ibp.de>
 \
 \ Published under the GNU General Public License version 2 or any
@@ -330,19 +330,23 @@ Stringstream line-stream        \ The current input line
 Create linebuf  /linebuf 1+ allot
 
 : get-line    linebuf /linebuf accept drop ;
-: do-line     linebuf line-stream interpret-stream  space ." ok" cr ;
-: do-lines    arg-interactive @ IF cr
-                  BEGIN get-line do-line  REPEAT THEN ;
+: do-line     linebuf line-stream interpret-stream ;
+: do-lines    arg-interactive @ IF
+                  BEGIN  ." ok" cr  get-line do-line  REPEAT THEN ;
 
 
 \ == Command interpreter ==
 
-: do-start    arg-cmdline @ 0;  line-stream interpret-stream ;
-
 : command-interpret    clear-rstack clearstack  do-lines  bye ;
 ' command-interpret is abort
 
-: do-boot   do-start  abort ;
+
+\ == Boot sequence ==
+
+: ?bootmsg       arg-interactive @ IF ."  . o ( mind )" cr THEN ;
+: ?do-cmdline    arg-cmdline @ 0;  line-stream interpret-stream ;
+
+: do-boot   ?bootmsg ?do-cmdline  abort ;
 ' do-boot is boot
 
 
