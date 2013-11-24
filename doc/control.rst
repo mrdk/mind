@@ -150,25 +150,24 @@ behind the kernel options are called the *program options*.
 
 The kernel options set the following Forth variables:
 
-.. word:: start-command	( -- addr ) |K|
+.. word:: arg-cmdline	( -- addr ) |K|
 
-      Variable containing the address of a string that is set by the
-      command options :option:`-e` and :option:`-x`; otherwise its
-      value is 0.
+   Variable containing the address of a string that is set by the
+   command options :option:`-e` and :option:`-x`; otherwise its value
+   is 0.
 
-      If the value of :word:`start-command` is nonzero, then it
-      contains a string that is executed after the file
-      :file:`init.mind` is read and before the system switches to
-      interactive mode (if it does).
+   If the value of :word:`arg-cmdline` is nonzero, then it contains a
+   string that is executed after the file :file:`init.mind` is read
+   and before the system switches to interactive mode (if it does).
 
-.. word:: interactive-mode	( -- addr ) |K|
+.. word:: arg-interactive	( -- addr ) |K|
 
-      Variable containing a flag that is set to :word:`false` by the
-      command line options :option:`-e`. By default its value is
-      :word:`true`.
+   Variable containing a flag that is set to :word:`false` by the
+   command line options :option:`-e`. By default its value is
+   :word:`true`.
 
-      If the value of :word:`interactive-mode` is :word:`true`, then
-      :program:`mind` switches to an interactive mode after startup.
+   If the value of :word:`arg-interactive` is :word:`true`, then
+   :program:`mind` switches to an interactive mode after startup.
 
 The complete command line parameters of :program:`mind` are accessible
 through the following words:

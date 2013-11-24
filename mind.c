@@ -338,8 +338,8 @@ raw_argc: FUNC0(args.raw_argc);
 raw_argv: FUNC0(args.raw_argv);
 argc:     FUNC0(args.argc);
 argv:     FUNC0(args.argv);
-start_command:    FUNC0(&args.command);
-interactive_mode: FUNC0(&args.interactive);
+arg_cmdline:    FUNC0(&args.command);
+arg_interactive: FUNC0(&args.interactive);
 
 // ---------------------------------------------------------------------------
 // Text streams

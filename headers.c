@@ -43,8 +43,8 @@ E(raw_argc, "raw-argc", 0)
 E(raw_argv, "raw-argv", 0)
 E(argc, "argc", 0)
 E(argv, "argv", 0)
-E(start_command, "start-command", 0)
-E(interactive_mode, "interactive-mode", 0)
+E(arg_cmdline, "arg-cmdline", 0)
+E(arg_interactive, "arg-interactive", 0)
 
 // Text streams
 E(init_mind, "init.mind", 0)

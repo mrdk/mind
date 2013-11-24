@@ -331,13 +331,13 @@ Create linebuf  /linebuf 1+ allot
 
 : get-line    linebuf /linebuf accept drop ;
 : do-line     linebuf line-stream interpret-stream  space ." ok" cr ;
-: do-lines    interactive-mode @ IF cr
+: do-lines    arg-interactive @ IF cr
                   BEGIN get-line do-line  REPEAT THEN ;
 
 
 \ == Command interpreter ==
 
-: do-start    start-command @ 0;  line-stream interpret-stream ;
+: do-start    arg-cmdline @ 0;  line-stream interpret-stream ;
 
 : command-interpret    clear-rstack clearstack  do-lines  bye ;
 ' command-interpret is abort
