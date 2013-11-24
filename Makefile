@@ -14,7 +14,9 @@ test: mind
 	@./mind -e '.( Finished.) cr'
 
 TAGS:
-	etags *.c *.h
+# Scan all files in the project, to allow global replace with
+# tags-query-replace.
+	etags *.c *.h *.mind doc/*.rst
 
 %.s: %.c
 	$(CC) -S $(CFLAGS) -fverbose-asm $<
