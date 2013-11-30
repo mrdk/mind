@@ -212,7 +212,7 @@ Variable #acc                   \ Number accumulator
 
 : clearstack      ( ... -- )   s0 @ sp! ;
 : clear-rstack ( R: ... -- )   r@  r0 @ rp!  >r ;
-     \ clear-rstack saves the caller's address to make it callable
+     \ clear-rstack saves the caller's address to make itself callable
 
 
 \ == Control flow ==
@@ -322,7 +322,7 @@ Constant /stringstream
   'instream !  instream >'current-char !  do-stream ;
 
 
-\ == Interpreting input lines ==
+\ == Command interpreter ==
 
 Stringstream line-stream        \ The current input line
 
@@ -334,16 +334,13 @@ Create linebuf  /linebuf 1+ allot
 : do-lines    arg-interactive @ IF
                   BEGIN  ." ok" cr  get-line do-line  REPEAT THEN ;
 
-
-\ == Command interpreter ==
-
 : command-interpret    clear-rstack clearstack  do-lines  bye ;
 ' command-interpret is abort
 
 
 \ == Boot sequence ==
 
-: ?bootmsg       arg-interactive @ IF ."  . o ( mind )" cr THEN ;
+: ?bootmsg       arg-interactive @ IF ." . o ( mind )" cr THEN ;
 : ?do-cmdline    arg-cmdline @ 0;  line-stream interpret-stream ;
 
 : do-boot   ?bootmsg ?do-cmdline  abort ;
