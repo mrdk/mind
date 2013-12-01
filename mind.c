@@ -393,11 +393,11 @@ file_eof:           // ( -- flag )
 do_stream: // : do-stream   BEGIN interpret  eos UNTIL ;
     CODE(C(interpret), C(eos), C(zbranch), (cell)(start));
 
-errno_: // ( -- addr )
-    // The identifier "errno" in <errno.h> is a macro; therefore it
-    // cannot be used as a label, as this would interfere with the
-    // macro magic in "headers.c".
-    FUNC0(&errno);
+// The identifier "errno" in <errno.h> is a macro; therefore it cannot
+// be used as a label, as this would interfere with the macro magic in
+// "headers.c".
+errno_: FUNC0(&errno); // ( -- addr )
+    
 
 // ---------------------------------------------------------------------------
 // Dictionary
