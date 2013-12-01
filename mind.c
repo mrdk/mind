@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "args.h"
 #include "io.h"
@@ -353,9 +354,6 @@ per_stream: FUNC0(sizeof(stream_t)); // /stream
 
 tick_instream: FUNC0(&sys.instream); // 'instream
 
-file_init:                      // file-init ( new, caller -- );
-    file_init((textfile_t*)NOS, (textfile_t*)TOS, dict); DROP(2);
-
 to_infile:     OFFSET(textfile_t, input);   // >infile
 to_infilename: OFFSET(textfile_t, name);    // >infile-name
 to_current:    OFFSET(textfile_t, current); // >current
@@ -372,6 +370,12 @@ current_fetch:      // current@ ( -- char )
 eos:                // ( -- char )
     w = (label_t*)((stream_t*)sys.instream)->eos; goto **w;
 
+file_init:                      // file-init ( new, caller -- );
+    file_init((textfile_t*)NOS, (textfile_t*)TOS, dict); DROP(2); goto next;
+file_open:                      // file-open ( str file -- )
+    file_open((textfile_t*)NOS, (char*)TOS); DROP(2); goto next;
+file_close:                     // file-close ( file --)
+    file_close((textfile_t*)TOS); DROP(1); goto next;
 file_forward:       // ( -- )
     file_forward((textfile_t*)sys.instream); goto next;
 file_current_fetch: // ( -- char )
@@ -381,6 +385,12 @@ file_eof:           // ( -- flag )
 
 do_stream: // : do-stream   BEGIN interpret  eos UNTIL ;
     CODE(C(interpret), C(eos), C(zbranch), (cell)(start));
+
+errno_: // ( -- addr )
+    // The identifier "errno" in <errno.h> is a macro; therefore it
+    // cannot be used as a label, as this would interfere with the
+    // macro magic in "headers.c".
+    FUNC0(&errno);
 
 // ---------------------------------------------------------------------------
 // Dictionary

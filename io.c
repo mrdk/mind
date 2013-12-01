@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 // Interpret FILENAME relative to the directory of MIND_FILE.
 char *mind_relative(char* mind_file, char *filename)
@@ -28,18 +29,19 @@ char *mind_relative(char* mind_file, char *filename)
 void file_open(textfile_t *inf, char* name)
 {
     inf->name = (cell)name;
-    if ((inf->input = (cell)fopen(name, "r")))
+    if ((inf->input = (cell)fopen(name, "r"))) {
+        errno = 0;
 	inf->current = fgetc((FILE*)inf->input);
+    }
 }
 
-int file_close(textfile_t *inf)
+void file_close(textfile_t *inf)
 {
-    int result = fclose((FILE*)inf->input);
+    if (!fclose((FILE*)inf->input))
+        errno = 0;              // Reset errno if no error occured
 
     inf->input = 0;
     inf->current = EOF;
-
-    return result;
 }
 
 void file_forward(textfile_t *inf)

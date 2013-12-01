@@ -204,8 +204,8 @@ a file (or any other stream in a Unix system).
 
    The TOS contains the address of a textfile structure: compute the
    address of its :word:`>current` field. This field is one cell wide
-   and contains the last character read from the file or the "end of
-   file" constant.
+   and contains either the latest character read from the file or
+   :word:`#eof`.
 
 .. word:: >line#	( 'textfile -- addr ) |K|, "to-line-number"
 
@@ -235,9 +235,42 @@ a file (or any other stream in a Unix system).
    The word :word:`file-init` then generates a new textfile structure
    at *new-file*. Its :word:`>caller` field is set to *caller*.
 
+.. word:: file-open     ( str 'textfile -- ) |K|
+
+   Open a file for the use in a text stream. *'textfile* must not be
+   already opened. *str* is the name of the file, which is opened in
+   reading mode.
+
+   If the opening of the file was successful, :word:`errno` is set to
+   0 and the first byte of the file is read into :word:`>current`. If
+   the file is empty, the content of :word:`>current` is :word:`#eof`.
+   Otherwise, the cause for the failure can be read from
+   :word:`errno`.
+
+.. word:: file-close    ( 'textfile -- ) |K|
+
+   Close a text stream. If an error occurs, it is stored in
+   :word:`errno`. Otherwise, :word:`errno` contains 0.
+
+.. word:: errno         ( -- addr ) |K|
+
+   This word provides access to the libc variable *errno*. If an error
+   occurs during the call of a library function, it is set to a value
+   that provides information about the nature of that error, but it is
+   usually left unchanged all went according to plan. Any error value
+   for :word:`errno` is different from 0. So it is possible to set
+   :word:`errno` to 0 before a word is executed and then use
+   :word:`errno` to check for an error.
+
+   Some words do however set :word:`errno` to 0 after correct
+   execution: this is then remarked in the explanation of this word.
+
 
 Implementation
 ^^^^^^^^^^^^^^
+
+These are words that should not usually called directly, but only
+through a file stream object.
 
 .. word:: file-forward	( -- ) |K|
 
