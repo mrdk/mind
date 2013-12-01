@@ -10,8 +10,8 @@ mind: mind.o args.o io.o
 
 -include *.d
 
-test: mind
-	@./mind -e '.( Finished.) cr'
+tests: mind
+	@./mind tests.mind
 
 TAGS:
 # Scan all files in the project, to allow global replace with
