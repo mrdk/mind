@@ -380,7 +380,7 @@ eos:                // ( -- char )
 file_init:          // file-init ( new caller -- );
     PROC2(file_init((textfile_t*)NOS, (textfile_t*)TOS, dict));
 file_open:          // file-open ( str file -- )
-    PROC2(file_open((textfile_t*)NOS, (char*)TOS));
+    PROC2(file_open((textfile_t*)TOS, (char*)NOS));
 file_close:         // file-close ( file --)
     PROC1(file_close((textfile_t*)TOS));
 file_forward:       // ( -- )
