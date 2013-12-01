@@ -114,8 +114,8 @@ E(rpfetch, "rp@", 0)
 E(rpstore, "rp!", 0)
 
 // Stack
-E(drop, "drop", 0)
 E(nip, "nip", 0)
+E(drop, "drop", 0)
 E(twodrop, "2drop", 0)
 E(qdup, "?dup", 0)
 E(dup, "dup", 0)

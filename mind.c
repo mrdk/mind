@@ -345,7 +345,8 @@ raw_argc: FUNC0(args.raw_argc);
 raw_argv: FUNC0(args.raw_argv);
 argc:     FUNC0(args.argc);
 argv:     FUNC0(args.argv);
-arg_cmdline:    FUNC0(&args.command);
+
+arg_cmdline:     FUNC0(&args.command);
 arg_interactive: FUNC0(&args.interactive);
 
 // ---------------------------------------------------------------------------
@@ -376,11 +377,11 @@ current_fetch:      // current@ ( -- char )
 eos:                // ( -- char )
     w = (label_t*)((stream_t*)sys.instream)->eos; goto **w;
 
-file_init:                      // file-init ( new caller -- );
+file_init:          // file-init ( new caller -- );
     PROC2(file_init((textfile_t*)NOS, (textfile_t*)TOS, dict));
-file_open:                      // file-open ( str file -- )
+file_open:          // file-open ( str file -- )
     PROC2(file_open((textfile_t*)NOS, (char*)TOS));
-file_close:                     // file-close ( file --)
+file_close:         // file-close ( file --)
     PROC1(file_close((textfile_t*)TOS));
 file_forward:       // ( -- )
     file_forward((textfile_t*)sys.instream); goto next;
@@ -404,14 +405,10 @@ errno_: // ( -- addr )
 align:
     ALIGN(cell); goto next;
 
-allot: // ( n -- )
-    PROC1(sys.dp += TOS);
+allot:  PROC1(sys.dp += TOS);     // ( n -- )
 
-comma: // , ( n -- )
-    PROC1(COMMA(TOS, cell));
-
-ccomma: // c, ( n -- )
-    PROC1(COMMA(TOS, char));
+comma:  PROC1(COMMA(TOS, cell));  // , ( n -- )
+ccomma: PROC1(COMMA(TOS, char));  // c, ( n -- )
 
 entry_comma: // entry, ( a c -- )  Compile an entry with the name A, code C
     {
@@ -445,8 +442,7 @@ colon_comma: // :, ( <word> -- )
 link_to:     FUNC1(&((entry_t*)TOS)->exec);	// link>  ( lfa -- xt )
 body_to:     FUNC1(&FROM_BODY(TOS)->exec);      // body>  ( body -- xt )
 flags_fetch: FUNC1(FROM_XT(TOS)->flags);	// flags@ ( xt -- n )
-flags_store:					// flags! ( n xt -- )
-    PROC2(FROM_XT(TOS)->flags = NOS);
+flags_store: PROC2(FROM_XT(TOS)->flags = NOS);  // flags! ( n xt -- )
 
 to_link: FUNC1(&FROM_XT(TOS)->link);	// >link ( xt -- 'link )
 to_name: FUNC1(&FROM_XT(TOS)->name);	// >name ( xt -- 'name )
@@ -487,24 +483,19 @@ wordq:    FUNC0(&sys.wordq);    // word? ( -- addr )
 rdrop:
     RDROP; goto next;
 
-rto: // >r ( n -- )
-    PROC1(RPUSH(TOS));
+rto: PROC1(RPUSH(TOS)); // >r ( n -- )
+rfrom: FUNC0(RPOP);     // r> ( -- n )
 
-rfrom: // r> ( -- n )
-    EXTEND(1); TOS = RPOP; goto next;
-
-rrto: // >rr ( n -- )
+rrto:   // >rr ( n -- )
     rp--; rp[0] = rp[1]; rp[1] = TOS; DROP(1); goto next;
 
 rrfrom: // rr> ( -- n )
     EXTEND(1); TOS = rp[1]; rp[1] = rp[0]; rp++;  goto next;
 
-rfetch: FUNC0(*rp); // r@ ( -- n)
-
-r0:      FUNC0(&sys.r0);  //  r0 ( -- addr)
-rpfetch: FUNC0(rp);       // rp@ ( -- addr )
-rpstore:                  // rp! ( addr -- )
-    PROC1(rp = (cell*)TOS);
+rfetch: FUNC0(*rp);              // r@  ( -- n)
+r0:      FUNC0(&sys.r0);         // r0  ( -- addr)
+rpfetch: FUNC0(rp);              // rp@ ( -- addr )
+rpstore: PROC1(rp = (cell*)TOS); // rp! ( addr -- )
 
 // ---------------------------------------------------------------------------
 // Stack
@@ -512,11 +503,10 @@ rpstore:                  // rp! ( addr -- )
 drop: // ( n -- )
     DROP(1); goto next;
 
-nip: // ( n1 n2 -- n2 )
-    NOS = TOS; DROP(1); goto next;
-
 twodrop: // 2drop ( n1 n2 -- )
     DROP(2); goto next;
+
+nip: FUNC2(TOS); // ( n1 n2 -- n2 )
 
 qdup: // ?dup ( 0 -- 0 | n -- n n  if n > 0)
     if (TOS == 0)
@@ -529,6 +519,7 @@ twodup: // 2dup ( a b -- a b a b )
 
 over: // ( a b -- a b a )
     EXTEND(1); TOS = sp[2]; goto next;
+
 under: // ( a b -- b a b )
     { cell a = NOS, b = TOS; EXTEND(1); sp[2] = TOS = b; NOS = a; goto next; }
 
@@ -619,14 +610,9 @@ within: // ( n n0 n1 -- flag )  true when  n0 <= n < n1, with wraparound
 fetch:  FUNC1(*(cell*)TOS);	// @  ( a -- n )
 cfetch: FUNC1(*(char*)TOS);	// c@ ( a -- n )
 
-store: // ! ( n a -- )
-    PROC2(*(cell*)TOS = NOS);
-
-plus_store: // +!  ( n a -- )
-    PROC2(*(cell*)TOS += NOS);
-
-cstore: // c! ( n a -- )
-    PROC2(*(char*)TOS = NOS);
+store:      PROC2(*(cell*)TOS = NOS);  // !  ( n a -- )
+plus_store: PROC2(*(cell*)TOS += NOS); // +! ( n a -- )
+cstore:     PROC2(*(char*)TOS = NOS);  // c! ( n a -- )
 
 append: // ( a char -- a' )
     *(char*)NOS = TOS; NOS++; DROP(1); goto next;
@@ -637,16 +623,15 @@ cmove: // ( from to u -- )
 fill: // ( addr u char -- )
     memset((char*)sp[2], TOS, NOS); DROP(3); goto next;
 
-malloc: FUNC1(malloc(TOS)); // ( n -- addr )
-free:                       // ( addr -- )
-    PROC1(free((void*)TOS));
+malloc: FUNC1(malloc(TOS));      // ( n -- addr )
+free:   PROC1(free((void*)TOS)); // ( addr -- )
 
 per_cell:  FUNC0(sizeof(cell));       // /cell ( -- n )
 cellplus:  FUNC1(TOS + sizeof(cell)); // cell+ ( n -- n' )
 cellminus: FUNC1(TOS - sizeof(cell)); // cell- ( n -- n' )
 
 strchr: FUNC2(strchr((char*)NOS, TOS)); // ( string char -- addr )
-strlen: FUNC1(strlen((char*)TOS)); // ( a -- # )
+strlen: FUNC1(strlen((char*)TOS));      // ( string -- # )
 
 // ---------------------------------------------------------------------------
 // Input/Output
@@ -654,8 +639,7 @@ strlen: FUNC1(strlen((char*)TOS)); // ( a -- # )
 cr:
     putchar('\n'); goto next;
 
-emit: // ( c -- )
-    PROC1(putchar(TOS));
+emit: PROC1(putchar(TOS)); // ( c -- )
 
 type: // ( a # -- )
     {
