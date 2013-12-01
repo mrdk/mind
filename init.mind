@@ -283,6 +283,11 @@ Variable this-file   init.mind this-file !
 : TStream ( <word> -- )
   Create here  /textfile allot  this-file @ file-init ;
 
+: ?open-error  errno @ abort" could not open file" ;
+: read-file ( str 'textstream -- )
+  under  file-open ?open-error  'instream !  do-stream ;
+
+
 \ init.mind is not a normal word:
 : tstream-body> ( 'tstream -- xt )
   dup init.mind =  IF drop  ['] init.mind ELSE body> THEN ;
@@ -329,10 +334,12 @@ Stringstream line-stream        \ The current input line
 256 Constant /linebuf
 Create linebuf  /linebuf 1+ allot
 
+: interactive? ( -- flag )    arg-interactive @  argc 0= and ;
+
 : get-line    linebuf /linebuf accept drop ;
 : do-line     linebuf line-stream interpret-stream ;
-: do-lines    arg-interactive @ IF
-                  BEGIN  ." ok" cr  get-line do-line  REPEAT THEN ;
+: do-lines    interactive? IF
+                  BEGIN space ." ok" cr  get-line do-line  REPEAT THEN ;
 
 : command-interpret    clear-rstack clearstack  do-lines  bye ;
 ' command-interpret is abort
@@ -340,10 +347,13 @@ Create linebuf  /linebuf 1+ allot
 
 \ == Boot sequence ==
 
-: ?bootmsg       arg-interactive @ IF ." . o ( mind )" cr THEN ;
+TStream bootfile                \ File that is read as first command parameter
+
+: ?bootfile      argc IF argv @  bootfile  read-file THEN ;
+: ?bootmsg       interactive? IF space ." . o ( mind )" cr THEN ;
 : ?do-cmdline    arg-cmdline @ 0;  line-stream interpret-stream ;
 
-: do-boot   ?bootmsg ?do-cmdline  abort ;
+: do-boot   ?bootfile ?bootmsg ?do-cmdline  abort ;
 ' do-boot is boot
 
 

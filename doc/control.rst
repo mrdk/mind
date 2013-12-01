@@ -130,7 +130,12 @@ Starting and Finishing
 Command Line Parameters
 -----------------------
 
-The program :program:`mind` has the following command line options:
+The program :program:`mind` can be called in the following way::
+
+  mind [-h] [-e <cmd>] [-x <cmd>] [<file>] [...]
+
+If `<file>` is present, it is opened and interpreted as Forth code.
+Afterwards the command line options are interpreted. They are:
 
 .. option:: -e <cmd>
 
@@ -138,7 +143,8 @@ The program :program:`mind` has the following command line options:
 
 .. option:: -x <cmd>
 
-   Execute <cmd> and start interactive mode.
+   Execute <cmd> and start interactive mode, unless there is a
+   `<file>` argument.
 
 .. option:: -h
 
