@@ -429,11 +429,12 @@ entry_comma: // entry, ( a c -- )  Compile an entry with the name A, code C
 	goto next;
     }
 
-create_comma: // Create, ( 'interpreter <word> -- )
+create_comma: // : Create, ( 'interpreter <word> -- )
+              //   parse  dup strlen 1+ allot  swap entry, ;
     CODE(C(parse), C(dup), C(strlen), C(oneplus), C(allot),
          C(swap), C(entry_comma));
 
-colon_comma: // :, ( <word> -- )
+colon_comma: // : :, ( <word> -- )   ^docol Create, ;
     CODE(C(docol_addr), C(create_comma));
 
 #define FROM_BODY(addr)                                 \
