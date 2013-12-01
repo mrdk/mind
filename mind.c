@@ -149,7 +149,13 @@ static void init_sys(entry_t dict[])
 #define TOS	(*sp)		// Top of Stack
 #define NOS     sp[1]		// Next in Stack
 
-// Macros for "functions": words with 1 parameter a result
+// Macros for "procedures": words that consume all of their parameters
+// The parameter X should be a single statement; otherwise the code
+// would become too complicated.
+#define PROC1(x)  x; DROP(1); goto next   // ( n -- )
+#define PROC2(x)  x; DROP(2); goto next   // ( n1 n2 -- )
+
+// Macros for "functions": words with 1 cell as a result
 #define FUNC0(x)  EXTEND(1); TOS = (cell)(x); goto next // ( -- n )
 #define FUNC1(x)  TOS = (cell)(x); goto next            // ( n1 -- n2 )
 #define FUNC2(x)  NOS = (cell)(x); DROP(1); goto next   // ( n1 n2 -- n3 )
@@ -370,12 +376,12 @@ current_fetch:      // current@ ( -- char )
 eos:                // ( -- char )
     w = (label_t*)((stream_t*)sys.instream)->eos; goto **w;
 
-file_init:                      // file-init ( new, caller -- );
-    file_init((textfile_t*)NOS, (textfile_t*)TOS, dict); DROP(2); goto next;
+file_init:                      // file-init ( new caller -- );
+    PROC2(file_init((textfile_t*)NOS, (textfile_t*)TOS, dict));
 file_open:                      // file-open ( str file -- )
-    file_open((textfile_t*)NOS, (char*)TOS); DROP(2); goto next;
+    PROC2(file_open((textfile_t*)NOS, (char*)TOS));
 file_close:                     // file-close ( file --)
-    file_close((textfile_t*)TOS); DROP(1); goto next;
+    PROC1(file_close((textfile_t*)TOS));
 file_forward:       // ( -- )
     file_forward((textfile_t*)sys.instream); goto next;
 file_current_fetch: // ( -- char )
@@ -399,13 +405,13 @@ align:
     ALIGN(cell); goto next;
 
 allot: // ( n -- )
-    sys.dp += TOS; DROP(1); goto next;
+    PROC1(sys.dp += TOS);
 
 comma: // , ( n -- )
-    COMMA(TOS, cell); DROP(1); goto next;
+    PROC1(COMMA(TOS, cell));
 
 ccomma: // c, ( n -- )
-    COMMA(TOS, char); DROP(1); goto next;
+    PROC1(COMMA(TOS, char));
 
 entry_comma: // entry, ( a c -- )  Compile an entry with the name A, code C
     {
@@ -440,7 +446,7 @@ link_to:     FUNC1(&((entry_t*)TOS)->exec);	// link>  ( lfa -- xt )
 body_to:     FUNC1(&FROM_BODY(TOS)->exec);      // body>  ( body -- xt )
 flags_fetch: FUNC1(FROM_XT(TOS)->flags);	// flags@ ( xt -- n )
 flags_store:					// flags! ( n xt -- )
-    FROM_XT(TOS)->flags = NOS; DROP(2); goto next;
+    PROC2(FROM_XT(TOS)->flags = NOS);
 
 to_link: FUNC1(&FROM_XT(TOS)->link);	// >link ( xt -- 'link )
 to_name: FUNC1(&FROM_XT(TOS)->name);	// >name ( xt -- 'name )
@@ -482,7 +488,7 @@ rdrop:
     RDROP; goto next;
 
 rto: // >r ( n -- )
-    RPUSH(TOS); DROP(1); goto next;
+    PROC1(RPUSH(TOS));
 
 rfrom: // r> ( -- n )
     EXTEND(1); TOS = RPOP; goto next;
@@ -498,7 +504,7 @@ rfetch: FUNC0(*rp); // r@ ( -- n)
 r0:      FUNC0(&sys.r0);  //  r0 ( -- addr)
 rpfetch: FUNC0(rp);       // rp@ ( -- addr )
 rpstore:                  // rp! ( addr -- )
-    rp = (cell*)TOS; DROP(1); goto next;
+    PROC1(rp = (cell*)TOS);
 
 // ---------------------------------------------------------------------------
 // Stack
@@ -614,13 +620,13 @@ fetch:  FUNC1(*(cell*)TOS);	// @  ( a -- n )
 cfetch: FUNC1(*(char*)TOS);	// c@ ( a -- n )
 
 store: // ! ( n a -- )
-    *(cell*)TOS = NOS; DROP(2); goto next;
+    PROC2(*(cell*)TOS = NOS);
 
 plus_store: // +!  ( n a -- )
-    *(cell*)TOS += NOS; DROP(2); goto next;
+    PROC2(*(cell*)TOS += NOS);
 
 cstore: // c! ( n a -- )
-    *(char*)TOS = NOS; DROP(2); goto next;
+    PROC2(*(char*)TOS = NOS);
 
 append: // ( a char -- a' )
     *(char*)NOS = TOS; NOS++; DROP(1); goto next;
@@ -633,7 +639,7 @@ fill: // ( addr u char -- )
 
 malloc: FUNC1(malloc(TOS)); // ( n -- addr )
 free:                       // ( addr -- )
-    free((void*)TOS); DROP(1); goto next;
+    PROC1(free((void*)TOS));
 
 per_cell:  FUNC0(sizeof(cell));       // /cell ( -- n )
 cellplus:  FUNC1(TOS + sizeof(cell)); // cell+ ( n -- n' )
@@ -649,7 +655,7 @@ cr:
     putchar('\n'); goto next;
 
 emit: // ( c -- )
-    putchar(TOS); DROP(1); goto next;
+    PROC1(putchar(TOS));
 
 type: // ( a # -- )
     {
@@ -667,10 +673,10 @@ gets: // ( a n -- a' )
     FUNC2(fgets((char*)NOS, TOS, stdin));
 
 puts: // ( a -- )               print null-terminated string
-    fputs((char*)TOS, stdout); DROP(1); goto next;
+    PROC1(fputs((char*)TOS, stdout));
 
 uhdot: // uh. ( n -- )		print unsigned hexadecimal
-    printf("%"PRIxCELL" ", TOS); DROP(1); goto next;
+    PROC1(printf("%"PRIxCELL" ", TOS));
 
 bl:  FUNC0(' ');
 num_eol: FUNC0('\n');		// #eol ( -- char )
