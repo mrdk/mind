@@ -369,8 +369,3 @@ TStream bootfile                \ File that is read as first command parameter
   drop rdrop ;
 
 : words   last  BEGIN @  ?dup WHILE  dup link> .name space  REPEAT ;
-
-
-\ Local Variables:
-\ comment-start: "\\ "
-\ End:

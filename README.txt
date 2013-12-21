@@ -12,6 +12,11 @@ generation of HTML or PDF files Sphinx v1.0.8 (or later) is needed.
 If Sphinx is installed, type "make html" or "make latexpdf" from the
 main directory or from doc/ to get the documentation.
 
+EDITING
+
+There is a minimal Emacs mode in the support/ directory. To enable it,
+follow the instructions in the file support/mind.el.
+
 COPYING
 
 The program is licensed under the GNU General Public License version 2
