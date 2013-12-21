@@ -310,7 +310,7 @@ lbrack:	// [
 rbrack:	// ]
     sys.state = 1; goto next;
 
-parse_to: // : parse-to ( addr string -- )
+parse_to: // : parse-to ( addr str -- )
           //   >r BEGIN current@ append  forward
           //            r@ current@ strchr  eos or UNTIL rdrop
           //      0 over c!  eos if; forward ;
@@ -631,8 +631,8 @@ per_cell:  FUNC0(sizeof(cell));       // /cell ( -- n )
 cellplus:  FUNC1(TOS + sizeof(cell)); // cell+ ( n -- n' )
 cellminus: FUNC1(TOS - sizeof(cell)); // cell- ( n -- n' )
 
-strchr: FUNC2(strchr((char*)NOS, TOS)); // ( string char -- addr )
-strlen: FUNC1(strlen((char*)TOS));      // ( string -- # )
+strchr: FUNC2(strchr((char*)NOS, TOS)); // ( str char -- addr )
+strlen: FUNC1(strlen((char*)TOS));      // ( str -- # )
 
 // ---------------------------------------------------------------------------
 // Input/Output
