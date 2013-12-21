@@ -272,19 +272,26 @@ Variable 'num                  \ points to the beginning of the generated string
 
 \ == Structures ==
 
-: Field  ( offset size <word> -- offset' )   Create over ,  +
-  does>  ( 'base -- 'field )                 @ + ;
+: cmove,  ( addr n -- )    here swap   dup allot  cmove ;
+
+         \ Reserve space for a field in a structure
+: Field  ( n size <word> -- n' )   Create over ,  +
+  does>  ( 'base -- 'field )       @ + ;
+
+         \ Allocate a new empty region in memory
+: Object ( size <word> -- addr )   Create here  swap allot ;
+         \ Copy of an existing object
+: Copy   ( addr n -- )    Create cmove, ;
 
 
 \ == Text files ==
 
 Variable this-file   init.mind this-file !
 
-: TStream ( <word> -- )
-  Create here  /textfile allot  this-file @ file-init ;
+: TStream ( <word> -- )    /textfile Object  this-file @ file-init ;
 
 : ?open-error  errno @ abort" could not open file" ;
-: read-file ( str 'textstream -- )
+: read-file ( str 'tstream -- )
   under  file-open ?open-error  'instream !  do-stream ;
 
 
@@ -304,27 +311,30 @@ Variable this-file   init.mind this-file !
 
 \ == Text Streams and String Streams ==
 
-: Stream ( <word> -- )   Create /stream allot ;
+: instream ( -- stream )   'instream @ ;
+
+: Stream ( <word> -- )   /stream Object drop ;
 
 /stream
-  /cell Field >'current-char         \ points to the current character
+  /cell Field >str-pointer      \ address of the current character
 Constant /stringstream
 
-: instream    'instream @ ;
+: str-pointer   ( -- addr )   instream >str-pointer ;
 
-: str-forward   ( -- )        instream >'current-char  1 swap +! ;
-: str-current@  ( -- char )   instream >'current-char @ c@ ;
+: str-forward   ( -- )        1 str-pointer +! ;
+: str-current@  ( -- char )   str-pointer @ c@ ;
 : str-eos       ( -- flag )   str-current@ 0= ;
 
-: Stringstream ( <word> -- )
-  Create here  /stringstream allot
-  ['] str-forward  over >forward !
-  ['] str-current@ over >current@ !
-  ['] str-eos      over >eos !
-  drop ;
+/stringstream Object stringstream0
+  ' str-forward  over >forward !
+  ' str-current@ over >current@ !
+  ' str-eos      over >eos !
+drop
 
-: interpret-stream ( 'string 'stream -- )
-  'instream !  instream >'current-char !  do-stream ;
+: Stringstream ( <word> -- )  stringstream0 /stringstream Copy ;
+
+: str-interpret ( str 'stream -- )
+  'instream !  str-pointer !  do-stream ;
 
 
 \ == Command interpreter ==
@@ -337,7 +347,7 @@ Create linebuf  /linebuf 1+ allot
 : interactive? ( -- flag )    arg-interactive @  argc 0= and ;
 
 : get-line    linebuf /linebuf accept drop ;
-: do-line     linebuf line-stream interpret-stream ;
+: do-line     linebuf line-stream str-interpret ;
 : do-lines    interactive? IF
                   BEGIN space ." ok" cr  get-line do-line  REPEAT THEN ;
 
@@ -351,7 +361,7 @@ TStream bootfile                \ File that is read as first command parameter
 
 : ?bootfile      argc IF argv @  bootfile  read-file THEN ;
 : ?bootmsg       interactive? IF space ." . o ( mind )" cr THEN ;
-: ?do-cmdline    arg-cmdline @ 0;  line-stream interpret-stream ;
+: ?do-cmdline    arg-cmdline @ 0;  line-stream str-interpret ;
 
 : do-boot   ?bootfile ?bootmsg ?do-cmdline  abort ;
 ' do-boot is boot
