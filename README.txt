@@ -1,6 +1,6 @@
-This program is the embryo of a Forth interpreter, intended for the
-use in a Unix-like environment together with libraries with a C
-interface.
+This program is the embryo of a Forth interpreter. It is intended for
+the use in a Unix-like environment, together with libraries that have
+a C interface.
 
 DOCUMENTATION
 

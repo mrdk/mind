@@ -1,12 +1,9 @@
-.. mind documentation master file, created by
-   sphinx-quickstart on Sun Apr 15 19:00:11 2012.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+*mind* -- a Forth system
+========================
 
-Welcome to mind's documentation!
-================================
-
-Contents:
+:command:`mind` is the embryo of a Forth interpreter. It is intended
+for the use in a Unix-like environment, together with libraries that
+have a C interface.
 
 .. toctree::
    :maxdepth: 2
