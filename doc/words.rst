@@ -11,4 +11,5 @@ Word List
    control
    interpreter
    data
+   streams
    other
