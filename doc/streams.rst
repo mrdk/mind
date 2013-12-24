@@ -107,16 +107,11 @@ a file (or any other stream in a Unix system).
 
       	Number of bytes in a file stream structure.
 
-.. word:: file-init     ( new-file caller -- )
+.. word:: textfile0     ( -- addr ) |K|, "textfile-0"
 
-   Initialise a new textfile structure. *new-file* is the address of a
-   memory region of :word:`/textfile` bytes. *caller* is either the
-   address of an existing textfile structure or 0. If it is not 0, it
-   contains the address of the file in which the current file was
-   defined.
-
-   The word :word:`file-init` then generates a new textfile structure
-   at *new-file*. Its :word:`>caller` field is set to *caller*.
+   Address of the prototype for the textfile structure. It has a size
+   of :word:`/textfile` bytes. The fields are already initialised,
+   ready for a call to :word:`file-open`.
 
 .. word:: file-open     ( str 'textfile -- ) |K|
 

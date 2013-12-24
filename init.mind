@@ -281,14 +281,15 @@ Variable 'num                  \ points to the beginning of the generated string
          \ Allocate a new empty region in memory
 : Object ( size <word> -- addr )   Create here  swap allot ;
          \ Copy of an existing object
-: Copy   ( addr n -- )    Create cmove, ;
+: Copy   ( addr n -- addr' )    Create  here -rot  cmove, ;
 
 
 \ == Text files ==
 
 Variable this-file   init.mind this-file !
 
-: TStream ( <word> -- )    /textfile Object  this-file @ file-init ;
+: TStream ( <word> -- )
+  textfile0 /textfile Copy   this-file @  swap >caller ! ; 
 
 : ?open-error  errno @ abort" could not open file" ;
 : read-file ( str 'tstream -- )
@@ -331,7 +332,7 @@ Constant /stringstream
   ' str-eos      over >eos !
 drop
 
-: Stringstream ( <word> -- )  stringstream0 /stringstream Copy ;
+: Stringstream ( <word> -- )  stringstream0 /stringstream Copy drop ;
 
 : str-interpret ( str 'stream -- )
   'instream !  str-pointer !  do-stream ;

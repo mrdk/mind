@@ -101,12 +101,13 @@ struct {
     cell state;		     // Compiler state
     cell wordq;		     // Called if word not found
     context_t root;          // root context
+    textfile_t textfile0;    // Prototype for text streams
     textfile_t inf;	     // Input file
     cell instream;	     // (stream_t*) Current input stream
     cell mem[MEMCELLS];	     // The memory
 } sys;
 
-static void file_init(textfile_t *inf, textfile_t *caller, entry_t dict[])
+static void file_init(textfile_t *inf, entry_t dict[])
 {
     inf->stream.forward = C(file_forward);
     inf->stream.current_fetch = C(file_current_fetch);
@@ -115,7 +116,7 @@ static void file_init(textfile_t *inf, textfile_t *caller, entry_t dict[])
     inf->name = 0;
     inf->current = EOF;
     inf->lineno = 0;
-    inf->caller = (cell)caller;
+    inf->caller = 0;
 }
 
 static void init_sys(entry_t dict[])
@@ -128,7 +129,8 @@ static void init_sys(entry_t dict[])
     sys.root.link = 0;
     sys.root.last = (cell)&dict[num_words - 1];
     sys.root.find_word = C(find_word);
-    file_init(&sys.inf, NULL, dict);
+    file_init(&sys.textfile0, dict);
+    memcpy(&sys.inf, &sys.textfile0, sizeof(textfile_t));
     sys.instream = (cell)&sys.inf.stream;
 }
 
@@ -377,8 +379,7 @@ current_fetch:      // current@ ( -- char )
 eos:                // ( -- char )
     w = (label_t*)((stream_t*)sys.instream)->eos; goto **w;
 
-file_init:          // file-init ( new caller -- );
-    PROC2(file_init((textfile_t*)NOS, (textfile_t*)TOS, dict));
+textfile0: FUNC0(&sys.textfile0);
 file_open:          // file-open ( str file -- )
     PROC2(file_open((textfile_t*)TOS, (char*)NOS));
 file_close:         // file-close ( file --)
