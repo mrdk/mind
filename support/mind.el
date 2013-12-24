@@ -18,6 +18,7 @@
 (define-derived-mode mind-mode prog-mode "mind"
   "Mode for mind programs"
   (setq comment-start "\\ ")
+  (setq comment-start-skip "\\\\")
 )
 
 (add-to-list 'auto-mode-alist '("\\.mind$" . mind-mode))
