@@ -26,7 +26,7 @@ E(dodoes_addr, "^dodoes", 0)
 
 // Outer interpreter
 E(interpret, "interpret", 0)
-E(exec_compile, "exec_compile", 0)
+E(exec_compile, "exec/compile", 0)
 E(notfound, "notfound", 0)
 E(find, "find", 0)
 E(find_word, "find-word", 0)
