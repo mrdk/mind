@@ -292,16 +292,16 @@ Variable this-file   init.mind this-file !
   textfile0 /textfile Copy   this-file @  swap >caller ! ; 
 
 : ?open-error  errno @ abort" could not open file" ;
-: read-file ( str 'tstream -- )
+: read-file ( str tstream -- )
   under  file-open ?open-error  'instream !  do-stream ;
 
 
 \ init.mind is not a normal word:
-: tstream-body> ( 'tstream -- xt )
+: tstream-body> ( tstream -- xt )
   dup init.mind =  IF drop  ['] init.mind ELSE body> THEN ;
 
-: .tstream-name ( 'tstream -- )   tstream-body> .name ;
-: .tstream      ( 'tstream -- )
+: .tstream-name ( tstream -- )   tstream-body> .name ;
+: .tstream      ( tstream -- )
   dup .tstream-name
   dup >infile-name @  ?dup IF [char] = emit  puts THEN  [char] : emit
   dup >line# @ .
@@ -334,7 +334,7 @@ drop
 
 : Stringstream ( <word> -- )  stringstream0 /stringstream Copy drop ;
 
-: str-interpret ( str 'stream -- )
+: str-interpret ( str stream -- )
   'instream !  str-pointer !  do-stream ;
 
 

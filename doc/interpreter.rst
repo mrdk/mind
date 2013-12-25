@@ -174,7 +174,7 @@ These are words to build data structures in the dictionary.
    end of the dictionary. The space character immediately after the
    word does not belong to the string.
 
-.. word:: entry,	( str addr -- ) |K|
+.. word:: entry,	( str addr -- ) |K|, "entry-comma"
 
    Put a new entry at the end of the end of the dictionary. *str* is
    its name and *addr* is stored in its XT field.

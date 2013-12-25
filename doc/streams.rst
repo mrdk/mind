@@ -6,23 +6,23 @@ Streams are an abstraction for the input from a source that produces
 data continuously. There is always one "current stream", with its
 address in :word:`'instream`.
 
-.. word:: >forward	( 'stream -- addr ) |K|, "to-forward"
+.. word:: >forward	( stream -- addr ) |K|, "to-forward"
 
    The TOS contains the address of a stream structure: compute the
    address of its :word:`forward` routine. The routine has the
    signature ( -- ).
 
-.. word:: >current@	( 'stream -- addr ) |K|, "to-current-fetch"
+.. word:: >current@	( stream -- addr ) |K|, "to-current-fetch"
 
    The TOS contains the address of a stream structure: compute the
    address of its :word:`current@` routine. The routine has the
    signature ( -- *char* ).
 
-.. word:: >eos		( 'stream -- addr ) |K|, "to-e-o-s"
+.. word:: >eos		( stream -- addr ) |K|, "to-e-o-s"
 
    The TOS contains the address of a stream structure: compute the
    address of its :word:`eos` routine. The routine has the signature (
-   -- *bool* ).
+   -- *flag* ).
 
 .. word:: /stream	( -- n ) |K|, "per-stream"
 
@@ -68,14 +68,14 @@ a file (or any other stream in a Unix system).
 
       Execute the code in the current input stream.
 
-.. word:: >infile	( 'textfile -- addr ) |K|, "to-infile"
+.. word:: >infile	( tstream -- addr ) |K|, "to-infile"
 
    The TOS contains the address of a textfile structure: compute the
    address of its :word:`>infile` field. The field is one cell wide
    and contains the underlying C file pointer of type :c:type:`FILE*`
    for this stream.
 
-.. word:: >infile-name	( 'textfile -- addr ) |K|, "to-infile-name"
+.. word:: >infile-name	( tstream -- addr ) |K|, "to-infile-name"
 
    The TOS contains the address of a textfile structure: compute the
    address of its :word:`>infile-name` field. The field is one cell
@@ -83,20 +83,20 @@ a file (or any other stream in a Unix system).
    contains the name of the file for this stream. The field may also
    contain a null pointer if the file is not open or has no name.
 
-.. word:: >current	( 'textfile -- addr ) |K|, "to-current"
+.. word:: >current	( tstream -- addr ) |K|, "to-current"
 
    The TOS contains the address of a textfile structure: compute the
    address of its :word:`>current` field. This field is one cell wide
    and contains either the latest character read from the file or
    :word:`#eof`.
 
-.. word:: >line#	( 'textfile -- addr ) |K|, "to-line-number"
+.. word:: >line#	( tstream -- addr ) |K|, "to-line-number"
 
    The TOS contains the address of a textfile structure: compute the
    address of its :word:`line#` field. The field is one cell wide and
    contains the current line number of this stream.
 
-.. word:: >caller       ( 'textfile -- addr ) |K|, "to-caller"
+.. word:: >caller       ( tstream -- addr ) |K|, "to-caller"
 
    Return the address of the caller field of a textfile structure. The
    field is one cell wide and contains the address of a text file in
@@ -107,15 +107,15 @@ a file (or any other stream in a Unix system).
 
       	Number of bytes in a file stream structure.
 
-.. word:: textfile0     ( -- addr ) |K|, "textfile-0"
+.. word:: textfile0     ( -- tstream ) |K|, "textfile-0"
 
    Address of the prototype for the textfile structure. It has a size
    of :word:`/textfile` bytes. The fields are already initialised,
    ready for a call to :word:`file-open`.
 
-.. word:: file-open     ( str 'textfile -- ) |K|
+.. word:: file-open     ( str tstream -- ) |K|
 
-   Open a file for the use in a text stream. *'textfile* must not be
+   Open a file for the use in a text stream. *tstream* must not be
    already opened. *str* is the name of the file, which is opened in
    reading mode.
 
@@ -125,7 +125,7 @@ a file (or any other stream in a Unix system).
    Otherwise, the cause for the failure can be read from
    :word:`errno`.
 
-.. word:: file-close    ( 'textfile -- ) |K|
+.. word:: file-close    ( tstream -- ) |K|
 
    Close a text stream. If an error occurs, it is stored in
    :word:`errno`. Otherwise, :word:`errno` contains 0.
