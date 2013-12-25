@@ -11,7 +11,7 @@
 
        \ If *flag*, then the rest of the calling word prints an error message
 : ok;  ( flag -- )   IF rdrop ;; THEN
-  'last .name space ." failed. "  later cr abort ;
+  'last .name space ." failed. "  LATER cr abort ;
 
 : ?stack-size   depth 0= ok;
                 depth . ." entries on stack."

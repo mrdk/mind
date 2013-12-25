@@ -219,9 +219,9 @@ Variable #acc                   \ Number accumulator
 
 : perform ( `xt -- )   @ execute ;
 
-: later   rr> >r ;
+: LATER   rr> >r ;
 : push ( addr -- )       \ Save content of addr during execution of current word
-  dup >rr @ >rr  later  r> r> ! ;
+  dup >rr @ >rr  LATER  r> r> ! ;
 
 
 \ == Conversion: numbers to string (Modified f.i.g. model.) ==
