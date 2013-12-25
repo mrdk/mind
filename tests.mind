@@ -7,4 +7,18 @@
 \
 \ This file contains the automatic regression tests.
 
+\ == Test system ==
+
+: ?remaining                   \ Stack too full?
+  depth ?dup IF ." Error: " . ." entries" cr abort" Stack full" THEN ;
+
+: assert    'last execute
+  ?stack ?remaining ;
+
+
+\ == Tests ==
+
+\ test the testing systems
+: test-basic ; assert
+
 .( Finished. ) cr
