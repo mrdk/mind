@@ -9,11 +9,16 @@
 
 \ == Test system ==
 
-: ?remaining                   \ Stack too full?
-  depth ?dup IF ." Error: " . ." entries" cr abort" Stack full" THEN ;
+       \ If *flag*, then the rest of the calling word prints an error message
+: ok;  ( flag -- )   IF rdrop ;; THEN
+  'last .name space ." failed. "  later cr abort ;
+
+: ?stack-size   depth 0= ok;
+                depth . ." entries on stack."
+                depth 0> IF space ." Stack: " .s THEN ;
 
 : assert    'last execute
-  ?stack ?remaining ;
+  ?stack-size ;
 
 
 \ == Tests ==
