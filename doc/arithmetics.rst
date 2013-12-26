@@ -134,6 +134,11 @@ Logic and Comparisons
    Test whether the TOS is equal to 0. (This also inverts boolean
    flags.)
 
+.. word:: 0<>		( n -- flag ) |K|, "zero-not-equals"
+
+   Test whether the TOS is different from 0. (This is used to convert
+   an arbitrary number to a boolean flag.)
+
 .. word:: 0<		( n -- flag ) |K|, |83|, "zero-less"
 
    Test whether TOS < 0

@@ -81,7 +81,7 @@ These words are about reading and interpreting program text.
 
       This word is the value of :word:`word?` at startup.
 
-.. word:: word?		( -- addr ) |K|, |rt|
+.. word:: word?		( -- addr ) |K|, |rt|, "word-question"
 
       Contains a word that is executed when a string that cannot be
       found in the dictionary by :word:`(interpret)`. At system

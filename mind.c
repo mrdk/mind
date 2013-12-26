@@ -592,6 +592,7 @@ udivmod: // u/mod ( u1 u2 -- div mod )
 equal:      FUNC2(BOOL(NOS == TOS)); // =
 unequal:    FUNC2(BOOL(NOS != TOS)); // <>
 zero_equal: FUNC1(BOOL(TOS == 0));   // 0=
+zero_unequal: FUNC1(BOOL(TOS != 0)); // 0<>
 zero_less:  FUNC1(BOOL(TOS < 0));    // 0<
 zero_greater: FUNC1(BOOL(TOS > 0));  // 0>
 less:       FUNC2(BOOL(NOS < TOS));  // <

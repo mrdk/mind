@@ -208,7 +208,9 @@ Variable #acc                   \ Number accumulator
 : on  ( addr -- )   true swap ! ;
 : off ( addr -- )   false swap ! ;
 
-: erase ( addr u -- )   0 fill ;
+: cmove, ( addr n -- )   here swap   dup allot  cmove ;
+
+: erase  ( addr u -- )   0 fill ;
 
 : clearstack      ( ... -- )   s0 @ sp! ;
 : clear-rstack ( R: ... -- )   r@  r0 @ rp!  >r ;
@@ -272,8 +274,6 @@ Variable 'num                  \ points to the beginning of the generated string
 
 \ == Structures ==
 
-: cmove,  ( addr n -- )    here swap   dup allot  cmove ;
-
          \ Reserve space for a field in a structure
 : Field  ( n size <word> -- n' )   Create over ,  +
   does>  ( 'base -- 'field )       @ + ;
@@ -325,7 +325,7 @@ Constant /stringstream
 
 : str-forward   ( -- )        1 str-pointer +! ;
 : str-current@  ( -- char )   str-pointer @ c@ ;
-: str-valid?    ( -- flag )   str-current@ 0 <> ;
+: str-valid?    ( -- flag )   str-current@ 0<> ;
 
 /stringstream Object stringstream0
   ' str-forward  over >forward !
