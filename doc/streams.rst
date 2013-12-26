@@ -18,11 +18,11 @@ address in :word:`'instream`.
    address of its :word:`current@` routine. The routine has the
    signature ( -- *char* ).
 
-.. word:: >eos		( stream -- addr ) |K|, "to-e-o-s"
+.. word:: >valid?	( stream -- addr ) |K|, "to-valid-question"
 
    The TOS contains the address of a stream structure: compute the
-   address of its :word:`eos` routine. The routine has the signature (
-   -- *flag* ).
+   address of its :word:`valid?` routine. The routine has the
+   signature ( -- *flag* ).
 
 .. word:: /stream	( -- n ) |K|, "per-stream"
 
@@ -37,12 +37,18 @@ address in :word:`'instream`.
       Read one character from the current stream. :word:`line#` is
       updated if the character is an "end of line" symbol.
 
-.. word:: current@	( -- char ) |K|, "current-fetch"
+.. word:: current@	( -- n ) |K|, "current-fetch"
 
-      Put the character at the current position of the current stream
-      onto the stack.
+   Put the value at the current position of the current stream onto
+   the stack. This is only defined if :word:`valid` returns
+   :word:`true`; however a stream may return a specific end-of-stream
+   value.
 
-.. word:: eos		( -- flag ) |K|, "e-o-s"
+.. word:: valid?        ( -- flag ) |K|, "valid-question"
+
+   Return :word:`true` if the end of the stream is not yet reached.
+
+.. word:: eos		( -- flag ) "e-o-s"
 
       Test whether the end of the current stream is reached.
 

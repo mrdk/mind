@@ -313,6 +313,7 @@ Variable this-file   init.mind this-file !
 \ == Text Streams and String Streams ==
 
 : instream ( -- stream )   'instream @ ;
+: eos      ( -- flag )     valid? 0= ;
 
 : Stream ( <word> -- )   /stream Object drop ;
 
@@ -324,12 +325,12 @@ Constant /stringstream
 
 : str-forward   ( -- )        1 str-pointer +! ;
 : str-current@  ( -- char )   str-pointer @ c@ ;
-: str-eos       ( -- flag )   str-current@ 0= ;
+: str-valid?    ( -- flag )   str-current@ 0 <> ;
 
 /stringstream Object stringstream0
   ' str-forward  over >forward !
   ' str-current@ over >current@ !
-  ' str-eos      over >eos !
+  ' str-valid    over >valid? !
 drop
 
 : Stringstream ( <word> -- )  stringstream0 /stringstream Copy drop ;

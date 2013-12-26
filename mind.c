@@ -111,7 +111,7 @@ static void file_init(textfile_t *inf, entry_t dict[])
 {
     inf->stream.forward = C(file_forward);
     inf->stream.current_fetch = C(file_current_fetch);
-    inf->stream.eos = C(file_eof);
+    inf->stream.validq = C(file_validq);
     inf->input = 0;
     inf->name = 0;
     inf->current = EOF;
@@ -314,14 +314,15 @@ rbrack:	// ]
 
 parse_to: // : parse-to ( addr str -- )
           //   >r BEGIN current@ append  forward
-          //            r@ current@ strchr  eos or UNTIL rdrop
-          //      0 over c!  eos if; forward ;
+          //            r@ current@ strchr  valid? 0= or UNTIL rdrop
+          //      0 over c!  valid? 0= if; forward ;
     CODE(C(rto),
 	 C(current_fetch), C(append), C(forward),
-	 C(rfetch), C(current_fetch), C(strchr), C(eos), C(or),
+	 C(rfetch), C(current_fetch), C(strchr),
+         C(validq), C(zero_equal), C(or),
 	 C(zbranch), (cell)(start + 1), C(rdrop),
 	 C(zero), C(swap), C(cstore),
-         C(eos), C(if_semi), C(forward));
+         C(validq), C(zero_equal), C(if_semi), C(forward));
 
 skip_whitespace: // : skip-whitespace ( -- )
 	         //   BEGIN  whitespace current@ strchr 0= if;  forward AGAIN ;
@@ -332,13 +333,15 @@ parse: // : parse ( -- addr )
        //   skip-whitespace  here whitespace parse-to  here ;
     CODE(C(skip_whitespace), C(here), C(whitespace), C(parse_to), C(here));
 
-backslash: // : \   BEGIN current@ forward  #eol = if;  eos UNTIL ; immediate
+backslash: // : \   BEGIN current@ forward  #eol = if;
+           //             valid? 0= UNTIL ;  immediate
     CODE(C(current_fetch), C(forward), C(num_eol), C(equal), C(if_semi),
-	 C(eos), C(zbranch), (cell)start);
+	 C(validq), C(zero_equal), C(zbranch), (cell)start);
 
-paren: // : (   BEGIN current@ forward  [char] ) = if;  eos UNTIL ; immediate
+paren: // : (   BEGIN current@ forward  [char] ) = if;
+       //             valid? 0= UNTIL ;  immediate
     CODE(C(current_fetch), C(forward), C(lit), ')', C(equal), C(if_semi),
-	 C(eos), C(zbranch), (cell)start);
+	 C(validq), C(zero_equal), C(zbranch), (cell)start);
 
 // ---------------------------------------------------------------------------
 // Command line parameters
@@ -358,7 +361,7 @@ init_mind: FUNC0(&sys.inf);     // init.mind ( -- addr )
 
 to_forward:       OFFSET(stream_t, forward);       // >forward
 to_current_fetch: OFFSET(stream_t, current_fetch); // >current@
-to_eos:           OFFSET(stream_t, eos);           // >eos
+to_validq:        OFFSET(stream_t, validq);        // >valid?
 per_stream: FUNC0(sizeof(stream_t)); // /stream
 
 tick_instream: FUNC0(&sys.instream); // 'instream
@@ -376,29 +379,31 @@ forward:	    // ( -- )
     w = (label_t*)((stream_t*)sys.instream)->forward; goto **w;
 current_fetch:      // current@ ( -- char )
     w = (label_t*)((stream_t*)sys.instream)->current_fetch; goto **w;
-eos:                // ( -- char )
-    w = (label_t*)((stream_t*)sys.instream)->eos; goto **w;
+validq:             // valid? ( -- flag )
+    w = (label_t*)((stream_t*)sys.instream)->validq; goto **w;
 
 textfile0: FUNC0(&sys.textfile0);
-file_open:          // file-open ( str file -- )
+file_open:          // file-open     ( str file -- )
     PROC2(file_open((textfile_t*)TOS, (char*)NOS));
-file_close:         // file-close ( file --)
+file_close:         // file-close    ( file --)
     PROC1(file_close((textfile_t*)TOS));
-file_forward:       // ( -- )
+file_forward:       // file-forward  ( -- )
     file_forward((textfile_t*)sys.instream); goto next;
-file_current_fetch: // ( -- char )
+file_current_fetch: // file-current@ ( -- char )
     FUNC0(((textfile_t*)sys.instream)->current);
-file_eof:           // ( -- flag )
+file_eof:           // file-eof      ( -- flag )
     FUNC0(BOOL(((textfile_t*)sys.instream)->current == EOF));
+file_validq:        // file-valid?   ( -- flag )
+    FUNC0(BOOL(((textfile_t*)sys.instream)->current != EOF));
 
-do_stream: // : do-stream   BEGIN interpret  eos UNTIL ;
-    CODE(C(interpret), C(eos), C(zbranch), (cell)(start));
+do_stream: // : do-stream   BEGIN interpret  valid? 0= UNTIL ;
+    CODE(C(interpret), C(validq), C(zero_equal), C(zbranch), (cell)(start));
 
 // The identifier "errno" in <errno.h> is a macro; therefore it cannot
 // be used as a label, as this would interfere with the macro magic in
 // "headers.c".
 errno_: FUNC0(&errno); // ( -- addr )
-    
+
 
 // ---------------------------------------------------------------------------
 // Dictionary

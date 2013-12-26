@@ -13,7 +13,7 @@
 typedef struct {
     cell forward;		// Forth word ( stream -- )
     cell current_fetch;		// Forth word ( stream -- char )
-    cell eos;			// Forth word ( stream -- flag )
+    cell validq;                // Forth word ( stream -- flag )
 } stream_t;
 
 typedef struct {
