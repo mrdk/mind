@@ -13,10 +13,11 @@ mind: mind.o args.o io.o
 tests: mind
 	@./mind tests.mind
 
+c_labels='{c}/^\([[:alnum:]_]+\):/\1/' # Labels in C programs.
 TAGS:
 # Scan all files in the project, to allow global replace with
 # tags-query-replace.
-	etags *.c *.h *.mind doc/*.rst
+	etags -r $(c_labels) *.c *.h *.mind doc/*.rst
 
 %.s: %.c
 	$(CC) -S $(CFLAGS) -fverbose-asm $<
