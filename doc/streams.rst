@@ -59,6 +59,11 @@ File Streams
 A file stream is an extension of the stream interface for reading from
 a file (or any other stream in a Unix system).
 
+.. word:: this-file    ( -- addr ) |K|
+
+   Variable that contains the address of the file stream which is
+   currently read.
+
 .. word:: init.mind    ( -- addr ) |K|, "init-dot-mind"
 
    File stream that refers to a file that is read automatically at

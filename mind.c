@@ -104,6 +104,7 @@ struct {
     textfile_t textfile0;    // Prototype for text streams
     textfile_t inf;	     // Input file
     cell instream;	     // (stream_t*) Current input stream
+    cell this_file;          // (stream_t*) Current input file
     cell mem[MEMCELLS];	     // The memory
 } sys;
 
@@ -131,6 +132,7 @@ static void init_sys(entry_t dict[])
     sys.root.find_word = C(find_word);
     file_init(&sys.textfile0, dict);
     memcpy(&sys.inf, &sys.textfile0, sizeof(textfile_t));
+    sys.this_file = (cell)&sys.inf.stream;
     sys.instream = (cell)&sys.inf.stream;
 }
 
@@ -364,7 +366,8 @@ to_current_fetch: OFFSET(stream_t, current_fetch); // >current@
 to_validq:        OFFSET(stream_t, validq);        // >valid?
 per_stream: FUNC0(sizeof(stream_t)); // /stream
 
-tick_instream: FUNC0(&sys.instream); // 'instream
+tick_instream: FUNC0(&sys.instream);  // 'instream ( -- addr )
+this_file:     FUNC0(&sys.this_file); // this-file ( -- addr )
 
 to_infile:     OFFSET(textfile_t, input);   // >infile
 to_infilename: OFFSET(textfile_t, name);    // >infile-name

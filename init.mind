@@ -286,8 +286,6 @@ Variable 'num                  \ points to the beginning of the generated string
 
 \ == Text files ==
 
-Variable this-file   init.mind this-file !
-
 : TStream ( <word> -- )
   textfile0 /textfile Copy   this-file @  swap >caller ! ; 
 
