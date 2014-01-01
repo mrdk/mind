@@ -328,7 +328,7 @@ Constant /stringstream
 /stringstream Object stringstream0
   ' str-forward  over >forward !
   ' str-current@ over >current@ !
-  ' str-valid    over >valid? !
+  ' str-valid?   over >valid? !
 drop
 
 : Stringstream ( <word> -- )  stringstream0 /stringstream Copy drop ;
