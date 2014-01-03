@@ -44,9 +44,8 @@
 : literal, ( n -- )   lit lit ,  , ;
 
 (') literal, Alias literal ( n -- )  immediate
-(') drop     Alias ?exists ( xt -- ) \ abort if word does not exist
 
-: '  ( <word> -- xt )                  (')  dup ?exists ;
+: '  ( <word> -- xt )                  (')  dup if; notfound ;
 \ Compile the XT of the following word
 : [']  ( -- xt; Compile: <word> -- )   ' literal, ;  immediate
 \ Compile the following word
