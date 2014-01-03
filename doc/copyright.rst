@@ -1,7 +1,7 @@
 Copyright
 =========
 
-Copyright 2012 Markus Redeker.
+Copyright 2012-2014 Markus Redeker.
 
 The program is licensed under the GNU General Public License version 2
 or any later version, at your choice. There is NO WARRANY, not at all.

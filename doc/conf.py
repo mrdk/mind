@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'mind'
-copyright = u'2012-2013, Markus Redeker'
+copyright = u'2012-2014, Markus Redeker'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -233,7 +233,7 @@ man_pages = [
 epub_title = u'mind'
 epub_author = u'Markus Redeker'
 epub_publisher = u'Markus Redeker'
-epub_copyright = u'2012, Markus Redeker'
+epub_copyright = copyright
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.

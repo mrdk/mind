@@ -1,5 +1,5 @@
 # Documentation module for Forth vocabularies.
-# Copyright 2011-2012 Markus Redeker <cep@ibp.de>
+# Copyright 2011-2014 Markus Redeker <cep@ibp.de>
 #
 # Published under the GNU General Public License version 2 or any
 # later version, at your choice. There is NO WARRANY, not at all. See

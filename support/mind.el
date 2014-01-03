@@ -1,5 +1,5 @@
 ;;; mind.el --- An Emacs mode for mind programs
-;; Copyright 2011-2013 Markus Redeker <cep@ibp.de>
+;; Copyright 2011-2014 Markus Redeker <cep@ibp.de>
 ;;
 ;; Published under the GNU General Public License version 2 or any
 ;; later version, at your choice. There is NO WARRANY, not at all. See
