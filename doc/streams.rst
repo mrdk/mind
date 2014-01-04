@@ -40,8 +40,8 @@ address in :word:`'instream`.
 .. word:: current@	( -- n ) |K|, "current-fetch"
 
    Put the value at the current position of the current stream onto
-   the stack. This is only defined if :word:`valid` returns
-   :word:`true`; however a stream may return a specific end-of-stream
+   the stack. This is only defined if :word:`valid?` returns
+   :word:`true`. A stream may however return a specific end-of-stream
    value.
 
 .. word:: valid?        ( -- flag ) |K|, "valid-question"
@@ -64,6 +64,11 @@ a file (or any other stream in a Unix system).
    Variable that contains the address of the file stream which is
    currently read.
 
+.. word:: with-file    |K|
+
+   Make the content of :word:`this-file` the current stream (by
+   storing it in :word:`'instream`).
+
 .. word:: init.mind    ( -- addr ) |K|, "init-dot-mind"
 
    File stream that refers to a file that is read automatically at
@@ -72,12 +77,12 @@ a file (or any other stream in a Unix system).
 
 .. word:: line#		( -- addr ) |K|, "line-number"
 
-      Address of the current line number in the current stream. The
-      first line of a file has the number 1.
+   Address of the current line number in the current file stream. The
+   first line of a file has the number 1.
 
 .. word:: do-stream |K|
 
-      Execute the code in the current input stream.
+   Execute the code in the current file stream.
 
 .. word:: >infile	( tstream -- addr ) |K|, "to-infile"
 

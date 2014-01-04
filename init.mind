@@ -290,7 +290,7 @@ Variable 'num                  \ points to the beginning of the generated string
 
 : ?open-error  errno @ abort" could not open file" ;
 : read-file ( str tstream -- )
-  under  file-open ?open-error  'instream !  do-stream ;
+  under  file-open ?open-error  this-file ! with-file  do-stream ;
 
 
 \ init.mind is not a normal word:
@@ -333,7 +333,7 @@ drop
 : Stringstream ( <word> -- )  stringstream0 /stringstream Copy drop ;
 
 : str-interpret ( str stream -- )
-  'instream !  str-pointer !  do-stream ;
+  this-file ! with-file  str-pointer !  do-stream ;
 
 
 \ == Command interpreter ==

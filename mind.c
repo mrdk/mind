@@ -315,35 +315,40 @@ rbrack:	// ]
     sys.state = 1; goto next;
 
 parse_to: // : parse-to ( addr str -- )
-          //   >r BEGIN current@ append  forward
-          //            r@ current@ strchr  valid? 0= or UNTIL rdrop
-          //      0 over c!  valid? 0= if; forward ;
-    CODE(C(rto),
+          //   with-file >r
+          //   BEGIN current@ append  forward
+          //      r@ current@ strchr  valid? 0= or UNTIL rdrop
+          //   0 over c!  valid? 0= if; forward ;
+    CODE(C(with_file), C(rto),
 	 C(current_fetch), C(append), C(forward),
 	 C(rfetch), C(current_fetch), C(strchr),
          C(validq), C(zero_equal), C(or),
-	 C(zbranch), (cell)(start + 1), C(rdrop),
+	 C(zbranch), (cell)(start + 2), C(rdrop),
 	 C(zero), C(swap), C(cstore),
          C(validq), C(zero_equal), C(if_semi), C(forward));
 
 skip_whitespace: // : skip-whitespace ( -- )
-	         //   BEGIN  whitespace current@ strchr 0= if;  forward AGAIN ;
-    CODE(C(whitespace), C(current_fetch), C(strchr), C(zero_equal),
-	 C(if_semi), C(forward), C(branch), (cell)(start));
+	         //   with-file BEGIN  whitespace current@ strchr 0= if;
+	         //       forward AGAIN ;
+    CODE(C(with_file),
+         C(whitespace), C(current_fetch), C(strchr), C(zero_equal),
+	 C(if_semi), C(forward), C(branch), (cell)(start + 1));
 
 parse: // : parse ( -- addr )
        //   skip-whitespace  here whitespace parse-to  here ;
     CODE(C(skip_whitespace), C(here), C(whitespace), C(parse_to), C(here));
 
-backslash: // : \   BEGIN current@ forward  #eol = if;
-           //             valid? 0= UNTIL ;  immediate
-    CODE(C(current_fetch), C(forward), C(num_eol), C(equal), C(if_semi),
-	 C(validq), C(zero_equal), C(zbranch), (cell)start);
+backslash: // : \   with-file BEGIN current@ forward  #eol = if;
+           //                    valid? 0= UNTIL ;  immediate
+    CODE(C(with_file),
+         C(current_fetch), C(forward), C(num_eol), C(equal), C(if_semi),
+	 C(validq), C(zero_equal), C(zbranch), (cell)(start + 1));
 
-paren: // : (   BEGIN current@ forward  [char] ) = if;
-       //             valid? 0= UNTIL ;  immediate
-    CODE(C(current_fetch), C(forward), C(lit), ')', C(equal), C(if_semi),
-	 C(validq), C(zero_equal), C(zbranch), (cell)start);
+paren: // : (   with-file BEGIN current@ forward  [char] ) = if;
+       //                    valid? 0= UNTIL ;  immediate
+    CODE(C(with_file),
+         C(current_fetch), C(forward), C(lit), ')', C(equal), C(if_semi),
+	 C(validq), C(zero_equal), C(zbranch), (cell)(start + 1));
 
 // ---------------------------------------------------------------------------
 // Command line parameters
@@ -368,6 +373,8 @@ per_stream: FUNC0(sizeof(stream_t)); // /stream
 
 tick_instream: FUNC0(&sys.instream);  // 'instream ( -- addr )
 this_file:     FUNC0(&sys.this_file); // this-file ( -- addr )
+
+with_file: sys.instream = sys.this_file; goto next; // with-file
 
 to_infile:     OFFSET(textfile_t, input);   // >infile
 to_infilename: OFFSET(textfile_t, name);    // >infile-name
@@ -399,8 +406,9 @@ file_eof:           // file-eof      ( -- flag )
 file_validq:        // file-valid?   ( -- flag )
     FUNC0(BOOL(((textfile_t*)sys.instream)->current != EOF));
 
-do_stream: // : do-stream   BEGIN interpret  valid? 0= UNTIL ;
-    CODE(C(interpret), C(validq), C(zero_equal), C(zbranch), (cell)(start));
+do_stream: // : do-stream   with-file BEGIN interpret  valid? 0= UNTIL ;
+    CODE(C(with_file),
+         C(interpret), C(validq), C(zero_equal), C(zbranch), (cell)(start + 1));
 
 // The identifier "errno" in <errno.h> is a macro; therefore it cannot
 // be used as a label, as this would interfere with the macro magic in
