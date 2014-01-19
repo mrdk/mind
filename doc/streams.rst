@@ -6,23 +6,23 @@ Streams are an abstraction for the input from a source that produces
 data continuously. There is always one "current stream", with its
 address in `'instream`.
 
-.. word:: >forward	( stream -- addr ) |K|, "to-forward"
+.. word:: >get	        ( stream -- addr ) |K|, "to-get"
 
    The TOS contains the address of a stream structure: compute the
-   address of its `forward` routine. The routine has the
-   signature ( -- ).
+   address of its `get` routine. The routine has the signature
+   :stack:`( -- )`.
 
-.. word:: >current@	( stream -- addr ) |K|, "to-current-fetch"
-
-   The TOS contains the address of a stream structure: compute the
-   address of its `current@` routine. The routine has the
-   signature ( -- *char* ).
-
-.. word:: >valid?	( stream -- addr ) |K|, "to-valid-question"
+.. word:: >i	        ( stream -- addr ) |K|, "to-i"
 
    The TOS contains the address of a stream structure: compute the
-   address of its `valid?` routine. The routine has the
-   signature ( -- *flag* ).
+   address of its `i` routine. The routine has the signature :stack:`(
+   -- char )`.
+
+.. word:: >i?	        ( stream -- addr ) |K|, "to-i-question"
+
+   The TOS contains the address of a stream structure: compute the
+   address of its `i?` routine. The routine has the signature
+   :stack:`( -- flag )`.
 
 .. word:: /stream	( -- n ) |K|, "per-stream"
 
@@ -32,19 +32,18 @@ address in `'instream`.
 
    Variable that contains the address of the current stream.
 
-.. word:: forward	( -- ) |K|
+.. word:: get	        ( -- ) |K|
 
-      Read one character from the current stream. `line#` is
-      updated if the character is an "end of line" symbol.
+   Read one element of the current stream. `line#` is updated if the
+   character is an "end of line" symbol.
 
-.. word:: current@	( -- n ) |K|, "current-fetch"
+.. word:: i	        ( -- n ) |K|
 
    Put the value at the current position of the current stream onto
-   the stack. This is only defined if `valid?` returns
-   `true`. A stream may however return a specific end-of-stream
-   value.
+   the stack. This is only defined if `i?` returns `true`. A stream
+   may however return a specific end-of-stream value.
 
-.. word:: valid?        ( -- flag ) |K|, "valid-question"
+.. word:: i?            ( -- flag ) |K|, "i-question"
 
    Return `true` if the end of the stream is not yet reached.
 
@@ -121,7 +120,7 @@ a file (or any other stream in a Unix system).
 
 .. word:: /textfile     ( -- n ) |K|, "per-textfile"
 
-      	Number of bytes in a file stream structure.
+   Number of bytes in a textfile structure.
 
 .. word:: textfile0     ( -- tstream ) |K|, "textfile-0"
 
@@ -166,18 +165,22 @@ Implementation
 These are words that should not usually called directly, but only
 through a file stream object.
 
-.. word:: file-forward	( -- ) |K|
+.. word:: file-get	( -- ) |K|
 
    Read one character from the current file stream and store it in its
-   `>current` field. `line#` is updated if the character
-   is an "end of line" symbol.
+   `>current` field. `line#` is updated if the character is an "end of
+   line" symbol.
 
    If the end of the file is reached, it is closed automatically.
 
-.. word:: file-current@	( -- char ) |K|, "file-current-fetch"
+.. word:: file-i	( -- char ) |K|, "file-i"
 
    Put the character at the current position of the current file
    stream onto the stack.
+
+.. word:: file-i?	( -- flag ) |K|, "file-i-question"
+
+   Test whether the end of the current file stream is not yet reached.
 
 .. word:: file-eof	( -- flag ) |K|, "file-e-o-f"
 

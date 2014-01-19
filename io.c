@@ -44,7 +44,7 @@ void file_close(textfile_t *inf)
     inf->current = EOF;
 }
 
-void file_forward(textfile_t *inf)
+void file_get(textfile_t *inf)
 {
     inf->current = fgetc((FILE*)inf->input);
 

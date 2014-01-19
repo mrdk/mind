@@ -180,10 +180,10 @@ Variable #acc                   \ Number accumulator
 : >unumber ( str -- n )         \ convert string to unsigned number
   0 #acc !  udigits ?rest  #acc @ ;
 
-: get-sign ( str -- a' sign )   \ read leading minus sign if it is there
+: read-sign ( str -- a' sign )   \ read leading minus sign if it is there
   dup c@  [char] - =  IF 1+  -1 ELSE 1 THEN ;
 : >number  ( str -- n )         \ convert string to signed number
-  get-sign swap  >unumber  * ;
+  read-sign swap  >unumber  * ;
 
 
 \ Add number conversion to the outer interpreter
@@ -310,7 +310,7 @@ Variable 'num                  \ points to the beginning of the generated string
 \ == Text Streams and String Streams ==
 
 : instream ( -- stream )   'instream @ ;
-: eos      ( -- flag )     valid? 0= ;
+: eos      ( -- flag )     i? 0= ;
 
 : Stream ( <word> -- )   /stream Object drop ;
 
@@ -320,14 +320,14 @@ Constant /stringstream
 
 : str-pointer   ( -- addr )   instream >str-pointer ;
 
-: str-forward   ( -- )        1 str-pointer +! ;
-: str-current@  ( -- char )   str-pointer @ c@ ;
-: str-valid?    ( -- flag )   str-current@ 0<> ;
+: str-get   ( -- )        1 str-pointer +! ;
+: str-i     ( -- char )   str-pointer @ c@ ;
+: str-i?    ( -- flag )   str-i 0<> ;
 
 /stringstream Object stringstream0
-  ' str-forward  over >forward !
-  ' str-current@ over >current@ !
-  ' str-valid?   over >valid? !
+  ' str-get  over >get !
+  ' str-i    over >i !
+  ' str-i?   over >i? !
 drop
 
 : Stringstream ( <word> -- )  stringstream0 /stringstream Copy drop ;
@@ -345,10 +345,10 @@ Create linebuf  /linebuf 1+ allot
 
 : interactive? ( -- flag )    arg-interactive @  argc 0= and ;
 
-: get-line    linebuf /linebuf accept drop ;
+: read-line   linebuf /linebuf accept drop ;
 : do-line     linebuf line-stream str-interpret ;
 : do-lines    interactive? IF
-                  BEGIN space ." ok" cr  get-line do-line  REPEAT THEN ;
+                  BEGIN space ." ok" cr  read-line do-line  REPEAT THEN ;
 
 : command-interpret    clear-rstack clearstack  do-lines  bye ;
 ' command-interpret is abort

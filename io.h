@@ -11,9 +11,9 @@
 #include "types.h"
 
 typedef struct {
-    cell forward;		// Forth word ( stream -- )
-    cell current_fetch;		// Forth word ( stream -- char )
-    cell validq;                // Forth word ( stream -- flag )
+    cell get;                   // Forth word ( stream -- )
+    cell i;                     // Forth word ( stream -- char )
+    cell iq;                    // Forth word ( stream -- flag )
 } stream_t;
 
 typedef struct {
@@ -29,6 +29,6 @@ char *mind_relative(char *mind_file, char *filename);
 
 void file_open(textfile_t *inf, char* name);
 void file_close(textfile_t *inf);
-void file_forward(textfile_t *inf);
+void file_get(textfile_t *inf);
 
 #endif

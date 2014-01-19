@@ -110,9 +110,9 @@ struct {
 
 static void file_init(textfile_t *inf, entry_t dict[])
 {
-    inf->stream.forward = C(file_forward);
-    inf->stream.current_fetch = C(file_current_fetch);
-    inf->stream.validq = C(file_validq);
+    inf->stream.get = C(file_get);
+    inf->stream.i = C(file_i);
+    inf->stream.iq = C(file_iq);
     inf->input = 0;
     inf->name = 0;
     inf->current = EOF;
@@ -316,39 +316,39 @@ rbrack:	// ]
 
 parse_to: // : parse-to ( addr str -- )
           //   with-file >r
-          //   BEGIN current@ append  forward
-          //      r@ current@ strchr  valid? 0= or UNTIL rdrop
-          //   0 over c!  valid? 0= if; forward ;
+          //   BEGIN i append  get
+          //      r@ i strchr  i? 0= or UNTIL rdrop
+          //   0 over c!  i? 0= if; get ;
     CODE(C(with_file), C(rto),
-	 C(current_fetch), C(append), C(forward),
-	 C(rfetch), C(current_fetch), C(strchr),
-         C(validq), C(zero_equal), C(or),
+	 C(i), C(append), C(get),
+	 C(rfetch), C(i), C(strchr),
+         C(iq), C(zero_equal), C(or),
 	 C(zbranch), (cell)(start + 2), C(rdrop),
 	 C(zero), C(swap), C(cstore),
-         C(validq), C(zero_equal), C(if_semi), C(forward));
+         C(iq), C(zero_equal), C(if_semi), C(get));
 
 skip_whitespace: // : skip-whitespace ( -- )
-	         //   with-file BEGIN  whitespace current@ strchr 0= if;
-	         //       forward AGAIN ;
+	         //   with-file BEGIN  whitespace i strchr 0= if;
+	         //       get AGAIN ;
     CODE(C(with_file),
-         C(whitespace), C(current_fetch), C(strchr), C(zero_equal),
-	 C(if_semi), C(forward), C(branch), (cell)(start + 1));
+         C(whitespace), C(i), C(strchr), C(zero_equal),
+	 C(if_semi), C(get), C(branch), (cell)(start + 1));
 
 parse: // : parse ( -- addr )
        //   skip-whitespace  here whitespace parse-to  here ;
     CODE(C(skip_whitespace), C(here), C(whitespace), C(parse_to), C(here));
 
-backslash: // : \   with-file BEGIN current@ forward  #eol = if;
-           //                    valid? 0= UNTIL ;  immediate
+backslash: // : \   with-file BEGIN i get  #eol = if;
+           //                    i? 0= UNTIL ;  immediate
     CODE(C(with_file),
-         C(current_fetch), C(forward), C(num_eol), C(equal), C(if_semi),
-	 C(validq), C(zero_equal), C(zbranch), (cell)(start + 1));
+         C(i), C(get), C(num_eol), C(equal), C(if_semi),
+	 C(iq), C(zero_equal), C(zbranch), (cell)(start + 1));
 
-paren: // : (   with-file BEGIN current@ forward  [char] ) = if;
-       //                    valid? 0= UNTIL ;  immediate
+paren: // : (   with-file BEGIN i get  [char] ) = if;
+       //                    i? 0= UNTIL ;  immediate
     CODE(C(with_file),
-         C(current_fetch), C(forward), C(lit), ')', C(equal), C(if_semi),
-	 C(validq), C(zero_equal), C(zbranch), (cell)(start + 1));
+         C(i), C(get), C(lit), ')', C(equal), C(if_semi),
+	 C(iq), C(zero_equal), C(zbranch), (cell)(start + 1));
 
 // ---------------------------------------------------------------------------
 // Command line parameters
@@ -366,10 +366,10 @@ arg_interactive: FUNC0(&args.interactive);
 
 init_mind: FUNC0(&sys.inf);     // init.mind ( -- addr )
 
-to_forward:       OFFSET(stream_t, forward);       // >forward
-to_current_fetch: OFFSET(stream_t, current_fetch); // >current@
-to_validq:        OFFSET(stream_t, validq);        // >valid?
-per_stream: FUNC0(sizeof(stream_t)); // /stream
+to_get:     OFFSET(stream_t, get);    // >get
+to_i:       OFFSET(stream_t, i);      // >i
+to_iq:      OFFSET(stream_t, iq);     // >i?
+per_stream: FUNC0(sizeof(stream_t));  // /stream
 
 tick_instream: FUNC0(&sys.instream);  // 'instream ( -- addr )
 this_file:     FUNC0(&sys.this_file); // this-file ( -- addr )
@@ -385,30 +385,30 @@ per_textfile: FUNC0(sizeof(textfile_t)); // /textfile
 
 lineno: FUNC0(&((textfile_t*)sys.instream)->lineno);
 
-forward:	    // ( -- )
-    w = (label_t*)((stream_t*)sys.instream)->forward; goto **w;
-current_fetch:      // current@ ( -- char )
-    w = (label_t*)((stream_t*)sys.instream)->current_fetch; goto **w;
-validq:             // valid? ( -- flag )
-    w = (label_t*)((stream_t*)sys.instream)->validq; goto **w;
+get:                // ( -- )
+    w = (label_t*)((stream_t*)sys.instream)->get; goto **w;
+i:                  // i ( -- char )
+    w = (label_t*)((stream_t*)sys.instream)->i; goto **w;
+iq:                 // i? ( -- flag )
+    w = (label_t*)((stream_t*)sys.instream)->iq; goto **w;
 
 textfile0: FUNC0(&sys.textfile0);
 file_open:          // file-open     ( str file -- )
     PROC2(file_open((textfile_t*)TOS, (char*)NOS));
 file_close:         // file-close    ( file --)
     PROC1(file_close((textfile_t*)TOS));
-file_forward:       // file-forward  ( -- )
-    file_forward((textfile_t*)sys.instream); goto next;
-file_current_fetch: // file-current@ ( -- char )
+file_get:           // file-get  ( -- )
+    file_get((textfile_t*)sys.instream); goto next;
+file_i:             // file-i ( -- char )
     FUNC0(((textfile_t*)sys.instream)->current);
 file_eof:           // file-eof      ( -- flag )
     FUNC0(BOOL(((textfile_t*)sys.instream)->current == EOF));
-file_validq:        // file-valid?   ( -- flag )
+file_iq:            // file-i?   ( -- flag )
     FUNC0(BOOL(((textfile_t*)sys.instream)->current != EOF));
 
-do_stream: // : do-stream   with-file BEGIN interpret  valid? 0= UNTIL ;
+do_stream: // : do-stream   with-file BEGIN interpret  i? 0= UNTIL ;
     CODE(C(with_file),
-         C(interpret), C(validq), C(zero_equal), C(zbranch), (cell)(start + 1));
+         C(interpret), C(iq), C(zero_equal), C(zbranch), (cell)(start + 1));
 
 // The identifier "errno" in <errno.h> is a macro; therefore it cannot
 // be used as a label, as this would interfere with the macro magic in
