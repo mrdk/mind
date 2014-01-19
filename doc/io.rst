@@ -72,7 +72,7 @@ Numbers
 .. word:: base          ( -- addr ) |83|
 
    Variable that contains the base for number conversion. The minimal
-   value of :word:`base` is 2, the maximal value is 36. Most words
+   value of `base` is 2, the maximal value is 36. Most words
    that convert a number from its internal representation as a cell to
    a string or backwards use this variable.
 
@@ -81,26 +81,26 @@ Numbers
           decimal       |83|
           hex           |83|
 
-   Sets :word:`base` to 2, 8, 10 or 16, respectively.
+   Sets `base` to 2, 8, 10 or 16, respectively.
 
 .. word:: .             ( n -- ) |83|, "dot"
           u\.           ( u -- ) |83|, "u-dot"
 
    Print the TOS as a signed or unsigned number, followed by a space.
-   The conversion uses the value of :word:`base`.
+   The conversion uses the value of `base`.
 
 .. word:: (.)           ( n -- str ) "paren-dot"
           (u.)          ( u -- str ) "paren-u-dot"
 
    Return the address that contains the TOS as a signed or unsigned
-   number, according to :word:`base`. There is no trailing space here.
+   number, according to `base`. There is no trailing space here.
    The string exists until another word is called that converts a cell
    to a string, then it is overwritten. (Among these words are also
-   :word:`.` and :word:`h.` and others, since they use internally
-   :word:`(.)` and :word:`(u.)`.)
+   `.` and `h.` and others, since they use internally
+   `(.)` and `(u.)`.)
 
 .. word:: h.            ( n -- ) |83|, "h-dot"
           uh.           ( u -- ) |K|, "u-h-dot"
 
    Print the TOS as a signed or unsigned hexadecimal number, followed
-   by a space. The value of :word:`base` is unchanged.
+   by a space. The value of `base` is unchanged.

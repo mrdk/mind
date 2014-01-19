@@ -50,9 +50,9 @@ Forth vocabulary
    This makes it much easier to switch between Forth and other
    applications in a window environment.
 
- * :word:`Create`-like words begin with a capital letter.
+ * `Create`-like words begin with a capital letter.
 
- * Control structure words like :word:`IF` and :word:`WHILE` are
+ * Control structure words like `IF` and `WHILE` are
    capitalised.
   
    This is a kind of convention in Forth code and it lets them stand

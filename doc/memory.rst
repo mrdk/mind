@@ -27,8 +27,8 @@ Memory Access
 .. word:: on            ( addr -- )
           off           ( addr -- )
 
-   Use the cell at *addr* as a binary flag. :word:`on` stores
-   :word:`true` at *addr* and :word:`off` stores :word:`false`.
+   Use the cell at *addr* as a binary flag. `on` stores
+   `true` at *addr* and `off` stores `false`.
 
 .. word:: cmove         ( from to u -- ) |K|, |83|, "c-move"
 
@@ -52,7 +52,7 @@ Memory Access
 .. word:: free		( addr -- ) |K|
 
       Free the memory space at *addr*, which must have been allocated
-      by :word:`malloc`.
+      by `malloc`.
 
 .. word:: /cell         ( -- n ) |K|, "per-cell"
 

@@ -92,8 +92,8 @@ Logic and Comparisons
 .. word:: true		( -- flag ) |K|, |83|
           false		( -- flag ) |K|, |83|
 
-   Boolean flags for true and false. The value for :word:`true` is
-   :word:`-1`, the value for :word:`false` is :word:`0`, so that
+   Boolean flags for true and false. The value for `true` is
+   `-1`, the value for `false` is `0`, so that
    either all bytes are set or all bytes are unset. This allows the
    replacement of control structures with arithmetic operations, as
    described in [ThinkingForth]_, p.243: It is then possible to

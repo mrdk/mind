@@ -9,7 +9,7 @@ Glossary
   
    XT
         Execution token. This is the address of a word such that
-        it can be executed by :word:`execute`.
+        it can be executed by `execute`.
 
    flag
         A boolean value. If a word returns a flag, it is either 0, for

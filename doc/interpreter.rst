@@ -21,7 +21,7 @@ Compiler Words
 .. word:: \:,           ( <word> -- ) "colon-comma"
 
    Create a header for the name *word* with the interpreter routine of
-   :word:`^docol`. This word performs the basic functionality of
+   `^docol`. This word performs the basic functionality of
    word:`:`. A colon definition ::
 
        : foo    ... ;
@@ -40,7 +40,7 @@ Compiler Words
           (abort")      "paren-abort"
 
    Words that are compiled by words that use an inlined string, like
-   :word:`"`, :word:`."` and :word:`abort"`. In the compiled code they
+   `"`, `."` and `abort"`. In the compiled code they
    are followed by a pointer to the address after the string and then
    by the string itself.
 
@@ -64,12 +64,12 @@ These words are about reading and interpreting program text.
 .. word:: exec/compile	( xt -- ) |K|, "exec-compile"
 
    Interpret or compile the word given by *xt*, depending on the value
-   of :word:`state`.
+   of `state`.
 
 .. word:: interpret |K|
 
    Read one word from the input and execute or compile it, depending
-   on the the value of :word:`state`. (The word occurs in [Forth83]_,
+   on the the value of `state`. (The word occurs in [Forth83]_,
    but with different behaviour.)
 
 .. word:: notfound |K|
@@ -77,23 +77,23 @@ These words are about reading and interpreting program text.
       This word is called by default if a word is not found in the
       dictionary. It prints an error message and closes the input
       file. The word that was searched for is expected as a string at
-      :word:`here`.
+      `here`.
 
-      This word is the value of :word:`word?` at startup.
+      This word is the value of `word?` at startup.
 
 .. word:: word?		( -- addr ) |K|, |rt|, "word-question"
 
       Contains a word that is executed when a string that cannot be
-      found in the dictionary by :word:`(interpret)`. At system
-      start, its value is :word:`notfound`.
+      found in the dictionary by `(interpret)`. At system
+      start, its value is `notfound`.
 
-      The Forth word stored in :word:`word?` has the signature
-      :stack:`( -- )`; it expects the searched string at :word:`here`.
+      The Forth word stored in `word?` has the signature
+      :stack:`( -- )`; it expects the searched string at `here`.
 
 .. word:: skip-whitespace  |K|
 
    Read from the current stream until the character at the current
-   position is no longer an element of :word:`whitespace`. If this is
+   position is no longer an element of `whitespace`. If this is
    already the case, do nothing.
 
 .. word:: parse-to	( addr str -- ) |K|
@@ -152,7 +152,7 @@ These are words to build data structures in the dictionary.
 
 .. word:: align         |K|
 
-      Increment (if necessary) the content of :word:`dp` so that it
+      Increment (if necessary) the content of `dp` so that it
       points to a valid address for a cell.
 
 .. word:: allot		( n -- ) |K|, |83|

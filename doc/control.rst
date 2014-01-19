@@ -11,12 +11,12 @@ Control Structures
    Components of a control structure for conditional execution. They
    are used either in the form ``IF ... THEN`` or ``IF ... ELSE ...
    THEN``, otherwise an error is raised at compile time. If at the
-   time when :word:`IF` is reached the TOS is zero, the code after
-   :word:`IF` is execued, otherwise the code after :word:`ELSE`, if it
-   exists. Afterwards the execution continues after :word:`THEN`.
+   time when `IF` is reached the TOS is zero, the code after
+   `IF` is execued, otherwise the code after `ELSE`, if it
+   exists. Afterwards the execution continues after `THEN`.
 
    These words are the user interfaces to the more primitive words
-   :word:`if,`, :word:`else,` and :word:`then,`.
+   `if,`, `else,` and `then,`.
 
 .. word:: BEGIN       ( Compile: -- addr cf ) |I|, |83|
           WHILE       ( n -- | Compile: addr1 cf1 -- addr2 addr1 cf2 ) |I|, |83|
@@ -27,13 +27,13 @@ Control Structures
 
        BEGIN ... WHILE ... WHILE ... REPEAT
 
-   with an arbitrary number of :word:`WHILE`\s. The code between
-   :word:`BEGIN` and :word:`REPEAT` is repeated until at some
-   :word:`WHILE` the TOS is a nonzero number. It is possible to omit
-   :word:`WHILE` completely; the result is an infinite loop.
+   with an arbitrary number of `WHILE`\s. The code between
+   `BEGIN` and `REPEAT` is repeated until at some
+   `WHILE` the TOS is a nonzero number. It is possible to omit
+   `WHILE` completely; the result is an infinite loop.
 
    These words are the user interfaces to the more primitive words
-   :word:`begin,`, :word:`while,` and :word:`repeat,`.
+   `begin,`, `while,` and `repeat,`.
 
 .. word:: ;;            |K|, |rt|, "semi-semi"
 
@@ -93,7 +93,7 @@ Implementation of Control Structures
 
        [ begin, ]  ... [ while, ] ... [ while, ] ... [ repeat, then, then, ]
 
-   There must be as many :word:`then,` as there are :word:`while,`. No
+   There must be as many `then,` as there are `while,`. No
    check for correct nesting is done.
 
 
@@ -102,11 +102,11 @@ Error Handling
 
 .. word:: abort         |K|, |83|
 
-   :word:`Defer` word that is called after an error has occured; it is
+   `Defer` word that is called after an error has occured; it is
    it is expected to reset the parameter stack and the return stack
    and then to start an interactive prompt. Its default value in the
-   kernel is :word:`bye`; in :file:`init.mind` it is then reset to
-   :word:`command-interpret`.
+   kernel is `bye`; in :file:`init.mind` it is then reset to
+   `command-interpret`.
 
 
 Starting and Finishing
@@ -120,11 +120,11 @@ Starting and Finishing
 
    Deferred word. It is called after :file:`init.mind` has been read.
    Its purpose is to processes the command line options, print an
-   initial message, and then to call :word:`abort`.
+   initial message, and then to call `abort`.
 
-   In the kernel it is originally initialised with :word:`abort`.
+   In the kernel it is originally initialised with `abort`.
    After :file:`init.mind` is executed, it is a call to
-   :word:`do-boot`.
+   `do-boot`.
 
 
 Command Line Parameters
@@ -162,17 +162,17 @@ The kernel options set the following Forth variables:
    command options :option:`-e` and :option:`-x`; otherwise its value
    is 0.
 
-   If the value of :word:`arg-cmdline` is nonzero, then it contains a
+   If the value of `arg-cmdline` is nonzero, then it contains a
    string that is executed after the file :file:`init.mind` is read
    and before the system switches to interactive mode (if it does).
 
 .. word:: arg-interactive	( -- addr ) |K|
 
-   Variable containing a flag that is set to :word:`false` by the
+   Variable containing a flag that is set to `false` by the
    command line options :option:`-e`. By default its value is
-   :word:`true`.
+   `true`.
 
-   If the value of :word:`arg-interactive` is :word:`true`, then
+   If the value of `arg-interactive` is `true`, then
    :program:`mind` switches to an interactive mode after startup.
 
 The complete command line parameters of :program:`mind` are accessible
@@ -184,10 +184,10 @@ through the following words:
 
 .. word:: raw-argv         ( -- addr ) |K|, "raw-arg-v"
 
-   Address of an array of cells. The array has :word:`raw-argc` + 1
+   Address of an array of cells. The array has `raw-argc` + 1
    elements, and the last element is always 0. The other elements are
    pointers to strings. These strings are the command line arguments
-   of :word:`mind`. They are usually part of system memory and
+   of `mind`. They are usually part of system memory and
    therefore immutable.
 
 The program options are accessible through the following words:
@@ -198,10 +198,10 @@ The program options are accessible through the following words:
 
 .. word:: argv             ( -- addr ) |K|, "arg-c"
 
-   Address of an array of cells. The array has :word:`argc` + 1
+   Address of an array of cells. The array has `argc` + 1
    elements, and the last element is always 0. The other elements are
    pointers to strings. These strings are the program options of
-   :word:`mind`. They are usually part of system memory and therefore
+   `mind`. They are usually part of system memory and therefore
    immutable.
 
-   The array :word:`argv` is always the end part of :word:`raw-argv`.
+   The array `argv` is always the end part of `raw-argv`.

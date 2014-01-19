@@ -4,24 +4,24 @@ Streams
 
 Streams are an abstraction for the input from a source that produces
 data continuously. There is always one "current stream", with its
-address in :word:`'instream`.
+address in `'instream`.
 
 .. word:: >forward	( stream -- addr ) |K|, "to-forward"
 
    The TOS contains the address of a stream structure: compute the
-   address of its :word:`forward` routine. The routine has the
+   address of its `forward` routine. The routine has the
    signature ( -- ).
 
 .. word:: >current@	( stream -- addr ) |K|, "to-current-fetch"
 
    The TOS contains the address of a stream structure: compute the
-   address of its :word:`current@` routine. The routine has the
+   address of its `current@` routine. The routine has the
    signature ( -- *char* ).
 
 .. word:: >valid?	( stream -- addr ) |K|, "to-valid-question"
 
    The TOS contains the address of a stream structure: compute the
-   address of its :word:`valid?` routine. The routine has the
+   address of its `valid?` routine. The routine has the
    signature ( -- *flag* ).
 
 .. word:: /stream	( -- n ) |K|, "per-stream"
@@ -34,19 +34,19 @@ address in :word:`'instream`.
 
 .. word:: forward	( -- ) |K|
 
-      Read one character from the current stream. :word:`line#` is
+      Read one character from the current stream. `line#` is
       updated if the character is an "end of line" symbol.
 
 .. word:: current@	( -- n ) |K|, "current-fetch"
 
    Put the value at the current position of the current stream onto
-   the stack. This is only defined if :word:`valid?` returns
-   :word:`true`. A stream may however return a specific end-of-stream
+   the stack. This is only defined if `valid?` returns
+   `true`. A stream may however return a specific end-of-stream
    value.
 
 .. word:: valid?        ( -- flag ) |K|, "valid-question"
 
-   Return :word:`true` if the end of the stream is not yet reached.
+   Return `true` if the end of the stream is not yet reached.
 
 .. word:: eos		( -- flag ) "e-o-s"
 
@@ -66,8 +66,8 @@ a file (or any other stream in a Unix system).
 
 .. word:: with-file    |K|
 
-   Make the content of :word:`this-file` the current stream (by
-   storing it in :word:`'instream`).
+   Make the content of `this-file` the current stream (by
+   storing it in `'instream`).
 
 .. word:: init.mind    ( -- addr ) |K|, "init-dot-mind"
 
@@ -87,14 +87,14 @@ a file (or any other stream in a Unix system).
 .. word:: >infile	( tstream -- addr ) |K|, "to-infile"
 
    The TOS contains the address of a textfile structure: compute the
-   address of its :word:`>infile` field. The field is one cell wide
+   address of its `>infile` field. The field is one cell wide
    and contains the underlying C file pointer of type :c:type:`FILE*`
    for this stream.
 
 .. word:: >infile-name	( tstream -- addr ) |K|, "to-infile-name"
 
    The TOS contains the address of a textfile structure: compute the
-   address of its :word:`>infile-name` field. The field is one cell
+   address of its `>infile-name` field. The field is one cell
    wide and contains a pointer to a null-terminated string that
    contains the name of the file for this stream. The field may also
    contain a null pointer if the file is not open or has no name.
@@ -102,14 +102,14 @@ a file (or any other stream in a Unix system).
 .. word:: >current	( tstream -- addr ) |K|, "to-current"
 
    The TOS contains the address of a textfile structure: compute the
-   address of its :word:`>current` field. This field is one cell wide
+   address of its `>current` field. This field is one cell wide
    and contains either the latest character read from the file or
-   :word:`#eof`.
+   `#eof`.
 
 .. word:: >line#	( tstream -- addr ) |K|, "to-line-number"
 
    The TOS contains the address of a textfile structure: compute the
-   address of its :word:`line#` field. The field is one cell wide and
+   address of its `line#` field. The field is one cell wide and
    contains the current line number of this stream.
 
 .. word:: >caller       ( tstream -- addr ) |K|, "to-caller"
@@ -126,8 +126,8 @@ a file (or any other stream in a Unix system).
 .. word:: textfile0     ( -- tstream ) |K|, "textfile-0"
 
    Address of the prototype for the textfile structure. It has a size
-   of :word:`/textfile` bytes. The fields are already initialised,
-   ready for a call to :word:`file-open`.
+   of `/textfile` bytes. The fields are already initialised,
+   ready for a call to `file-open`.
 
 .. word:: file-open     ( str tstream -- ) |K|
 
@@ -135,16 +135,16 @@ a file (or any other stream in a Unix system).
    already opened. *str* is the name of the file, which is opened in
    reading mode.
 
-   If the opening of the file was successful, :word:`errno` is set to
-   0 and the first byte of the file is read into :word:`>current`. If
-   the file is empty, the content of :word:`>current` is :word:`#eof`.
+   If the opening of the file was successful, `errno` is set to
+   0 and the first byte of the file is read into `>current`. If
+   the file is empty, the content of `>current` is `#eof`.
    Otherwise, the cause for the failure can be read from
-   :word:`errno`.
+   `errno`.
 
 .. word:: file-close    ( tstream -- ) |K|
 
    Close a text stream. If an error occurs, it is stored in
-   :word:`errno`. Otherwise, :word:`errno` contains 0.
+   `errno`. Otherwise, `errno` contains 0.
 
 .. word:: errno         ( -- addr ) |K|
 
@@ -152,11 +152,11 @@ a file (or any other stream in a Unix system).
    occurs during the call of a library function, it is set to a value
    that provides information about the nature of that error, but it is
    usually left unchanged all went according to plan. Any error value
-   for :word:`errno` is different from 0. So it is possible to set
-   :word:`errno` to 0 before a word is executed and then use
-   :word:`errno` to check for an error.
+   for `errno` is different from 0. So it is possible to set
+   `errno` to 0 before a word is executed and then use
+   `errno` to check for an error.
 
-   Some words do however set :word:`errno` to 0 after correct
+   Some words do however set `errno` to 0 after correct
    execution: this is then remarked in the explanation of this word.
 
 
@@ -169,7 +169,7 @@ through a file stream object.
 .. word:: file-forward	( -- ) |K|
 
    Read one character from the current file stream and store it in its
-   :word:`>current` field. :word:`line#` is updated if the character
+   `>current` field. `line#` is updated if the character
    is an "end of line" symbol.
 
    If the end of the file is reached, it is closed automatically.

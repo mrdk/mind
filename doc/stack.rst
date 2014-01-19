@@ -23,7 +23,7 @@ Parameter Stack
 .. word:: sp@		( -- addr ) |K|, |83|, "s-p-fetch"
 
    Get the value of the stack pointer. ``sp@ @`` is equivalent to
-   :word:`dup`.
+   `dup`.
 
 .. word:: sp!		( addr -- ) |K|, |vf| "s-p-store"
 
@@ -37,7 +37,7 @@ Parameter Stack
 .. word:: clearstack    ( ... -- ) |vf|
 
    Empty the stack by resetting the stack pointer to the value of
-   :word:`s0`.
+   `s0`.
 
 
 Return Stack
@@ -62,7 +62,7 @@ Return Stack
 .. word:: rr>		( -- a; R: a b -- b ) |K|, |rv|, "r-r-from"
 
    Move the second entry of the return stack to the TOS. The words
-   :word:`rr>` and :word:`>rr` are helpful when one turns return stack
+   `rr>` and `>rr` are helpful when one turns return stack
    manipulations into Forth words. As an example we may use the
    following sequence as part of a word ::
 
@@ -73,7 +73,7 @@ Return Stack
 
        : r+  ( n -- )   rr> + >rr ;
 
-   because there is one more value on the return stack when :word:`r+`
+   because there is one more value on the return stack when `r+`
    is called.
 
 .. word:: r@		( -- a ) |K|, |83|, "r-fetch"
@@ -83,7 +83,7 @@ Return Stack
 .. word:: rp@		( -- addr ) |K|, "r-p-fetch"
 
    Get the value of the return stack pointer. ``rp@ @`` is equivalent
-   to :word:`r@`.
+   to `r@`.
 
 .. word:: rp!		( addr -- ) |K|, "r-p-store"
 
