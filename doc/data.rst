@@ -31,17 +31,17 @@ Data Definitions
 .. word:: Variable      ( <word> -- ) |83|
 
    :samp:`Variable {xxx}` creates a word :word:`xxx` with signature
-   ``( -- addr )``, where *addr* is the address of a newly allocated
-   cell in the dictionary.
+   :stack:`( -- addr )`, where *addr* is the address of a newly
+   :sallocated cell in the dictionary.
 
 .. word:: Constant      ( n <word> -- ) |83|
 
    :samp:`n Constant {xxx}` creates a word :word:`xxx` with signature
-   `( -- n )`.
+   :stack:`( -- n )`.
 
-.. word:: Alias         ( xt <word> -- )
+.. word:: Alias         ( xt <word> -- )-
 
-   Define a new word `word` that executes the word with the execution
+   Define a new word that does the same as the word with the execution
    token *xt*. It is typically used in the form :samp:`' {foo} Alias
    {bar}`, which defines *bar* as a new name for *foo*.
 
@@ -93,7 +93,7 @@ The internal structure of the dictionary.
 
      ' word >name @
 
-   leaves the address of the string `"word"` on the stack.
+   leaves the address of the string ``word`` on the stack.
 
 .. word:: >doer         ( xt -- addr ) |K|, "to-doer"
 

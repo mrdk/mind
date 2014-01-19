@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath('.'))
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-#needs_sphinx = '1.0'
+needs_sphinx = '0.6'
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
@@ -68,6 +68,7 @@ exclude_patterns = ['_build']
 
 # Put in front of every file.
 rst_prolog = """
+.. role:: stack(emphasis)
 .. |I| replace:: :ref:`I <immediate>`
 .. |K| replace:: :ref:`K <kernel>`
 .. |83| replace:: :ref:`83 <from-forth83>`

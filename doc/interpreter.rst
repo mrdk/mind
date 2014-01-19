@@ -87,8 +87,8 @@ These words are about reading and interpreting program text.
       found in the dictionary by :word:`(interpret)`. At system
       start, its value is :word:`notfound`.
 
-      The Forth word stored in :word:`word?` has the signature `( --
-      )`; it expects the searched string at :word:`here`.
+      The Forth word stored in :word:`word?` has the signature
+      :stack:`( -- )`; it expects the searched string at :word:`here`.
 
 .. word:: skip-whitespace  |K|
 
