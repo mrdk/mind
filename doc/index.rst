@@ -15,3 +15,4 @@ have a C interface.
    glossary
    references
    copyright
+   appendix
