@@ -27,11 +27,11 @@ is a list of the most important ones.
     a text character: a number that fits into one byte.
 
 *flag*
-    a boolean flag, either `true` or `false`.
+    a Boolean flag, either `true` or `false`.
 
 *cf*
     a "compilation flag". These flags are left on the stack during the
-    compilation of control stuctures (like ``IF ... ELSE ... THEN``)
+    compilation of control structures (like ``IF ... ELSE ... THEN``)
     in order to check for correct nesting.
 
 *str*
@@ -48,8 +48,10 @@ is a list of the most important ones.
 
 *<word>*
     a word that is read from the input stream. Words are sequences
-    of nonblank characters.
+    of non-blank characters.
 
+
+.. _naming-conventions:
 
 Naming Conventions
 ------------------
@@ -58,21 +60,27 @@ To keep the names of words short, many naming conventions are used in
 the Forth community. *mind* follows mainly those listed in
 [ThinkingForth]_, p. 288--290, but also adds some of its own.
 
-.. describe:: Xxxx
-
-   Caitalised words create other words, usually by calling `Create`.
-   They are typically used in the form :samp:`Xxxx {foo}`. Such a call
-   is expected to create a word *foo*.
-
 .. describe:: XXX
 
    Uppercase words influence the control flow. Examples are `BEGIN` or
    `IF`.
 
+   Writing control flow words in uppercase lets them stand out and
+   gives structure the words in which they appear. This convention is
+   already in use for Forth code in case-insensitive systems, like
+   [volksForth]_.
+
+.. describe:: Xxx
+
+   Capitalised words create other words, usually by calling `Create`.
+   They are typically used in the form :samp:`Xxx {foo}`. Such a call
+   is expected to create a word named *foo*.
+
 .. describe:: xxx!
 
    Words that store stack values in memory, like `c!`. The value on
-   the stack does not need to be copied literally, e.g. in `+!`.
+   the stack does not need to be copied literally to the memory, e.g.
+   in `+!`.
 
 .. describe:: xxx"
 
@@ -89,7 +97,7 @@ the Forth community. *mind* follows mainly those listed in
 
 .. describe:: (xxx)
 
-   A word that provides inplementation details for *xxx*, like `(.)`.
+   A word that provides implementation details for *xxx*, like `(.)`.
    In many cases it should not be called directly.
 
 .. describe:: xxx,
@@ -111,7 +119,7 @@ the Forth community. *mind* follows mainly those listed in
 
 .. describe:: xxx?
 
-   Return a boolean flag, like `i?`.
+   Return a Boolean flag, like `i?`.
 
 .. describe:: xxx@
 
