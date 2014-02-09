@@ -259,18 +259,6 @@ Variable 'num                  \ points to the beginning of the generated string
 : h.    ( n -- )   base push  hex . ;
 
 
-\ == Line input ==
-\ accept
-
-: ?split   ( addr c -- )    \ if character at `addr` is `c`, split string there
-  over c@ = IF  0 swap c!  ELSE drop THEN ;
-: chomp    ( str -- )           \ remove trailing end-of-line character.
-  dup strlen + 1-  #eol ?split ;
-
-: accept  ( addr n -- n' )
-  over swap  1+ gets IF  dup chomp strlen ELSE  0 swap c!  drop 0 THEN ;
-
-
 \ == Structures ==
 
          \ Reserve space for a field in a structure
@@ -307,10 +295,24 @@ Variable 'num                  \ points to the beginning of the generated string
   drop ;
 
 
+\ == Line Streams ==
+
+/lines Object stdin-lines
+  ' lines-get  over >get !
+  ' lines-i    over >i !
+  ' lines-i?   over >i? !
+    stdin      over >infile !
+    here       over >infile-name !  ," <stdin>"
+    0          over >current !
+    0          over >line# !
+drop
+
+: with-stdin  stdin-lines 'instream ! ;
+
+
 \ == Text Streams and String Streams ==
 
 : instream ( -- stream )   'instream @ ;
-: eos      ( -- flag )     i? 0= ;
 
 : Stream ( <word> -- )   /stream Object drop ;
 
@@ -340,17 +342,13 @@ drop
 
 Stringstream line-stream        \ The current input line
 
-256 Constant /linebuf
-Create linebuf  /linebuf 1+ allot
-
 : interactive? ( -- flag )    arg-interactive @  argc 0= and ;
 
-: read-line   linebuf /linebuf accept drop ;
-: do-line     linebuf line-stream str-interpret ;
-: do-lines    interactive? IF
-                  BEGIN space ." ok" cr  read-line do-line  REPEAT THEN ;
+: do-lines    BEGIN ." ok" cr  with-stdin get i? WHILE
+                  i line-stream str-interpret REPEAT ;
+: ?do-lines    interactive? IF do-lines THEN ;   
 
-: command-interpret    clear-rstack clearstack  do-lines  bye ;
+: command-interpret    clear-rstack clearstack  ?do-lines  bye ;
 ' command-interpret is abort
 
 

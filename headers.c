@@ -46,6 +46,11 @@ E(argv, "argv", 0)
 E(arg_cmdline, "arg-cmdline", 0)
 E(arg_interactive, "arg-interactive", 0)
 
+// Files
+E(stdin_, "stdin", 0)
+E(stdout_, "stdout", 0)
+E(stderr_, "stderr", 0)
+
 // Text streams
 E(init_mind, "init.mind", 0)
 E(to_get, ">get", 0)
@@ -72,6 +77,12 @@ E(file_get, "file-get", 0)
 E(file_i, "file-i", 0)
 E(file_eof, "file-eof", 0)
 E(file_iq, "file-i?", 0)
+E(per_lines, "/lines", 0)
+E(lines_open, "lines-open", 0)
+E(lines_close, "lines-close", 0)
+E(lines_get, "lines-get", 0)
+E(lines_i, "lines-i", 0)
+E(lines_iq, "lines-i?", 0)
 E(errno_, "errno", 0)
 E(do_stream, "do-stream", 0)
 

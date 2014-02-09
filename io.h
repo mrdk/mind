@@ -25,10 +25,23 @@ typedef struct {
     cell caller;                // (textfile_t*) File that called it
 } textfile_t;
 
+// Structure to iterate over the lines in a file.
+typedef struct {
+    stream_t stream;
+    cell file;			// (FILE*) Input file, or NULL
+    cell path;                  // (char*) File path
+    cell line;                  // (char*) Line at input position (or NULL)
+    cell lineno;		// integer: line number
+} lines_t;
+
 char *mind_relative(char *mind_file, char *filename);
 
 void file_open(textfile_t *inf, char* name);
 void file_close(textfile_t *inf);
 void file_get(textfile_t *inf);
+
+void lines_open(lines_t *seq, char* path);
+void lines_close(lines_t *seq);
+void lines_get(lines_t *seq);
 
 #endif

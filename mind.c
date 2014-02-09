@@ -362,6 +362,13 @@ arg_cmdline:     FUNC0(&args.command);
 arg_interactive: FUNC0(&args.interactive);
 
 // ---------------------------------------------------------------------------
+// Files
+
+stdin_: FUNC0(stdin);
+stdout_: FUNC0(stdout);
+stderr_: FUNC0(stderr);
+
+// ---------------------------------------------------------------------------
 // Text streams
 
 init_mind: FUNC0(&sys.inf);     // init.mind ( -- addr )
@@ -406,13 +413,22 @@ file_eof:           // file-eof      ( -- flag )
 file_iq:            // file-i?   ( -- flag )
     FUNC0(BOOL(((textfile_t*)sys.instream)->current != EOF));
 
+per_lines: FUNC0(sizeof(lines_t)); // /lines
+lines_open:          // lines-open     ( str file -- )
+    PROC2(lines_open((lines_t*)TOS, (char*)NOS));
+lines_close:         // lines-close    ( file --)
+    PROC1(lines_close((lines_t*)TOS));
+lines_get:           // lines-get  ( -- )
+    lines_get((lines_t*)sys.instream); goto next;
+lines_i:             // lines-i ( -- char )
+    FUNC0(((lines_t*)sys.instream)->line);
+lines_iq:            // lines-i?   ( -- flag )
+    FUNC0(BOOL(((lines_t*)sys.instream)->line != 0));
+
 do_stream: // : do-stream   with-file BEGIN interpret  i? 0= UNTIL ;
     CODE(C(with_file),
          C(interpret), C(iq), C(zero_equal), C(zbranch), (cell)(start + 1));
 
-// The identifier "errno" in <errno.h> is a macro; therefore it cannot
-// be used as a label, as this would interfere with the macro magic in
-// "headers.c".
 errno_: FUNC0(&errno); // ( -- addr )
 
 

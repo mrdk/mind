@@ -53,3 +53,40 @@ void file_get(textfile_t *inf)
     else if (inf->current == EOF)
         file_close(inf);
 }
+
+void lines_open(lines_t *seq, char* path)
+{
+    seq->path = (cell)path;
+    if ((seq->file = (cell)fopen(path, "r"))) {
+        errno = 0;              // Reset errno if no error occured
+        seq->line = 0;
+        seq->lineno = 0;
+        lines_get(seq);
+    }
+}
+
+void lines_close(lines_t *seq)
+{
+    if (!fclose((FILE*)seq->file))
+        errno = 0;              // Reset errno if no error occured
+
+    seq->file = 0;
+    seq->lineno++;
+
+    if (seq->line) {
+        free((void*)seq->line);
+        seq->line = 0;
+    }
+}
+
+void lines_get(lines_t *seq)
+{
+    char *lineptr = (char*)seq->line;
+    size_t len;
+
+    if (getline(&lineptr, &len, (FILE*)seq->file) != -1) {
+        seq->line = (cell)lineptr;
+        seq->lineno++;
+    } else
+        lines_close(seq);
+}
