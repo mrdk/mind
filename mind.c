@@ -17,7 +17,8 @@
 #include "args.h"
 #include "io.h"
 
-#define MEMCELLS 0x10000	/* Memory size in cells */
+#define MEMCELLS 0x10000	// Size of the main memory
+#define RCELLS   0x100          // Size of the return stack
 
 /* ---------------------------------------------------------------------- */
 /* Dictionary structure */
@@ -105,7 +106,8 @@ struct {
     textfile_t inf;	     // Input file
     cell instream;	     // (stream_t*) Current input stream
     cell this_file;          // (stream_t*) Current input file
-    cell mem[MEMCELLS];	     // The memory
+    cell rstack[RCELLS];     // Return stack
+    cell mem[MEMCELLS];	     // Main memory
 } sys;
 
 static void file_init(textfile_t *inf, entry_t dict[])
@@ -122,8 +124,8 @@ static void file_init(textfile_t *inf, entry_t dict[])
 
 static void init_sys(entry_t dict[])
 {
-    sys.r0 = (cell)(sys.mem + 100);
-    sys.dp = sys.r0 + sizeof(cell);
+    sys.r0 = (cell)(sys.rstack + RCELLS);
+    sys.dp = (cell)sys.mem;
     sys.s0 = (cell)(sys.mem + MEMCELLS - 0x10); // Top of memory + safety space
     sys.state = 0;
     sys.wordq = C(notfound);
