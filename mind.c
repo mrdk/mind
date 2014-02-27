@@ -445,19 +445,17 @@ ccomma: PROC1(COMMA(TOS, char));  // c, ( n -- )
 
 entry_comma: // entry, ( a c -- )  Compile an entry with the name A, code C
     {
-	entry_t *e;
-
 	ALIGN(entry_t);
-	e = (entry_t*)sys.dp;
+
+        *(entry_t*)sys.dp = (entry_t) {
+            .link = sys.root.last,
+            .name = NOS,
+            .exec = TOS,
+        };
+
+	sys.root.last = sys.dp;
 	sys.dp += sizeof(entry_t);
 
-	e->link = sys.root.last;
-	e->name = NOS;
-	e->flags = 0;
-	e->exec = TOS;
-	e->doer = 0;
-
-	sys.root.last = (cell)e;
 	DROP(2);
 	goto next;
     }
