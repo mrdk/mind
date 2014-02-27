@@ -185,3 +185,14 @@ through a file stream object.
 .. word:: file-eof	( -- flag ) |K|, "file-e-o-f"
 
    Test whether the end of the current file stream is reached.
+
+
+Low Level I/O
+-------------
+
+.. word:: stdin         ( -- file ) "standard-in"
+          stdout        ( -- file ) "standard-out"
+          stderr        ( -- file ) "standard-err"
+
+   The standard Unix character streams, for input, output and error
+   output. `stdin` can be used as the `>infile` field of a line stream.
