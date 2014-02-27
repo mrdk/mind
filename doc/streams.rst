@@ -47,10 +47,6 @@ address in `'instream`.
 
    Return `true` if the end of the stream is not yet reached.
 
-.. word:: eos		( -- flag ) "e-o-s"
-
-      Test whether the end of the current stream is reached.
-
 
 File Streams
 ------------
@@ -181,10 +177,6 @@ through a file stream object.
 .. word:: file-i?	( -- flag ) |K|, "file-i-question"
 
    Test whether the end of the current file stream is not yet reached.
-
-.. word:: file-eof	( -- flag ) |K|, "file-e-o-f"
-
-   Test whether the end of the current file stream is reached.
 
 
 Low Level I/O

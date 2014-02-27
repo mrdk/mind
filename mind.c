@@ -410,8 +410,6 @@ file_get:           // file-get  ( -- )
     file_get((textfile_t*)sys.instream); goto next;
 file_i:             // file-i ( -- char )
     FUNC0(((textfile_t*)sys.instream)->current);
-file_eof:           // file-eof      ( -- flag )
-    FUNC0(BOOL(((textfile_t*)sys.instream)->current == EOF));
 file_iq:            // file-i?   ( -- flag )
     FUNC0(BOOL(((textfile_t*)sys.instream)->current != EOF));
 
