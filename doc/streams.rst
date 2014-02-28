@@ -179,6 +179,52 @@ through a file stream object.
    Test whether the end of the current file stream is not yet reached.
 
 
+Line Streams
+------------
+
+This stream is used to read a text file line by line. `i` returns a
+pointer to a string which contains the line that was read last --
+including a final linefeed character. The string is allocated and
+managed by the stream object. Pointers to characters in the current
+line are valid until the next line is read.
+
+.. word:: /lines        ( -- n ) |K|, "per-textfile"
+
+   Number of bytes in a textfile structure.
+
+.. word:: lines-open    ( str linestream -- ) |K|
+
+   Open a file for the use in a line stream. *linestream* must not be
+   already opened. *str* is the name of the file, which is opened in
+   reading mode.
+
+   If the opening of the file was successful and the file is not
+   empty, the first line of the file is read. 
+
+   The cause of a failure can be read from `errno`, which is set to 0
+   in case of a success. (Opening an empty file causes no error.)
+
+.. word:: lines-close   ( linestream -- ) |K|
+
+   Close a line stream. If an error occurs, it is stored in `errno`.
+   Otherwise, `errno` contains 0.
+
+.. word:: lines-get	( -- ) |K|
+
+   Try to read one line from the current stream. If a line is has been
+   read successfully, `line#` is incremented. When the end of the file
+   is reached, it is closed automatically.
+
+.. word:: lines-i	( -- char ) |K|, "lines-i"
+
+   Return the pointer to the beginning of the current line.
+
+.. word:: lines-i?	( -- flag ) |K|, "lines-i-question"
+
+   Test whether the end of the current stream is not yet reached.
+
+
+
 Low Level I/O
 -------------
 
