@@ -10,6 +10,7 @@ This section contains the words defined in the kernel and in
    arithmetics
    stack
    memory
+   objects
    io
    control
    interpreter

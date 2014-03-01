@@ -2,9 +2,8 @@
 Streams
 =======
 
-Streams are an abstraction for the input from a source that produces
-data continuously. There is always one "current stream", with its
-address in `'instream`.
+A stream is an object that is an abstraction for the input from a
+source that produces data continuously.
 
 .. word:: >get	        ( stream -- addr ) |K|, "to-get"
 
@@ -27,11 +26,7 @@ address in `'instream`.
 .. word:: /stream	( -- n ) |K|, "per-stream"
 
    Number of bytes in a stream data structure.
-
-.. word:: 'instream	( -- addr ) |K|, "tick-instream"
-
-   Variable that contains the address of the current stream.
-
+   
 .. word:: get	        ( -- ) |K|
 
    Read one element of the current stream. `line#` is updated if the
@@ -61,8 +56,7 @@ a file (or any other stream in a Unix system).
 
 .. word:: with-file    |K|
 
-   Make the content of `this-file` the current stream (by
-   storing it in `'instream`).
+   Make the content of `this-file` the active object.
 
 .. word:: init.mind    ( -- addr ) |K|, "init-dot-mind"
 
