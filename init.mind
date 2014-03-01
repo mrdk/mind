@@ -307,12 +307,10 @@ Variable 'num                  \ points to the beginning of the generated string
     0          over >line# !
 drop
 
-: with-stdin  stdin-lines 'instream ! ;
+: with-stdin  stdin-lines !class ;
 
 
 \ == Text Streams and String Streams ==
-
-: instream ( -- stream )   'instream @ ;
 
 : Stream ( <word> -- )   /stream Object drop ;
 
@@ -320,7 +318,7 @@ drop
   /cell Field >str-pointer      \ address of the current character
 Constant /stringstream
 
-: str-pointer   ( -- addr )   instream >str-pointer ;
+: str-pointer   ( -- addr )   class >str-pointer ;
 
 : str-get   ( -- )        1 str-pointer +! ;
 : str-i     ( -- char )   str-pointer @ c@ ;

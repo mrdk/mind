@@ -13,6 +13,12 @@ D(boot, "boot", abort, 0)
 D(abort, "abort", bye, 0)
 E(bye, "bye", 0)
 
+// Objects
+E(this, "this", 0)
+E(class, "class", 0)
+E(store_this, "!this", 0)
+E(store_class, "!class", 0)
+
 // Inner interpreter
 E(next, "noop", 0)
 E(semi, ";;", 0)
@@ -57,7 +63,6 @@ E(to_get, ">get", 0)
 E(to_i, ">i", 0)
 E(to_iq, ">i?", 0)
 E(per_stream, "/stream", 0)
-E(tick_instream, "'instream", 0)
 E(this_file, "this-file", 0)
 E(with_file, "with-file", 0)
 E(to_infile, ">infile", 0)
