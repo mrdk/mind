@@ -17,9 +17,18 @@
 #include "args.h"
 #include "io.h"
 
-#define MEMCELLS 0x10000	// Size of the main memory
-#define RCELLS   0x100          // Size of the return stack
-#define OCELLS   0x200          // Size of the object stack
+#define MEMCELLS 0x10000	// Number of cells in the main memory
+#define RCELLS   0x100          // Number of cells in the return stack
+#define OREFS    0x100          // Number of references in the object stack
+
+// ---------------------------------------------------------------------------
+// Objects
+
+// References to objects
+typedef struct {
+    cell this;
+    cell class;
+} ref_t;
 
 /* ---------------------------------------------------------------------- */
 /* Dictionary structure */
@@ -110,7 +119,7 @@ struct {
     cell this_file;          // (stream_t*) Current input file
 
     // Memory layout
-    cell ostack[OCELLS];     // Object stack
+    ref_t ostack[OREFS];     // Object stack
     cell rstack[RCELLS];     // Return stack
     cell mem[MEMCELLS];	     // Main memory
 } sys;
@@ -130,7 +139,7 @@ static void file_init(textfile_t *inf, entry_t dict[])
 static void init_sys(entry_t dict[])
 {
     sys.r0 = (cell)(sys.rstack + RCELLS);
-    sys.ob0 = (cell)(sys.ostack + OCELLS);
+    sys.ob0 = (cell)(sys.ostack + OREFS);
     sys.dp = (cell)sys.mem;
     sys.s0 = (cell)(sys.mem + MEMCELLS - 0x10); // Top of memory + safety space
     sys.state = 0;
@@ -227,6 +236,7 @@ void mind()
     rp = (cell*)sys.r0;
     this = NULL;
     class = (cell*)&sys.inf.stream;
+
     {
 	static cell interpreter[] = { C(do_stream), C(boot) };
 	ip = interpreter;
@@ -243,6 +253,16 @@ this:  FUNC0(this);                     // ( -- addr )
 class: FUNC0(class);                    // ( -- addr )
 store_this:  PROC1(this = (cell*)TOS);  // !this  ( addr -- )
 store_class: PROC1(class = (cell*)TOS); // !class ( addr -- )
+
+per_ref: FUNC0(sizeof(ref_t));  // /ref ( -- n )
+ref_store:                      // ref! ( addr -- )
+    *(ref_t*)TOS = (ref_t) { .this = (cell)this, .class = (cell)class };
+    DROP(1); goto next;
+ref_fetch: {                    // ref@ ( addr -- )
+        ref_t *tmp = (ref_t*)TOS;
+        this = (cell*)tmp->this; class = (cell*)tmp->class;
+        DROP(1); goto next;
+    }
 
 // ---------------------------------------------------------------------------
 // Inner interpreter

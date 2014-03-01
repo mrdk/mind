@@ -18,6 +18,9 @@ E(this, "this", 0)
 E(class, "class", 0)
 E(store_this, "!this", 0)
 E(store_class, "!class", 0)
+E(per_ref, "/ref", 0)
+E(ref_fetch, "ref@", 0)
+E(ref_store, "ref!", 0)
 
 // Inner interpreter
 E(next, "noop", 0)
