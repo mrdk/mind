@@ -370,15 +370,14 @@ parse_to: // : parse-to ( addr str -- )
          C(iq), C(zero_equal), C(if_semi), C(get));
 
 skip_whitespace: // : skip-whitespace ( -- )
-	         //   with-file BEGIN  whitespace i strchr 0= if;
-	         //       get AGAIN ;
-    CODE(C(with_file),
-         C(whitespace), C(i), C(strchr), C(zero_equal),
-	 C(if_semi), C(get), C(branch), (cell)(start + 1));
+	         //   BEGIN  whitespace i strchr 0= if;  get AGAIN ;
+    CODE(C(whitespace), C(i), C(strchr), C(zero_equal),
+	 C(if_semi), C(get), C(branch), (cell)(start));
 
 parse: // : parse ( -- addr )
-       //   skip-whitespace  here whitespace parse-to  here ;
-    CODE(C(skip_whitespace), C(here), C(whitespace), C(parse_to), C(here));
+       //   with-file skip-whitespace  here whitespace parse-to  here ;
+    CODE(C(with_file), C(skip_whitespace),
+         C(here), C(whitespace), C(parse_to), C(here));
 
 backslash: // : \   with-file BEGIN i get  #eol = if;
            //                    i? 0= UNTIL ;  immediate

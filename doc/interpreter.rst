@@ -92,9 +92,9 @@ These words are about reading and interpreting program text.
 
 .. word:: skip-whitespace  |K|
 
-   Read from the current stream until the character at the current
-   position is no longer an element of `whitespace`. If this is
-   already the case, do nothing.
+   Read from the current stream (which is not necessarily the current
+   file) until the character at the current position is no longer an
+   element of `whitespace`. If this is already the case, do nothing.
 
 .. word:: parse-to	( addr str -- ) |K|
 
