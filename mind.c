@@ -108,7 +108,7 @@ typedef struct {
 struct {
     // System variables
     cell r0;		     // (cell*) Start of the return stack
-    cell o0;                 // (ref_t*) Start of the object stack
+    cell op0;                // (ref_t*) Start of the object stack
     cell op;                 // (ref_t*) Top of the object stack
     cell dp;		     // (cell*) Dictionary pointer
     cell s0;		     // (cell*) Start of the parameter stack
@@ -140,7 +140,8 @@ static void file_init(textfile_t *inf, entry_t dict[])
 static void init_sys(entry_t dict[])
 {
     sys.r0 = (cell)(sys.rstack + RCELLS);
-    sys.o0 = (cell)(sys.ostack + OREFS);
+    sys.op0 = (cell)(sys.ostack + OREFS - 0x10);
+    sys.op = sys.op0;
     sys.dp = (cell)sys.mem;
     sys.s0 = (cell)(sys.mem + MEMCELLS - 0x10); // Top of memory + safety space
     sys.state = 0;
@@ -249,14 +250,22 @@ bye:
 // ---------------------------------------------------------------------------
 // Objects
 
-this:  FUNC0(obj.this);                     // ( -- addr )
-class: FUNC0(obj.class);                    // ( -- addr )
-store_this:  PROC1(obj.this = TOS);         // !this  ( addr -- )
-store_class: PROC1(obj.class = TOS);        // !class ( addr -- )
+this:        FUNC0(obj.this);        // ( -- addr )
+store_this:  PROC1(obj.this = TOS);  // !this  ( addr -- )
+class:       FUNC0(obj.class);       // ( -- addr )
+store_class: PROC1(obj.class = TOS); // !class ( addr -- )
 
-per_ref: FUNC0(sizeof(ref_t));        // /ref ( -- n )
+per_ref:   FUNC0(sizeof(ref_t));      // /ref ( -- n )
 ref_store: PROC1(*(ref_t*)TOS = obj); // ref! ( addr -- )
 ref_fetch: PROC1(obj = *(ref_t*)TOS); // ref@ ( addr -- )
+
+op0: FUNC0(&sys.op0);  // ( -- addr )
+op:  FUNC0(&sys.op);   // ( -- addr )
+
+scope:      // {
+    sys.op -= sizeof(ref_t); *((ref_t*)sys.op) = obj; goto next;
+end_scope:  // }
+    obj = *((ref_t*)sys.op); sys.op += sizeof(ref_t); goto next;
 
 // ---------------------------------------------------------------------------
 // Inner interpreter

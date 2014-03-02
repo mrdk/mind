@@ -21,6 +21,10 @@ E(store_class, "!class", 0)
 E(per_ref, "/ref", 0)
 E(ref_fetch, "ref@", 0)
 E(ref_store, "ref!", 0)
+E(op0, "op0", 0)
+E(op, "op", 0)
+E(scope, "{", 0)
+E(end_scope, "}", 0)
 
 // Inner interpreter
 E(next, "noop", 0)
