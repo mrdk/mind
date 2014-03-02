@@ -108,7 +108,8 @@ typedef struct {
 struct {
     // System variables
     cell r0;		     // (cell*) Start of the return stack
-    cell ob0;                // (cell*) Start of the object stack
+    cell o0;                 // (ref_t*) Start of the object stack
+    cell op;                 // (ref_t*) Top of the object stack
     cell dp;		     // (cell*) Dictionary pointer
     cell s0;		     // (cell*) Start of the parameter stack
     cell state;		     // Compiler state
@@ -139,7 +140,7 @@ static void file_init(textfile_t *inf, entry_t dict[])
 static void init_sys(entry_t dict[])
 {
     sys.r0 = (cell)(sys.rstack + RCELLS);
-    sys.ob0 = (cell)(sys.ostack + OREFS);
+    sys.o0 = (cell)(sys.ostack + OREFS);
     sys.dp = (cell)sys.mem;
     sys.s0 = (cell)(sys.mem + MEMCELLS - 0x10); // Top of memory + safety space
     sys.state = 0;
@@ -210,8 +211,7 @@ void mind()
     label_t *w;			/* Word Pointer */
     cell *rp;			/* Return Stack Pointer */
     cell *sp;			/* Stack Pointer */
-    cell *this;                 // Pointer to the active object
-    cell *class;                // Pointer to the active class
+    ref_t obj;                  // Active object
 
     static entry_t dict[] = { /* Dictionary */
 #define E NEW_WORD
@@ -234,8 +234,8 @@ void mind()
 
     sp = (cell*)sys.s0;
     rp = (cell*)sys.r0;
-    this = NULL;
-    class = (cell*)&sys.inf.stream;
+    obj.this = 0;
+    obj.class = (cell)&sys.inf.stream;
 
     {
 	static cell interpreter[] = { C(do_stream), C(boot) };
@@ -249,20 +249,14 @@ bye:
 // ---------------------------------------------------------------------------
 // Objects
 
-this:  FUNC0(this);                     // ( -- addr )
-class: FUNC0(class);                    // ( -- addr )
-store_this:  PROC1(this = (cell*)TOS);  // !this  ( addr -- )
-store_class: PROC1(class = (cell*)TOS); // !class ( addr -- )
+this:  FUNC0(obj.this);                     // ( -- addr )
+class: FUNC0(obj.class);                    // ( -- addr )
+store_this:  PROC1(obj.this = TOS);         // !this  ( addr -- )
+store_class: PROC1(obj.class = TOS);        // !class ( addr -- )
 
-per_ref: FUNC0(sizeof(ref_t));  // /ref ( -- n )
-ref_store:                      // ref! ( addr -- )
-    *(ref_t*)TOS = (ref_t) { .this = (cell)this, .class = (cell)class };
-    DROP(1); goto next;
-ref_fetch: {                    // ref@ ( addr -- )
-        ref_t *tmp = (ref_t*)TOS;
-        this = (cell*)tmp->this; class = (cell*)tmp->class;
-        DROP(1); goto next;
-    }
+per_ref: FUNC0(sizeof(ref_t));        // /ref ( -- n )
+ref_store: PROC1(*(ref_t*)TOS = obj); // ref! ( addr -- )
+ref_fetch: PROC1(obj = *(ref_t*)TOS); // ref@ ( addr -- )
 
 // ---------------------------------------------------------------------------
 // Inner interpreter
@@ -337,7 +331,7 @@ interpret:  // : interpret   parse find exec/compile ;
 notfound: // Tell that the word at sys.dp could not be interpreted
     {
 	printf("l%"PRIdCELL": not found: %s\n",
-	       ((textfile_t*)class)->lineno, (char*)sys.dp);
+	       ((textfile_t*)obj.class)->lineno, (char*)sys.dp);
         file_close(&sys.inf);
         w = (label_t)C(abort); goto **w;
     }
@@ -419,7 +413,7 @@ per_stream: FUNC0(sizeof(stream_t));  // /stream
 
 this_file:     FUNC0(&sys.this_file); // this-file ( -- addr )
 
-with_file: class = (cell*)sys.this_file; goto next; // with-file
+with_file: obj.class = sys.this_file; goto next; // with-file
 
 to_infile:     OFFSET(textfile_t, input);   // >infile
 to_infilename: OFFSET(textfile_t, name);    // >infile-name
@@ -428,14 +422,14 @@ to_lineno:     OFFSET(textfile_t, lineno);  // >line#
 to_caller:     OFFSET(textfile_t, caller);  // >caller
 per_textfile: FUNC0(sizeof(textfile_t)); // /textfile
 
-lineno: FUNC0(&((textfile_t*)class)->lineno);
+lineno: FUNC0(&((textfile_t*)obj.class)->lineno);
 
 get:                // ( -- )
-    w = (label_t*)((stream_t*)class)->get; goto **w;
+    w = (label_t*)((stream_t*)obj.class)->get; goto **w;
 i:                  // i ( -- char )
-    w = (label_t*)((stream_t*)class)->i; goto **w;
+    w = (label_t*)((stream_t*)obj.class)->i; goto **w;
 iq:                 // i? ( -- flag )
-    w = (label_t*)((stream_t*)class)->iq; goto **w;
+    w = (label_t*)((stream_t*)obj.class)->iq; goto **w;
 
 textfile0: FUNC0(&sys.textfile0);
 file_open:          // file-open     ( str file -- )
@@ -443,11 +437,11 @@ file_open:          // file-open     ( str file -- )
 file_close:         // file-close    ( file --)
     PROC1(file_close((textfile_t*)TOS));
 file_get:           // file-get  ( -- )
-    file_get((textfile_t*)class); goto next;
+    file_get((textfile_t*)obj.class); goto next;
 file_i:             // file-i ( -- char )
-    FUNC0(((textfile_t*)class)->current);
+    FUNC0(((textfile_t*)obj.class)->current);
 file_iq:            // file-i?   ( -- flag )
-    FUNC0(BOOL(((textfile_t*)class)->current != EOF));
+    FUNC0(BOOL(((textfile_t*)obj.class)->current != EOF));
 
 per_lines: FUNC0(sizeof(lines_t)); // /lines
 lines_open:          // lines-open     ( str file -- )
@@ -455,11 +449,11 @@ lines_open:          // lines-open     ( str file -- )
 lines_close:         // lines-close    ( file --)
     PROC1(lines_close((lines_t*)TOS));
 lines_get:           // lines-get  ( -- )
-    lines_get((lines_t*)class); goto next;
+    lines_get((lines_t*)obj.class); goto next;
 lines_i:             // lines-i ( -- char )
-    FUNC0(((lines_t*)class)->line);
+    FUNC0(((lines_t*)obj.class)->line);
 lines_iq:            // lines-i?   ( -- flag )
-    FUNC0(BOOL(((lines_t*)class)->line != 0));
+    FUNC0(BOOL(((lines_t*)obj.class)->line != 0));
 
 do_stream: // : do-stream   with-file BEGIN interpret  i? 0= UNTIL ;
     CODE(C(with_file),
