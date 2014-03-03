@@ -38,13 +38,15 @@ E(dovar_addr, "^dovar", 0)
 E(dodoes_addr, "^dodoes", 0)
 
 // Outer interpreter
+E(state, "state", 0)
+E(lbrack, "[", IMMEDIATE)
+E(rbrack, "]", 0)
+E(wordq, "word?", 0)
 E(interpret, "interpret", 0)
 E(exec_compile, "exec/compile", 0)
 E(notfound, "notfound", 0)
 E(find, "find", 0)
 E(find_word, "find-word", 0)
-E(lbrack, "[", IMMEDIATE)
-E(rbrack, "]", 0)
 E(skip_whitespace, "skip-whitespace", 0)
 E(parse_to, "parse-to", 0)
 E(parse, "parse", 0)
@@ -98,6 +100,9 @@ E(errno_, "errno", 0)
 E(do_stream, "do-stream", 0)
 
 // Dictionary
+E(last, "last",0)
+E(dp, "dp",0)
+E(here, "here", 0)
 E(align, "align", 0)
 E(allot, "allot", 0)
 E(comma, ",", 0)
@@ -119,13 +124,6 @@ E(num_immediate, "#immediate", 0)
 E(branch, "branch", 0)
 E(zbranch, "0branch", 0)
 E(lit, "lit", 0)
-
-// System variables
-E(last, "last",0)
-E(dp, "dp",0)
-E(here, "here", 0)
-E(state, "state", 0)
-E(wordq, "word?", 0)
 
 // Return stack
 E(rdrop, "rdrop", 0)

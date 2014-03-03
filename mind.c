@@ -314,6 +314,12 @@ execute: // ( a -- )
 // ---------------------------------------------------------------------------
 // Outer interpreter
 
+state:  FUNC0(&sys.state);        // ( -- addr )
+lbrack: sys.state = 0; goto next; // [
+rbrack: sys.state = 1; goto next; // ]
+
+wordq: FUNC0(&sys.wordq);  // word? ( -- addr )
+
 exec_compile: // exec/compile ( xt -- )
     {
         cell xt = TOS;
@@ -350,9 +356,6 @@ find: // find ( str -- xt | 0 )
 
 find_word: // find-word ( str ctx -- xt | 0 )
     FUNC2(find_xt((entry_t*)((context_t*)TOS)->last, (char*)NOS));
-
-lbrack: sys.state = 0; goto next; // [
-rbrack: sys.state = 1; goto next; // ]
 
 parse_to: // : parse-to ( addr str -- )
           //   with-file >r
@@ -470,6 +473,10 @@ errno_: FUNC0(&errno); // ( -- addr )
 // ---------------------------------------------------------------------------
 // Dictionary
 
+last:   FUNC0(&sys.root.last);    // ( -- addr )
+dp:     FUNC0(&sys.dp);           // ( -- addr )
+here:   FUNC0(sys.dp);            // ( -- addr )
+
 align:  ALIGN(cell); goto next;
 allot:  PROC1(sys.dp += TOS);     // ( n -- )
 
@@ -531,15 +538,6 @@ zbranch:			/* flag -- */
     goto next;
 
 lit: FUNC0(*ip++);              // ( -- n )
-
-// ---------------------------------------------------------------------------
-// System variables
-
-last:     FUNC0(&sys.root.last);
-dp:       FUNC0(&sys.dp);
-here:     FUNC0(sys.dp);
-state:    FUNC0(&sys.state);
-wordq:    FUNC0(&sys.wordq);    // word? ( -- addr )
 
 // ---------------------------------------------------------------------------
 // Return stack
