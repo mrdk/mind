@@ -52,7 +52,7 @@ typedef struct {
     cell link;      // (entry*)  Pointer to previous entry.
     cell name;      // (char*)   Pointer to start of word name.
     char flags;
-    cell exec;      // (label_t) C code that executes this word.
+    cell xt;        // (label_t) C code that executes this word.
     cell doer;      // (cell*)   Forth routine for `does>` part.
     cell body[];
 } entry_t;
@@ -61,27 +61,27 @@ typedef struct {
 {   .link  = i_##label ? (cell)&dict[i_##label - 1] : 0,	\
     .flags = wflags,						\
     .name  = (cell)wname,					\
-    .exec = (cell)&&label,					\
+    .xt    = (cell)&&label,					\
     .doer  = 0 },
 
 #define NEW_DEFER(label, wname, wdoer, wflags)                  \
 {   .link  = i_##label ? (cell)&dict[i_##label - 1] : 0,	\
     .flags = wflags,						\
     .name  = (cell)wname,					\
-    .exec = (cell)&&dodefer,					\
+    .xt    = (cell)&&dodefer,					\
     .doer  = C(wdoer) },
 
 // Compute the address of an entry_t field when given an execution
 // token instead of the beginning of the struct.
-#define FROM_XT(xt)                                     \
-    ((entry_t*)((char*)(xt) - offsetof(entry_t, exec)))
+#define FROM_XT(addr)                                     \
+    ((entry_t*)((char*)(addr) - offsetof(entry_t, xt)))
 
 /* Find XT for *name* in dictionary, starting at *e*. */
 static cell* find_xt(entry_t *e, char *name)
 {
     for (; e; e = (entry_t*)e->link) {
 	if (!strcmp((char*)e->name, name))
-	    return &e->exec;
+	    return &e->xt;
     }
     return NULL;
 }
@@ -100,7 +100,7 @@ typedef struct {
 	RPUSH(ip), ip = start; goto next;		\
     }
 
-#define C(label)  ((cell)(&dict[i_##label].exec)) // Call to Forth word
+#define C(label)  ((cell)(&dict[i_##label].xt)) // Call to Forth word
 
 // ---------------------------------------------------------------------------
 // System variables
@@ -323,11 +323,11 @@ exec_compile: // exec/compile ( xt -- )
             entry_t *e = FROM_XT(xt);
 
 	    if (sys.state && !(e->flags & IMMEDIATE)) {
-		COMMA(&e->exec, cell);
+		COMMA(&e->xt, cell);
 		goto next;
 	    }
 	    else
-		w = (label_t*)&e->exec;
+		w = (label_t*)&e->xt;
 	} else
 	    w = (label_t*)sys.wordq;
 
@@ -351,10 +351,8 @@ find: // find ( str -- xt | 0 )
 find_word: // find-word ( str ctx -- xt | 0 )
     FUNC2(find_xt((entry_t*)((context_t*)TOS)->last, (char*)NOS));
 
-lbrack:	// [
-    sys.state = 0; goto next;
-rbrack:	// ]
-    sys.state = 1; goto next;
+lbrack: sys.state = 0; goto next; // [
+rbrack: sys.state = 1; goto next; // ]
 
 parse_to: // : parse-to ( addr str -- )
           //   with-file >r
@@ -405,7 +403,7 @@ arg_interactive: FUNC0(&args.interactive);
 // ---------------------------------------------------------------------------
 // Files
 
-stdin_: FUNC0(stdin);
+stdin_:  FUNC0(stdin);
 stdout_: FUNC0(stdout);
 stderr_: FUNC0(stderr);
 
@@ -419,8 +417,7 @@ to_i:       OFFSET(stream_t, i);      // >i
 to_iq:      OFFSET(stream_t, iq);     // >i?
 per_stream: FUNC0(sizeof(stream_t));  // /stream
 
-this_file:     FUNC0(&sys.this_file); // this-file ( -- addr )
-
+this_file: FUNC0(&sys.this_file);                // this-file ( -- addr )
 with_file: obj.class = sys.this_file; goto next; // with-file
 
 to_infile:     OFFSET(textfile_t, input);   // >infile
@@ -473,22 +470,20 @@ errno_: FUNC0(&errno); // ( -- addr )
 // ---------------------------------------------------------------------------
 // Dictionary
 
-align:
-    ALIGN(cell); goto next;
-
+align:  ALIGN(cell); goto next;
 allot:  PROC1(sys.dp += TOS);     // ( n -- )
 
 comma:  PROC1(COMMA(TOS, cell));  // , ( n -- )
 ccomma: PROC1(COMMA(TOS, char));  // c, ( n -- )
 
-entry_comma: // entry, ( a c -- )  Compile an entry with the name A, code C
+entry_comma:                      // entry, ( str xt -- )
     {
 	ALIGN(entry_t);
 
         *(entry_t*)sys.dp = (entry_t) {
             .link = sys.root.last,
             .name = NOS,
-            .exec = TOS,
+            .xt = TOS,
         };
 
 	sys.root.last = sys.dp;
@@ -509,8 +504,8 @@ colon_comma: // : :, ( <word> -- )   ^docol Create, ;
 #define FROM_BODY(addr)                                 \
     ((entry_t*)((char*)(addr) - offsetof(entry_t, body)))
 
-link_to:     FUNC1(&((entry_t*)TOS)->exec);	// link>  ( lfa -- xt )
-body_to:     FUNC1(&FROM_BODY(TOS)->exec);      // body>  ( body -- xt )
+link_to:     FUNC1(&((entry_t*)TOS)->xt);	// link>  ( lfa -- xt )
+body_to:     FUNC1(&FROM_BODY(TOS)->xt);        // body>  ( body -- xt )
 flags_fetch: FUNC1(FROM_XT(TOS)->flags);	// flags@ ( xt -- n )
 flags_store: PROC2(FROM_XT(TOS)->flags = NOS);  // flags! ( n xt -- )
 
@@ -535,8 +530,7 @@ zbranch:			/* flag -- */
     DROP(1);
     goto next;
 
-lit:				/* -- n */
-    PUSH(*ip++); goto next;
+lit: FUNC0(*ip++);              // ( -- n )
 
 // ---------------------------------------------------------------------------
 // System variables
@@ -550,11 +544,9 @@ wordq:    FUNC0(&sys.wordq);    // word? ( -- addr )
 // ---------------------------------------------------------------------------
 // Return stack
 
-rdrop:
-    RDROP; goto next;
-
-rto: PROC1(RPUSH(TOS)); // >r ( n -- )
-rfrom: FUNC0(RPOP);     // r> ( -- n )
+rdrop: RDROP; goto next;
+rto:   PROC1(RPUSH(TOS)); // >r ( n -- )
+rfrom: FUNC0(RPOP);       // r> ( -- n )
 
 rrto:   // >rr ( n -- )
     rp--; rp[0] = rp[1]; rp[1] = TOS; DROP(1); goto next;
@@ -562,7 +554,7 @@ rrto:   // >rr ( n -- )
 rrfrom: // rr> ( -- n )
     EXTEND(1); TOS = rp[1]; rp[1] = rp[0]; rp++;  goto next;
 
-rfetch: FUNC0(*rp);              // r@  ( -- n)
+rfetch:  FUNC0(*rp);             // r@  ( -- n)
 r0:      FUNC0(&sys.r0);         // r0  ( -- addr)
 rpfetch: FUNC0(rp);              // rp@ ( -- addr )
 rpstore: PROC1(rp = (cell*)TOS); // rp! ( addr -- )
@@ -570,13 +562,9 @@ rpstore: PROC1(rp = (cell*)TOS); // rp! ( addr -- )
 // ---------------------------------------------------------------------------
 // Stack
 
-drop: // ( n -- )
-    DROP(1); goto next;
-
-twodrop: // 2drop ( n1 n2 -- )
-    DROP(2); goto next;
-
-nip: FUNC2(TOS); // ( n1 n2 -- n2 )
+drop:    DROP(1); goto next; // ( n -- )
+twodrop: DROP(2); goto next; // 2drop ( n1 n2 -- )
+nip:     FUNC2(TOS);         // ( n1 n2 -- n2 )
 
 qdup: // ?dup ( 0 -- 0 | n -- n n  if n > 0)
     if (TOS == 0)
@@ -707,8 +695,7 @@ strlen: FUNC1(strlen((char*)TOS));      // ( str -- # )
 // ---------------------------------------------------------------------------
 // Input/Output
 
-cr:
-    putchar('\n'); goto next;
+cr: putchar('\n'); goto next;
 
 emit: PROC1(putchar(TOS)); // ( c -- )
 
