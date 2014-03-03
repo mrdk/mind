@@ -25,3 +25,20 @@ is given by two words, `class` and `this`.
 
    Make *addr* the new address of the instance data for the current
    object.
+
+A *reference* is a pair of `this` and `class` values. The following
+words allow to save them in memory and restore them.
+
+.. word:: ref!         ( addr -- ) |K|, "ref-store"
+
+   Copy a reference to the current object to the memory region
+   starting at *addr*.
+
+.. word:: ref@         ( addr -- ) |K|, "ref-fetch"
+
+   Make the reference that is stored in the memory region at *addr*
+   the active object.
+
+.. word:: /ref         ( -- n ) |K|, "per-ref"
+
+   Return the size of a reference in bytes.
