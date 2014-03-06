@@ -358,17 +358,17 @@ find_word: // find-word ( str ctx -- xt | 0 )
     FUNC2(find_xt((entry_t*)((context_t*)TOS)->last, (char*)NOS));
 
 parse_to: // : parse-to ( addr str -- )
-          //   with-file >r
+          //   { with-file >r
           //   BEGIN i append  get
           //      r@ i strchr  i? 0= or UNTIL rdrop
-          //   0 over c!  i? 0= if; get ;
-    CODE(C(with_file), C(rto),
+          //   0 over c!  i? 0= if; get } ;
+    CODE(C(scope), C(with_file), C(rto),
 	 C(i), C(append), C(get),
 	 C(rfetch), C(i), C(strchr),
          C(iq), C(zero_equal), C(or),
-	 C(zbranch), (cell)(start + 2), C(rdrop),
+	 C(zbranch), (cell)(start + 3), C(rdrop),
 	 C(zero), C(swap), C(cstore),
-         C(iq), C(zero_equal), C(if_semi), C(get));
+         C(iq), C(zero_equal), C(if_semi), C(get), C(end_scope));
 
 skip_whitespace: // : skip-whitespace ( -- )
 	         //   BEGIN  whitespace i strchr 0= if;  get AGAIN ;
@@ -376,21 +376,23 @@ skip_whitespace: // : skip-whitespace ( -- )
 	 C(if_semi), C(get), C(branch), (cell)(start));
 
 parse: // : parse ( -- addr )
-       //   with-file skip-whitespace  here whitespace parse-to  here ;
-    CODE(C(with_file), C(skip_whitespace),
-         C(here), C(whitespace), C(parse_to), C(here));
+       //   { with-file skip-whitespace  here whitespace parse-to }  here ;
+    CODE(C(scope), C(with_file), C(skip_whitespace),
+         C(here), C(whitespace), C(parse_to), C(here), C(end_scope));
 
-backslash: // : \   with-file BEGIN i get  #eol = if;
-           //                    i? 0= UNTIL ;  immediate
-    CODE(C(with_file),
+backslash: // : \   { with-file BEGIN i get  #eol = if;
+           //                      i? 0= UNTIL } ;  immediate
+    CODE(C(scope), C(with_file),
          C(i), C(get), C(num_eol), C(equal), C(if_semi),
-	 C(iq), C(zero_equal), C(zbranch), (cell)(start + 1));
+	 C(iq), C(zero_equal), C(zbranch), (cell)(start + 2),
+         C(end_scope));
 
-paren: // : (   with-file BEGIN i get  [char] ) = if;
-       //                    i? 0= UNTIL ;  immediate
-    CODE(C(with_file),
+paren: // : (   { with-file BEGIN i get  [char] ) = if;
+       //                      i? 0= UNTIL } ;  immediate
+    CODE(C(scope), C(with_file),
          C(i), C(get), C(lit), ')', C(equal), C(if_semi),
-	 C(iq), C(zero_equal), C(zbranch), (cell)(start + 1));
+	 C(iq), C(zero_equal), C(zbranch), (cell)(start + 2),
+         C(end_scope));
 
 // ---------------------------------------------------------------------------
 // Command line parameters
@@ -463,9 +465,10 @@ lines_i:             // lines-i ( -- char )
 lines_iq:            // lines-i?   ( -- flag )
     FUNC0(BOOL(((lines_t*)obj.class)->line != 0));
 
-do_stream: // : do-stream   with-file BEGIN interpret  i? 0= UNTIL ;
-    CODE(C(with_file),
-         C(interpret), C(iq), C(zero_equal), C(zbranch), (cell)(start + 1));
+do_stream: // : do-stream   { with-file BEGIN interpret  i? 0= UNTIL } ;
+    CODE(C(scope), C(with_file),
+         C(interpret), C(iq), C(zero_equal), C(zbranch), (cell)(start + 2),
+         C(end_scope));
 
 errno_: FUNC0(&errno); // ( -- addr )
 
