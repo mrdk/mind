@@ -54,7 +54,7 @@ a file (or any other stream in a Unix system).
    Variable that contains the address of the file stream which is
    currently read.
 
-.. word:: with-file    |K|
+.. word:: file:        |K|, "file-colon"
 
    Make the content of `this-file` the active object.
 

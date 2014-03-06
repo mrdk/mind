@@ -286,7 +286,7 @@ Variable 'num                  \ points to the beginning of the generated string
 
 : ?open-error  errno @ abort" could not open file" ;
 : read-file ( str tstream -- )
-  under  file-open ?open-error this-file ! { with-file  do-stream } ;
+  under  file-open ?open-error this-file ! { file:  do-stream } ;
 
 
 \ init.mind is not a normal word:
@@ -315,7 +315,7 @@ Variable 'num                  \ points to the beginning of the generated string
     0          over >line# !
 drop
 
-: with-stdin  stdin-lines !class ;
+: interactive:  stdin-lines !class ;
 
 
 \ == Text Streams and String Streams ==
@@ -341,7 +341,7 @@ drop
 : Stringstream ( <word> -- )  stringstream0 /stringstream Copy drop ;
 
 : str-interpret ( str stream -- )
-  this-file !  { with-file  str-pointer !  do-stream } ;
+  this-file !  { file:  str-pointer !  do-stream } ;
 
 
 \ == Command interpreter ==
@@ -350,7 +350,7 @@ Stringstream line-stream        \ The current input line
 
 : interactive? ( -- flag )    arg-interactive @  argc 0= and ;
 
-: do-lines    { with-stdin BEGIN ." ok" cr  get i? WHILE
+: do-lines    { interactive: BEGIN ." ok" cr  get i? WHILE
                                  i line-stream str-interpret REPEAT } ;
 : ?do-lines   interactive? IF do-lines THEN ;   
 
