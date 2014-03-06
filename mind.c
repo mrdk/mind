@@ -465,10 +465,10 @@ lines_i:             // lines-i ( -- char )
 lines_iq:            // lines-i?   ( -- flag )
     FUNC0(BOOL(((lines_t*)obj.class)->line != 0));
 
-do_stream: // : do-stream   { file: BEGIN interpret  i? 0= UNTIL } ;
-    CODE(C(scope), C(file_colon),
-         C(interpret), C(iq), C(zero_equal), C(zbranch), (cell)(start + 2),
-         C(end_scope));
+do_stream: // : do-stream   BEGIN interpret { file: i? } 0= UNTIL ;
+    CODE(C(interpret),
+         C(scope), C(file_colon), C(iq), C(end_scope),
+         C(zero_equal), C(zbranch), (cell)start);
 
 errno_: FUNC0(&errno); // ( -- addr )
 

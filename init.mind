@@ -262,7 +262,7 @@ Variable 'num                  \ points to the beginning of the generated string
 \ == Objects ==
 
 : odepth ( -- n )    op0 @ op @ -  /ref / ;
-: oclear             op0 @ op ! ;
+: oclear             op0 @ op !  0 !this 0 !class ;
 
 : Reference ( <word> -- )   Create /ref allot  does> ref! ;
 
@@ -341,7 +341,7 @@ drop
 : Stringstream ( <word> -- )  stringstream0 /stringstream Copy drop ;
 
 : str-interpret ( str stream -- )
-  this-file !  { file:  str-pointer !  do-stream } ;
+  this-file !  { file: str-pointer ! }  do-stream ;
 
 
 \ == Command interpreter ==
@@ -350,8 +350,9 @@ Stringstream line-stream        \ The current input line
 
 : interactive? ( -- flag )    arg-interactive @  argc 0= and ;
 
-: do-lines    { interactive: BEGIN ." ok" cr  get i? WHILE
-                                 i line-stream str-interpret REPEAT } ;
+: do-lines    BEGIN ." ok" cr 
+                { interactive: get i? } WHILE
+                { interactive: i } line-stream str-interpret REPEAT ;
 : ?do-lines   interactive? IF do-lines THEN ;   
 
 : command-interpret    clear-rstack clearstack oclear  ?do-lines  bye ;
