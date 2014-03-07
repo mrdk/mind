@@ -15,7 +15,9 @@ E(bye, "bye", 0)
 
 // Objects
 E(this, "this", 0)
+E(this_plus, "this+", 0)
 E(class, "class", 0)
+E(class_plus, "class+", 0)
 E(store_this, "!this", 0)
 E(store_class, "!class", 0)
 E(per_ref, "/ref", 0)

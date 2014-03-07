@@ -251,8 +251,10 @@ bye:
 // Objects
 
 this:        FUNC0(obj.this);        // ( -- addr )
+this_plus:   FUNC1(obj.this + TOS);  // this+  ( u -- addr )
 store_this:  PROC1(obj.this = TOS);  // !this  ( addr -- )
 class:       FUNC0(obj.class);       // ( -- addr )
+class_plus:  FUNC1(obj.class + TOS); // class+ ( u -- addr )
 store_class: PROC1(obj.class = TOS); // !class ( addr -- )
 
 per_ref:   FUNC0(sizeof(ref_t));      // /ref ( -- n )

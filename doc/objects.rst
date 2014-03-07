@@ -10,22 +10,30 @@ store its own data. Therefore the full identity of the current object
 is given by two words, `class` and `this`. Together they form the
 *active reference*.
 
-.. word:: class         ( -- addr ) |K|
-
-   Return the address of the class data for the active object.
-
-.. word:: !class        ( addr -- ) |K|, "store-class"
-
-   Make *addr* the new class of the current object.
-
 .. word:: this          ( -- addr ) |K|
 
    Return the address of the instance data for the active object.
+
+.. word:: this+         ( u -- addr ) |K|, "this-plus"
+
+   Return the address *u* cells after `this`.
 
 .. word:: !this         ( addr -- ) |K|, "store-this"
 
    Make *addr* the new address of the instance data for the current
    object.
+
+.. word:: class         ( -- addr ) |K|
+
+   Return the address of the class data for the active object.
+
+.. word:: class+        ( u -- addr ) |K|, "class-plus"
+
+   Return the address *u* cells after `class`.
+
+.. word:: !class        ( addr -- ) |K|, "store-class"
+
+   Make *addr* the new class of the current object.
 
 Generally speaking, a *reference* is a pair of `this` and `class`
 values. The following words allow to save them in memory and restore
