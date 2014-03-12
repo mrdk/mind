@@ -264,7 +264,7 @@ Variable 'num                  \ points to the beginning of the generated string
 : odepth ( -- n )    op0 @ op @ -  /ref / ;
 : oclear             op0 @ op !  0 !this 0 !class ;
 
-: Reference ( <word> -- )   Create /ref allot  does> ref! ;
+: Ref  ( <word> -- )   Create /ref allot ;
 
 
 \ == Structures ==
@@ -282,11 +282,11 @@ Variable 'num                  \ points to the beginning of the generated string
 \ == Text files ==
 
 : TStream ( <word> -- )
-  textfile0 /textfile Copy   this-file @  swap >caller ! ; 
+  textfile0 /textfile Copy   { file: class } swap >caller ! ; 
 
 : ?open-error  errno @ abort" could not open file" ;
 : read-file ( str tstream -- )
-  under  file-open ?open-error this-file ! { file:  do-stream } ;
+  under  file-open ?open-error { file: !class  file-ref ref! }  do-stream ;
 
 
 \ init.mind is not a normal word:
@@ -341,7 +341,7 @@ drop
 : Stringstream ( <word> -- )  stringstream0 /stringstream Copy drop ;
 
 : str-interpret ( str stream -- )
-  this-file !  { file: str-pointer ! }  do-stream ;
+  { file:  !class file-ref ref!  str-pointer ! }  do-stream ;
 
 
 \ == Command interpreter ==
