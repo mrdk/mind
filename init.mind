@@ -275,15 +275,14 @@ Variable 'num                  \ points to the beginning of the generated string
   does>  ( 'base -- 'field )       @ + ;
 
          \ Allocate a new empty region in memory
-: Struct ( size <word> -- addr )   Create here  swap allot ;
+: Struct ( size <word> -- {class} )   Create  here !class  allot ;
          \ Copy of an existing object
-: Copy   ( addr n -- addr' )    Create  here -rot  cmove, ;
-
+: Copy   ( addr n -- {class} )        Create  here !class  cmove, ;
 
 \ == Text files ==
 
-: TStream ( <word> -- )
-  textfile0 /textfile Copy   { file: class } swap >caller ! ; 
+: TStream ( <word> -- {tstream} )
+  textfile0 /textfile Copy  { file: class } class >caller ! ; 
 
 : ?open-error  errno @ abort" could not open file" ;
 : read-file ( str tstream -- )
@@ -307,14 +306,13 @@ Variable 'num                  \ points to the beginning of the generated string
 \ == Line Streams ==
 
 /lines Struct stdin-lines-class
-  ' lines-get  over >get !
-  ' lines-i    over >i !
-  ' lines-i?   over >i? !
-    stdin      over >infile !
-    here       over >infile-name !  ," <stdin>"
-    0          over >current !
-    0          over >line# !
-drop
+  ' lines-get  class >get !
+  ' lines-i    class >i !
+  ' lines-i?   class >i? !
+    stdin      class >infile !
+    here       class >infile-name !  ," <stdin>"
+    0          class >current !
+    0          class >line# !
 
 Ref stdin-ref  { 0 stdin-lines-class ref:  stdin-ref ref! }
 
@@ -323,7 +321,7 @@ Ref stdin-ref  { 0 stdin-lines-class ref:  stdin-ref ref! }
 
 \ == Text Streams and String Streams ==
 
-: Stream ( <word> -- )   /stream Struct drop ;
+: Stream ( <word> -- )   /stream Struct ;
 
 /stream
   /cell Field >str-pointer      \ address of the current character
@@ -336,12 +334,11 @@ Constant /stringstream
 : str-i?    ( -- flag )   str-i 0<> ;
 
 /stringstream Struct stringstream0
-  ' str-get  over >get !
-  ' str-i    over >i !
-  ' str-i?   over >i? !
-drop
+  ' str-get  class >get !
+  ' str-i    class >i !
+  ' str-i?   class >i? !
 
-: Stringstream ( <word> -- )  stringstream0 /stringstream Copy drop ;
+: Stringstream ( <word> -- {stream})  stringstream0 /stringstream Copy ;
 
 : str-interpret ( str stream -- )
   { file:  !class file-ref ref!  str-pointer ! }  do-stream ;
