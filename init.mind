@@ -264,7 +264,8 @@ Variable 'num                  \ points to the beginning of the generated string
 : odepth ( -- n )    op0 @ op @ -  /ref / ;
 : oclear             op0 @ op !  0 !this 0 !class ;
 
-: Ref  ( <word> -- )   Create /ref allot ;
+: Ref   ( <word> -- )       Create /ref allot ;
+: ref:  ( this class -- )   !class !this ;
 
 
 \ == Structures ==
@@ -305,7 +306,7 @@ Variable 'num                  \ points to the beginning of the generated string
 
 \ == Line Streams ==
 
-/lines Struct stdin-lines
+/lines Struct stdin-lines-class
   ' lines-get  over >get !
   ' lines-i    over >i !
   ' lines-i?   over >i? !
@@ -315,7 +316,9 @@ Variable 'num                  \ points to the beginning of the generated string
     0          over >line# !
 drop
 
-: interactive:  stdin-lines !class ;
+Ref stdin-ref  { 0 stdin-lines-class ref:  stdin-ref ref! }
+
+: interactive:  stdin-ref ref@ ;
 
 
 \ == Text Streams and String Streams ==
