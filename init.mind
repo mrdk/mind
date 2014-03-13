@@ -271,18 +271,18 @@ Variable 'num                  \ points to the beginning of the generated string
 \ == Structures ==
 
          \ Reserve space for a field in a structure
-: Field  ( n size <word> -- n' )   Create over ,  +
-  does>  ( 'base -- 'field )       @ + ;
+: CField ( n size <word> -- n' )   Create over ,  +
+  does>  ( {obj} -- 'field )       @ class+ ;
 
          \ Allocate a new empty region in memory
-: Struct ( size <word> -- {class} )   Create  here !class  allot ;
+: Struct ( size <word> -- {obj} )   Create  here !class  allot ;
          \ Copy of an existing object
-: Copy   ( addr n -- {class} )        Create  here !class  cmove, ;
+: Copy   ( addr n -- {obj} )        Create  here !class  cmove, ;
 
 \ == Text files ==
 
 : TStream ( <word> -- {tstream} )
-  textfile0 /textfile Copy  { file: class } class >caller ! ; 
+  textfile0 /textfile Copy  { file: class } 'caller ! ;
 
 : ?open-error  errno @ abort" could not open file" ;
 : read-file ( str tstream -- )
@@ -296,22 +296,22 @@ Variable 'num                  \ points to the beginning of the generated string
 : .tstream-name ( {tstream} -- )   class tstream-body> .name ;
 : .tstream      ( {tstream} -- )
   .tstream-name
-  class >infile-name @  ?dup IF [char] = emit  puts THEN  [char] : emit
-  class >line# @ .
-  class >infile @  IF ." (open) "  THEN
-  class >caller @  ?dup IF ." <- " { !class .tstream-name } THEN ;
+  'infile-name @  ?dup IF [char] = emit  puts THEN  [char] : emit
+  'line# @ .
+  'infile @  IF ." (open) "  THEN
+  'caller @  ?dup IF ." <- " { !class .tstream-name } THEN ;
 
 
 \ == Line Streams ==
 
 /lines Struct stdin-lines-class
-  ' lines-get  class >get !
-  ' lines-i    class >i !
-  ' lines-i?   class >i? !
-    stdin      class >infile !
-    here       class >infile-name !  ," <stdin>"
-    0          class >current !
-    0          class >line# !
+  ' lines-get  'get !
+  ' lines-i    'i !
+  ' lines-i?   'i? !
+    stdin      'infile !
+    here       'infile-name !  ," <stdin>"
+    0          'current !
+    0          'line# !
 
 Ref stdin-ref  { 0 stdin-lines-class ref:  stdin-ref ref! }
 
@@ -323,24 +323,22 @@ Ref stdin-ref  { 0 stdin-lines-class ref:  stdin-ref ref! }
 : Stream ( <word> -- )   /stream Struct ;
 
 /stream
-  /cell Field >str-pointer      \ address of the current character
+  /cell CField str-pointer      \ Address of the current character
 Constant /stringstream
-
-: str-pointer   ( -- addr )   class >str-pointer ;
 
 : str-get   ( -- )        1 str-pointer +! ;
 : str-i     ( -- char )   str-pointer @ c@ ;
 : str-i?    ( -- flag )   str-i 0<> ;
 
 /stringstream Struct stringstream0
-  ' str-get  class >get !
-  ' str-i    class >i !
-  ' str-i?   class >i? !
+  ' str-get  'get !
+  ' str-i    'i !
+  ' str-i?   'i? !
 
 : Stringstream ( <word> -- {stream})  stringstream0 /stringstream Copy ;
 
 : str-interpret ( str stream -- )
-  { file:  !class file-ref ref!  str-pointer ! }  do-stream ;
+  { file:  !class file-ref ref!  str-pointer ! } do-stream ;
 
 
 \ == Command interpreter ==
@@ -349,10 +347,10 @@ Stringstream line-stream        \ The current input line
 
 : interactive? ( -- flag )    arg-interactive @  argc 0= and ;
 
-: do-lines    BEGIN ." ok" cr 
+: do-lines    BEGIN ." ok" cr
                 { interactive: get i? } WHILE
                 { interactive: i } line-stream str-interpret REPEAT ;
-: ?do-lines   interactive? IF do-lines THEN ;   
+: ?do-lines   interactive? IF do-lines THEN ;
 
 : command-interpret    clear-rstack clearstack oclear  ?do-lines  bye ;
 ' command-interpret is abort

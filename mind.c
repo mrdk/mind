@@ -187,7 +187,7 @@ static void init_sys(entry_t dict[])
 
 // Macro for a word that computes the address of a field from the
 // address of a struct
-#define OFFSET(type, field)   FUNC1(TOS + offsetof(type, field))
+#define OFFSET(type, field)   FUNC0(obj.class + offsetof(type, field))
 
 /* ---------------------------------------------------------------------- */
 /* Code and dictionary */
@@ -419,19 +419,19 @@ stderr_: FUNC0(stderr);
 
 init_mind: FUNC0(&sys.inf);     // init.mind ( -- addr )
 
-to_get:     OFFSET(stream_t, get);    // >get
-to_i:       OFFSET(stream_t, i);      // >i
-to_iq:      OFFSET(stream_t, iq);     // >i?
+tick_get:     OFFSET(stream_t, get);    // 'get
+tick_i:       OFFSET(stream_t, i);      // 'i
+tick_iq:      OFFSET(stream_t, iq);     // 'i?
 per_stream: FUNC0(sizeof(stream_t));  // /stream
 
 file_ref:   FUNC0(&sys.this_file);          // file-ref  ( -- addr )
 file_colon: obj = sys.this_file; goto next; // file:
 
-to_infile:     OFFSET(textfile_t, input);   // >infile
-to_infilename: OFFSET(textfile_t, name);    // >infile-name
-to_current:    OFFSET(textfile_t, current); // >current
-to_lineno:     OFFSET(textfile_t, lineno);  // >line#
-to_caller:     OFFSET(textfile_t, caller);  // >caller
+tick_infile:     OFFSET(textfile_t, input);   // 'infile
+tick_infilename: OFFSET(textfile_t, name);    // 'infile-name
+tick_current:    OFFSET(textfile_t, current); // 'current
+tick_lineno:     OFFSET(textfile_t, lineno);  // 'line#
+tick_caller:     OFFSET(textfile_t, caller);  // 'caller
 per_textfile: FUNC0(sizeof(textfile_t)); // /textfile
 
 lineno: FUNC0(&((textfile_t*)obj.class)->lineno);

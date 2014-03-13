@@ -5,23 +5,20 @@ Streams
 A stream is an object that is an abstraction for the input from a
 source that produces data continuously.
 
-.. word:: >get	        ( stream -- addr ) |K|, "to-get"
+.. word:: 'get	        ( {steam} -- addr ) |K|, "tick-get"
 
-   The TOS contains the address of a stream structure: compute the
-   address of its `get` routine. The routine has the signature
-   :stack:`( -- )`.
+   Return the address of the `get` routine of the active stream. The
+   routine has the signature :stack:`( -- )`.
 
-.. word:: >i	        ( stream -- addr ) |K|, "to-i"
+.. word:: 'i	        ( {steam} -- addr ) |K|, "tick-i"
 
-   The TOS contains the address of a stream structure: compute the
-   address of its `i` routine. The routine has the signature :stack:`(
-   -- char )`.
+   Return the address of the `i` routine of the active stream. The
+   routine has the signature :stack:`( -- char )`.
 
-.. word:: >i?	        ( stream -- addr ) |K|, "to-i-question"
+.. word:: 'i?	        ( {steam} -- addr ) |K|, "tick-i-question"
 
-   The TOS contains the address of a stream structure: compute the
-   address of its `i?` routine. The routine has the signature
-   :stack:`( -- flag )`.
+   Return the address of the `i?` routine of the active stream. The
+   routine has the signature :stack:`( -- flag )`.
 
 .. word:: /stream	( -- n ) |K|, "per-stream"
 
@@ -72,40 +69,38 @@ a file (or any other stream in a Unix system).
 
    Execute the code in the current file stream.
 
-.. word:: >infile	( tstream -- addr ) |K|, "to-infile"
+.. word:: 'infile	( {tstream} -- addr ) |K|, "tick-infile"
 
-   The TOS contains the address of a textfile structure: compute the
-   address of its `>infile` field. The field is one cell wide
-   and contains the underlying C file pointer of type :c:type:`FILE*`
-   for this stream.
+   Return the address of the `'infile` field of the active text
+   stream. The field is one cell wide and contains the underlying C
+   file pointer of type :c:type:`FILE*` for this stream.
 
-.. word:: >infile-name	( tstream -- addr ) |K|, "to-infile-name"
+.. word:: 'infile-name	( {tstream} -- addr ) |K|, "tick-infile-name"
 
-   The TOS contains the address of a textfile structure: compute the
-   address of its `>infile-name` field. The field is one cell
-   wide and contains a pointer to a null-terminated string that
-   contains the name of the file for this stream. The field may also
-   contain a null pointer if the file is not open or has no name.
+   Return the address of the `'infile-name` field of the active text
+   stream. The field is one cell wide and contains a pointer to a
+   null-terminated string that contains the name of the file for this
+   stream. The field may also contain a null pointer if the file is
+   not open or has no name.
 
-.. word:: >current	( tstream -- addr ) |K|, "to-current"
+.. word:: 'current	( {tstream} -- addr ) |K|, "tick-current"
 
-   The TOS contains the address of a textfile structure: compute the
-   address of its `>current` field. This field is one cell wide
-   and contains either the latest character read from the file or
-   `#eof`.
+   Return the address of the `'current` field of the active text
+   stream. This field is one cell wide and contains either the latest
+   character read from the file or `#eof`.
 
-.. word:: >line#	( tstream -- addr ) |K|, "to-line-number"
+.. word:: 'line#	( {tstream} -- addr ) |K|, "tick-line-number"
 
-   The TOS contains the address of a textfile structure: compute the
-   address of its `line#` field. The field is one cell wide and
-   contains the current line number of this stream.
+   Return the address of the `'line#` field of the active text stream.
+   The field is one cell wide and contains the current line number of
+   this stream.
 
-.. word:: >caller       ( tstream -- addr ) |K|, "to-caller"
+.. word:: 'caller       ( {tstream} -- addr ) |K|, "tick-caller"
 
-   Return the address of the caller field of a textfile structure. The
-   field is one cell wide and contains the address of a text file in
-   which the current text file has been defined. If such a file does
-   not exist, the value is 0.
+   Return the address of the `'caller` field of the active text
+   stream. The field is one cell wide and contains the address of a
+   text file in which the current text file has been defined. If such
+   a file does not exist, the value is 0.
 
 .. word:: /textfile     ( -- n ) |K|, "per-textfile"
 
@@ -123,11 +118,10 @@ a file (or any other stream in a Unix system).
    already opened. *str* is the name of the file, which is opened in
    reading mode.
 
-   If the opening of the file was successful, `errno` is set to
-   0 and the first byte of the file is read into `>current`. If
-   the file is empty, the content of `>current` is `#eof`.
-   Otherwise, the cause for the failure can be read from
-   `errno`.
+   If the opening of the file was successful, `errno` is set to 0 and
+   the first byte of the file is read into `'current`. If the file is
+   empty, the content of `'current` is `#eof`. Otherwise, the cause
+   for the failure can be read from `errno`.
 
 .. word:: file-close    ( tstream -- ) |K|
 
@@ -157,7 +151,7 @@ through a file stream object.
 .. word:: file-get	( -- ) |K|
 
    Read one character from the current file stream and store it in its
-   `>current` field. `line#` is updated if the character is an "end of
+   `'current` field. `line#` is updated if the character is an "end of
    line" symbol.
 
    If the end of the file is reached, it is closed automatically.
@@ -226,4 +220,5 @@ Low Level I/O
           stderr        ( -- file ) "standard-err"
 
    The standard Unix character streams, for input, output and error
-   output. `stdin` can be used as the `>infile` field of a line stream.
+   output. `stdin` can be used as the `'infile` field of a line
+   stream.
