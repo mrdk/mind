@@ -293,14 +293,13 @@ Variable 'num                  \ points to the beginning of the generated string
 : tstream-body> ( tstream -- xt )
   dup init.mind =  IF drop  ['] init.mind ELSE body> THEN ;
 
-: .tstream-name ( tstream -- )   tstream-body> .name ;
-: .tstream      ( tstream -- )
-  dup .tstream-name
-  dup >infile-name @  ?dup IF [char] = emit  puts THEN  [char] : emit
-  dup >line# @ .
-  dup >infile @  IF ." (open) "  THEN
-  dup >caller @  ?dup IF ." <- " .tstream-name THEN
-  drop ;
+: .tstream-name ( {tstream} -- )   class tstream-body> .name ;
+: .tstream      ( {tstream} -- )
+  .tstream-name
+  class >infile-name @  ?dup IF [char] = emit  puts THEN  [char] : emit
+  class >line# @ .
+  class >infile @  IF ." (open) "  THEN
+  class >caller @  ?dup IF ." <- " { !class .tstream-name } THEN ;
 
 
 \ == Line Streams ==
