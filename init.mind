@@ -279,10 +279,10 @@ Variable 'num                  \ points to the beginning of the generated string
          \ Copy of an existing object
 : Copy   ( addr n -- {obj} )        Create  here !class  cmove, ;
 
+
 \ == Text files ==
 
-: TStream ( <word> -- {tstream} )
-  textfile0 /textfile Copy  { file: class } 'caller ! ;
+: TStream ( <word> -- {tstream} )   textfile0 /textfile Copy ;
 
 : ?open-error  errno @ abort" could not open file" ;
 : read-file ( str tstream -- )
@@ -298,8 +298,7 @@ Variable 'num                  \ points to the beginning of the generated string
   .tstream-name
   'infile-name @  ?dup IF [char] = emit  puts THEN  [char] : emit
   'line# @ .
-  'infile @  IF ." (open) "  THEN
-  'caller @  ?dup IF ." <- " { !class .tstream-name } THEN ;
+  'infile @  IF ." (open) "  THEN ;
 
 
 \ == Line Streams ==

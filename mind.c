@@ -134,7 +134,6 @@ static void file_init(textfile_t *inf, entry_t dict[])
     inf->name = 0;
     inf->current = EOF;
     inf->lineno = 0;
-    inf->caller = 0;
 }
 
 static void init_sys(entry_t dict[])
@@ -431,7 +430,6 @@ tick_infile:     OFFSET(textfile_t, input);   // 'infile
 tick_infilename: OFFSET(textfile_t, name);    // 'infile-name
 tick_current:    OFFSET(textfile_t, current); // 'current
 tick_lineno:     OFFSET(textfile_t, lineno);  // 'line#
-tick_caller:     OFFSET(textfile_t, caller);  // 'caller
 per_textfile: FUNC0(sizeof(textfile_t)); // /textfile
 
 lineno: FUNC0(&((textfile_t*)obj.class)->lineno);

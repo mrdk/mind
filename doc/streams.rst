@@ -95,13 +95,6 @@ a file (or any other stream in a Unix system).
    The field is one cell wide and contains the current line number of
    this stream.
 
-.. word:: 'caller       ( {tstream} -- addr ) |K|, "tick-caller"
-
-   Return the address of the `'caller` field of the active text
-   stream. The field is one cell wide and contains the address of a
-   text file in which the current text file has been defined. If such
-   a file does not exist, the value is 0.
-
 .. word:: /textfile     ( -- n ) |K|, "per-textfile"
 
    Number of bytes in a textfile structure.
