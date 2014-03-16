@@ -275,9 +275,11 @@ Variable 'num                  \ points to the beginning of the generated string
   does>  ( {obj} -- 'field )       @ class+ ;
 
          \ Allocate a new empty region in memory
-: Struct ( size <word> -- {obj} )   Create  here !class  allot ;
+: Struct ( size <word> -- {obj} ) Create  here !class  allot
+  does>  ( -- {obj} )             0 swap ref: ;
          \ Copy of an existing object
-: Copy   ( addr n -- {obj} )        Create  here !class  cmove, ;
+: Copy   ( n {obj} -- {obj1} )    Create here swap  class swap cmove,  !class
+  does>  ( -- {obj} )             0 swap ref: ;
 
 
 \ == Text files ==
@@ -303,7 +305,7 @@ Variable 'num                  \ points to the beginning of the generated string
 
 \ == Line Streams ==
 
-/lines Struct stdin-lines-class
+/lines Struct interactive:
   ' lines-get  'get !
   ' lines-i    'i !
   ' lines-i?   'i? !
@@ -312,14 +314,10 @@ Variable 'num                  \ points to the beginning of the generated string
     0          'current !
     0          'line# !
 
-Ref stdin-ref  { 0 stdin-lines-class ref:  stdin-ref ref! }
-
-: interactive:  stdin-ref ref@ ;
-
 
 \ == Text Streams and String Streams ==
 
-: Stream ( <word> -- )   /stream Struct ;
+: Stream ( <word> -- {stream} )   /stream Struct ;
 
 /stream
   /cell CField str-pointer      \ Address of the current character
@@ -334,7 +332,7 @@ Constant /stringstream
   ' str-i    'i !
   ' str-i?   'i? !
 
-: Stringstream ( <word> -- {stream})  stringstream0 /stringstream Copy ;
+: Stringstream ( <word> -- {stream} )  stringstream0 /stringstream Copy ;
 
 : str-interpret ( str stream -- )
   { file:  !class file-ref ref!  str-pointer ! } do-stream ;
@@ -348,7 +346,7 @@ Stringstream line-stream        \ The current input line
 
 : do-lines    BEGIN ." ok" cr
                 { interactive: get i? } WHILE
-                { interactive: i } line-stream str-interpret REPEAT ;
+                { interactive: i } line-stream class str-interpret REPEAT ;
 : ?do-lines   interactive? IF do-lines THEN ;
 
 : command-interpret    clear-rstack clearstack oclear  ?do-lines  bye ;
@@ -359,9 +357,9 @@ Stringstream line-stream        \ The current input line
 
 TStream bootfile                \ File that is read as first command parameter
 
-: ?bootfile      argc IF argv @  bootfile  read-file THEN ;
+: ?bootfile      argc IF argv @  bootfile class  read-file THEN ;
 : ?bootmsg       interactive? IF space ." . o ( mind )" cr THEN ;
-: ?do-cmdline    arg-cmdline @ 0;  line-stream str-interpret ;
+: ?do-cmdline    arg-cmdline @ 0;  line-stream class str-interpret ;
 
 : do-boot   ?bootfile ?bootmsg ?do-cmdline  abort ;
 ' do-boot is boot

@@ -441,7 +441,7 @@ i:                  // i ( -- char )
 iq:                 // i? ( -- flag )
     w = (label_t*)((stream_t*)obj.class)->iq; goto **w;
 
-textfile0: FUNC0(&sys.textfile0);
+textfile0: obj.this = 0; obj.class = (cell)&sys.textfile0; goto next;
 file_open:          // file-open     ( str file -- )
     PROC2(file_open((textfile_t*)TOS, (char*)NOS));
 file_close:         // file-close    ( file --)

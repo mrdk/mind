@@ -99,11 +99,11 @@ a file (or any other stream in a Unix system).
 
    Number of bytes in a textfile structure.
 
-.. word:: textfile0     ( -- tstream ) |K|, "textfile-0"
+.. word:: textfile0     ( -- {tstream} ) |K|, "textfile-0"
 
-   Address of the prototype for the textfile structure. It has a size
-   of `/textfile` bytes. The fields are already initialised,
-   ready for a call to `file-open`.
+   Class prototype for the textfile structure. It has a size of
+   `/textfile` bytes. The fields are already initialised, ready for a
+   call to `file-open`.
 
 .. word:: file-open     ( str tstream -- ) |K|
 
