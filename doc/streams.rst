@@ -101,11 +101,11 @@ a file (or any other stream in a Unix system).
 
 .. word:: textfile0     ( -- {tstream} ) |K|, "textfile-0"
 
-   Class prototype for the textfile structure. It has a size of
+   Class prototype for the text stream structure. It has a size of
    `/textfile` bytes. The fields are already initialised, ready for a
    call to `file-open`.
 
-.. word:: file-open     ( str tstream -- ) |K|
+.. word:: file-open     ( str {tstream} -- ) |K|
 
    Open a file for the use in a text stream. *tstream* must not be
    already opened. *str* is the name of the file, which is opened in
@@ -116,9 +116,9 @@ a file (or any other stream in a Unix system).
    empty, the content of `'current` is `#eof`. Otherwise, the cause
    for the failure can be read from `errno`.
 
-.. word:: file-close    ( tstream -- ) |K|
+.. word:: file-close    ( {tstream} -- ) |K|
 
-   Close a text stream. If an error occurs, it is stored in
+   Close the active text stream. If an error occurs, it is stored in
    `errno`. Otherwise, `errno` contains 0.
 
 .. word:: errno         ( -- addr ) |K|

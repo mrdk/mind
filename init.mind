@@ -287,8 +287,8 @@ Variable 'num                  \ points to the beginning of the generated string
 : TStream ( <word> -- {tstream} )   textfile0 /textfile Copy ;
 
 : ?open-error  errno @ abort" could not open file" ;
-: read-file ( str tstream -- )
-  under  file-open ?open-error { file: !class  file-ref ref! }  do-stream ;
+: read-file ( str {tstream} -- )
+  file-open ?open-error  file-ref ref!  do-stream ;
 
 
 \ init.mind is not a normal word:
@@ -334,8 +334,8 @@ Constant /stringstream
 
 : Stringstream ( <word> -- {stream} )  stringstream0 /stringstream Copy ;
 
-: str-interpret ( str stream -- )
-  { file:  !class file-ref ref!  str-pointer ! } do-stream ;
+: str-interpret ( str {stream} -- )
+  file-ref ref!  str-pointer !  do-stream ;
 
 
 \ == Command interpreter ==
@@ -346,7 +346,7 @@ Stringstream line-stream        \ The current input line
 
 : do-lines    BEGIN ." ok" cr
                 { interactive: get i? } WHILE
-                { interactive: i } line-stream class str-interpret REPEAT ;
+                { interactive: i } line-stream str-interpret REPEAT ;
 : ?do-lines   interactive? IF do-lines THEN ;
 
 : command-interpret    clear-rstack clearstack oclear  ?do-lines  bye ;
@@ -357,9 +357,9 @@ Stringstream line-stream        \ The current input line
 
 TStream bootfile                \ File that is read as first command parameter
 
-: ?bootfile      argc IF argv @  bootfile class  read-file THEN ;
+: ?bootfile      argc IF argv @  bootfile read-file THEN ;
 : ?bootmsg       interactive? IF space ." . o ( mind )" cr THEN ;
-: ?do-cmdline    arg-cmdline @ 0;  line-stream class str-interpret ;
+: ?do-cmdline    arg-cmdline @ 0;  line-stream str-interpret ;
 
 : do-boot   ?bootfile ?bootmsg ?do-cmdline  abort ;
 ' do-boot is boot
