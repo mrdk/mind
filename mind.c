@@ -249,16 +249,16 @@ bye:
 // ---------------------------------------------------------------------------
 // Objects
 
-this:        FUNC0(obj.this);        // ( -- addr )
-this_plus:   FUNC1(obj.this + TOS);  // this+  ( u -- addr )
-store_this:  PROC1(obj.this = TOS);  // !this  ( addr -- )
-class:       FUNC0(obj.class);       // ( -- addr )
-class_plus:  FUNC1(obj.class + TOS); // class+ ( u -- addr )
-store_class: PROC1(obj.class = TOS); // !class ( addr -- )
+this:       FUNC0(obj.this);        // ( -- addr )
+this_plus:  FUNC1(obj.this + TOS);  // this+  ( u -- addr )
+at_this:    PROC1(obj.this = TOS);  // @this  ( addr -- )
+class:      FUNC0(obj.class);       // ( -- addr )
+class_plus: FUNC1(obj.class + TOS); // class+ ( u -- addr )
+at_class:   PROC1(obj.class = TOS); // @class ( addr -- )
 
 per_ref:   FUNC0(sizeof(ref_t));      // /ref ( -- n )
 ref_store: PROC1(*(ref_t*)TOS = obj); // ref! ( addr -- )
-ref_fetch: PROC1(obj = *(ref_t*)TOS); // ref@ ( addr -- )
+at_ref:    PROC1(obj = *(ref_t*)TOS); // @ref ( addr -- )
 
 op0: FUNC0(&sys.op0);  // ( -- addr )
 op:  FUNC0(&sys.op);   // ( -- addr )

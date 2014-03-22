@@ -262,10 +262,11 @@ Variable 'num                  \ points to the beginning of the generated string
 \ == Objects ==
 
 : odepth ( -- n )    op0 @ op @ -  /ref / ;
-: oclear             op0 @ op !  0 !this 0 !class ;
 
 : Ref   ( <word> -- )       Create /ref allot ;
-: ref:  ( this class -- )   !class !this ;
+: @obj  ( this class -- )   @class @this ;
+
+: @oclear    op0 @ op !  0 0 @obj ;
 
 
 \ == Structures ==
@@ -275,11 +276,11 @@ Variable 'num                  \ points to the beginning of the generated string
   does>  ( {obj} -- 'field )       @ class+ ;
 
          \ Allocate a new empty region in memory
-: Struct ( size <word> -- {obj} ) Create  here !class  allot
-  does>  ( -- {obj} )             0 swap ref: ;
+: Struct ( size <word> -- {obj} ) Create  here @class  allot
+  does>  ( -- {obj} )             0 swap @obj ;
          \ Copy of an existing object
-: Copy   ( n {obj} -- {obj1} )    Create here swap  class swap cmove,  !class
-  does>  ( -- {obj} )             0 swap ref: ;
+: Copy   ( n {obj} -- {obj1} )    Create here swap  class swap cmove,  @class
+  does>  ( -- {obj} )             0 swap @obj ;
 
 
 \ == Text files ==
@@ -305,8 +306,7 @@ Variable 'num                  \ points to the beginning of the generated string
 
 \ == Line Streams ==
 
-/lines Struct interactive:
-  ' lines-get  'get !
+/lines Struct @stdin   ' lines-get  'get !
   ' lines-i    'i !
   ' lines-i?   'i? !
     stdin      'infile !
@@ -327,12 +327,12 @@ Constant /stringstream
 : str-i     ( -- char )   str-pointer @ c@ ;
 : str-i?    ( -- flag )   str-i 0<> ;
 
-/stringstream Struct stringstream0
+/stringstream Struct @stringstream
   ' str-get  'get !
   ' str-i    'i !
   ' str-i?   'i? !
 
-: Stringstream ( <word> -- {stream} )  stringstream0 /stringstream Copy ;
+: Stringstream ( <word> -- {stream} )  @stringstream /stringstream Copy ;
 
 : str-interpret ( str {stream} -- )
   file-ref ref!  str-pointer !  do-stream ;
@@ -340,26 +340,26 @@ Constant /stringstream
 
 \ == Command interpreter ==
 
-Stringstream line-stream        \ The current input line
+Stringstream @line        \ The current input line
 
 : interactive? ( -- flag )    arg-interactive @  argc 0= and ;
 
 : do-lines    BEGIN ." ok" cr
-                { interactive: get i? } WHILE
-                { interactive: i } line-stream str-interpret REPEAT ;
+                { @stdin get i? } WHILE
+                { @stdin i } @line str-interpret REPEAT ;
 : ?do-lines   interactive? IF do-lines THEN ;
 
-: command-interpret    clear-rstack clearstack oclear  ?do-lines  bye ;
+: command-interpret    clear-rstack clearstack @oclear  ?do-lines  bye ;
 ' command-interpret is abort
 
 
 \ == Boot sequence ==
 
-TStream bootfile                \ File that is read as first command parameter
+TStream @bootfile               \ File that is read as first command parameter
 
-: ?bootfile      argc IF argv @  bootfile read-file THEN ;
+: ?bootfile      argc IF argv @  @bootfile read-file THEN ;
 : ?bootmsg       interactive? IF space ." . o ( mind )" cr THEN ;
-: ?do-cmdline    arg-cmdline @ 0;  line-stream str-interpret ;
+: ?do-cmdline    arg-cmdline @ 0;  @line str-interpret ;
 
 : do-boot   ?bootfile ?bootmsg ?do-cmdline  abort ;
 ' do-boot is boot

@@ -18,7 +18,7 @@ is given by two words, `class` and `this`. Together they form the
 
    Return the address *u* cells after `this`.
 
-.. word:: !this         ( addr -- ) |K|, "store-this"
+.. word:: @this         ( addr -- ) |K|, "at-this"
 
    Make *addr* the new address of the instance data for the current
    object.
@@ -31,7 +31,7 @@ is given by two words, `class` and `this`. Together they form the
 
    Return the address *u* cells after `class`.
 
-.. word:: !class        ( addr -- ) |K|, "store-class"
+.. word:: @class        ( addr -- ) |K|, "at-class"
 
    Make *addr* the new class of the current object.
 
@@ -43,7 +43,7 @@ them.
 
    Copy the active reference to the memory region starting at *addr*.
 
-.. word:: ref@          ( addr -- ) |K|, "ref-fetch"
+.. word:: @ref          ( addr -- ) |K|, "at-ref"
 
    Make the reference that is stored in the memory region at *addr*
    the active reference.
