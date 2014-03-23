@@ -353,8 +353,7 @@ notfound: // Tell that the word at sys.dp could not be interpreted
     }
 
 find: // find ( str -- xt | 0 )
-    CODE(C(lit), (cell)&sys.root, C(find_word));
-
+    FUNC1(find_xt((entry_t*)(sys.root.last), (char*)TOS));
 find_word: // find-word ( str ctx -- xt | 0 )
     FUNC2(find_xt((entry_t*)((context_t*)TOS)->last, (char*)NOS));
 
